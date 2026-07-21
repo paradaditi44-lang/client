@@ -1,0 +1,168 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+.register-page{
+    display:flex;
+    min-height:100vh;
+}
+
+/* Left Section */
+
+.register-left{
+    flex:1;
+    position:relative;
+    overflow:hidden;
+
+    background-image:url("../assets/login-bg.jpg");
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.register-left::before{
+    content:"";
+    position:absolute;
+    inset:0;
+
+    background:linear-gradient(
+        rgba(37,99,235,.55),
+        rgba(15,23,42,.75)
+    );
+}
+
+.register-left-content{
+    position:relative;
+    z-index:2;
+    color:white;
+    padding:60px;
+}
+
+.register-left-content h1{
+    font-size:60px;
+    margin-bottom:20px;
+}
+
+.register-left-content h2{
+    font-size:42px;
+    margin-bottom:20px;
+}
+
+.register-left-content p{
+    font-size:20px;
+    line-height:1.8;
+    max-width:520px;
+}
+
+/* Right Section */
+
+.register-right{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#f8fafc;
+}
+
+/* Register Box */
+
+.register-box{
+    width:430px;
+    background:white;
+    padding:45px;
+    border-radius:20px;
+    box-shadow:0 15px 40px rgba(0,0,0,.15);
+}
+
+.user-icon{
+    width:80px;
+    height:80px;
+
+    margin:0 auto 20px;
+
+    background:#2563eb;
+    color:white;
+
+    border-radius:50%;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:35px;
+}
+
+.register-box h2{
+    text-align:center;
+    color:#2563eb;
+    margin-bottom:10px;
+}
+
+.register-box p{
+    text-align:center;
+    color:gray;
+    margin-bottom:30px;
+}
+
+.register-box input{
+    width:100%;
+    padding:15px;
+    margin-bottom:18px;
+
+    border:1px solid #ddd;
+    border-radius:12px;
+
+    font-size:16px;
+    transition:.3s;
+}
+
+.register-box input:focus{
+    outline:none;
+    border-color:#2563eb;
+    box-shadow:0 0 8px rgba(37,99,235,.3);
+}
+
+.register-box button{
+    width:100%;
+    padding:15px;
+
+    border:none;
+    border-radius:12px;
+
+    background:linear-gradient(90deg,#2563eb,#3b82f6);
+
+    color:white;
+    font-size:18px;
+    font-weight:bold;
+
+    cursor:pointer;
+    transition:.3s;
+}
+
+.register-box button:hover{
+    transform:translateY(-3px);
+    box-shadow:0 8px 20px rgba(37,99,235,.35);
+}
+
+.register-box span{
+    display:block;
+    text-align:center;
+    margin-top:22px;
+}
+
+.register-box a{
+    text-decoration:none;
+    color:#2563eb;
+    font-weight:bold;
+}
+
+.register-box a:hover{
+    text-decoration:underline;
+}

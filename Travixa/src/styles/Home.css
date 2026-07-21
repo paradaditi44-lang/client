@@ -1,62 +1,193 @@
+/* ===========================
+   HOME
+=========================== */
 
-.home{
-    background:#0f172a;
-    color:white;
-    min-height:100vh;
-    text-align:center;
-    padding:70px 20px;
+.home {
+    min-height: 100vh;
+    text-align: center;
+    padding: 70px 20px;
+    position: relative;
+    overflow: hidden;
+
+    background: red;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+    color: white;
 }
 
-.home h1{
-    font-size:55px;
-    color:#38bdf8;
+/* ===========================
+   HEADING
+=========================== */
+
+.home h1 {
+    font-size: 55px;
+    color: #38bdf8;
+    margin-bottom: 20px;
 }
 
-.home p{
-    font-size:20px;
-    width:60%;
-    margin:25px auto;
-    line-height:1.6;
+.home p {
+    width: 60%;
+    margin: 25px auto;
+    font-size: 20px;
+    line-height: 1.6;
 }
 
-.home button{
-    background:#2563eb;
-    color:white;
-    border:none;
-    padding:15px 35px;
-    border-radius:30px;
-    font-size:18px;
-    cursor:pointer;
-    margin-top:20px;
+/* ===========================
+   BUTTON
+=========================== */
+
+.home button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 15px 35px;
+    border-radius: 30px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.3s;
 }
 
-.home button:hover{
-    background:#1d4ed8;
+.home button:hover {
+    background: #1d4ed8;
+    transform: translateY(-3px);
 }
 
-.cards{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:25px;
-    margin-top:60px;
-    width:80%;
-    margin-left:auto;
-    margin-right:auto;
+/* ===========================
+   CARDS
+=========================== */
+
+.cards {
+    width: 80%;
+    margin: 60px auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
 }
 
-.card{
-    background:#1e293b;
-    padding:30px;
-    border-radius:15px;
-    box-shadow:0 5px 15px rgba(0,0,0,0.3);
+.card {
+    background: rgba(30,41,59,0.88);
+    backdrop-filter: blur(8px);
+    padding: 30px;
+    border-radius: 18px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.35);
+    transition: .3s;
 }
 
-.card h2{
-    margin-bottom:15px;
-    color:#38bdf8;
+.card:hover {
+    transform: translateY(-8px);
 }
 
-.card:hover{
-    transform:translateY(-8px);
-    transition:.3s;
+.card h2 {
+    color: #38bdf8;
+    margin-bottom: 15px;
+}
+
+.card p {
+    width: 100%;
+    margin: 0;
+    font-size: 18px;
+}
+
+/* ===========================
+   LIGHT THEME
+=========================== */
+
+.light .home {
+    background:
+        linear-gradient(rgba(255,255,255,0.45), rgba(255,255,255,0.45)),
+        url("../assets/travel-bg.jpg");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+    color: #111827;
+}
+
+.light .home h1 {
+    color: #2563eb;
+}
+
+.light .home p {
+    color: #374151;
+}
+
+.light .card {
+    background: rgba(255,255,255,0.90);
+    color: #111827;
+    box-shadow: 0 8px 20px rgba(0,0,0,.15);
+}
+
+.light .card h2 {
+    color: #2563eb;
+}
+
+.light .home button {
+    background: #2563eb;
+    color: white;
+}
+
+/* ===========================
+   DARK THEME
+=========================== */
+
+.dark .home {
+    background:
+        linear-gradient(rgba(15,23,42,0.70), rgba(15,23,42,0.70)),
+        url("../assets/travel-bg.jpg");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+    color: white;
+}
+
+.dark .home h1 {
+    color: #60a5fa;
+}
+
+.dark .home p {
+    color: #d1d5db;
+}
+
+.dark .card {
+    background: rgba(30,41,59,0.88);
+    color: white;
+    box-shadow: 0 8px 20px rgba(0,0,0,.45);
+}
+
+.dark .card h2 {
+    color: #60a5fa;
+}
+
+.dark .home button {
+    background: #3b82f6;
+    color: white;
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media (max-width: 768px) {
+
+    .home h1 {
+        font-size: 38px;
+    }
+
+    .home p {
+        width: 90%;
+        font-size: 18px;
+    }
+
+    .cards {
+        width: 95%;
+        grid-template-columns: 1fr;
+    }
 }

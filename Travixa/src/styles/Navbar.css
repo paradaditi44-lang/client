@@ -42,9 +42,52 @@
     border-radius:30px;
     cursor:pointer;
     font-weight:bold;
+    transition:0.3s;
 }
 
 .login-btn:hover{
     background:#ffd700;
     color:black;
+}
+
+/* Right Side */
+.nav-right{
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+/* Theme Icon */
+.theme-toggle{
+    background:transparent;
+    border:none;
+    font-size:28px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.theme-toggle:hover{
+    transform:scale(1.2) rotate(20deg);
+}
+
+/* Navbar Theme */
+
+.light .navbar{
+    background:#2563eb;
+    color:white;
+}
+
+.dark .navbar{
+    background:#1f2937;
+    color:white;
+}
+
+.light .nav-links li,
+.dark .nav-links li{
+    color:white;
+}
+
+.light .logo,
+.dark .logo{
+    color:white;
 }

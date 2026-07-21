@@ -182,3 +182,14 @@
     border-right-color: var(--border);
   }
 }
+.light{
+    background:#ffffff;
+    color:#000;
+    min-height:100vh;
+}
+
+.dark{
+    background:#0f172a;
+    color:white;
+    min-height:100vh;
+}
