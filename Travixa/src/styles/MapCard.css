@@ -1,0 +1,39 @@
+.map-card{
+
+    background:white;
+
+    border-radius:20px;
+
+    padding:30px;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+
+}
+
+.map-card h2{
+
+    color:#2563eb;
+
+    margin-bottom:20px;
+
+}
+
+.map-placeholder{
+
+    height:450px;
+
+    border-radius:15px;
+
+    background:#e8eefc;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-size:22px;
+
+    color:#555;
+
+}

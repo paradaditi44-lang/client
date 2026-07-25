@@ -193,3 +193,93 @@
     color:white;
     min-height:100vh;
 }
+/* Light Theme */
+
+.app.light{
+    background:#f5f7fb;
+    color:#111827;
+    min-height:100vh;
+}
+
+/* Dark Theme */
+
+.app.dark{
+    background:#111827;
+    color:white;
+    min-height:100vh;
+}
+
+/* Dashboard */
+
+.app.dark .dashboard{
+    background:#111827;
+}
+
+.app.light .dashboard{
+    background:#f5f7fb;
+}
+
+/* Hero Section */
+
+.app.dark .hero{
+    background:linear-gradient(135deg,#2563eb,#1e3a8a);
+}
+
+.app.light .hero{
+    background:linear-gradient(135deg,#2563eb,#60a5fa);
+}
+
+/* Cards */
+
+.app.dark .planner-card,
+.app.dark .map-card,
+.app.dark .stats-card,
+.app.dark .destination-card,
+.app.dark .hotel-card,
+.app.dark .weather-card,
+.app.dark .ai-card{
+
+    background:#1f2937;
+    color:white;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.4);
+}
+
+/* Inputs */
+
+.app.dark input{
+    background:#111827;
+    color:white;
+    border:1px solid #374151;
+}
+
+.app.dark input::placeholder{
+    color:#9ca3af;
+}
+
+/* Navbar */
+
+.app.dark .dashboard-navbar{
+    background:#0f172a;
+}
+
+.app.dark .dashboard-links li{
+    color:white;
+}
+
+.app.dark .dashboard-logo{
+    color:white;
+}
+
+/* Section Titles */
+
+.app.dark .section-title{
+    color:#60a5fa;
+}
+
+/* Footer */
+
+.app.dark footer{
+    background:#0f172a;
+    color:white;
+}

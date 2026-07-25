@@ -1,0 +1,66 @@
+.hotel-card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  transition: 0.3s;
+}
+
+.hotel-card:hover {
+  transform: translateY(-6px);
+}
+
+.hotel-card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+.hotel-info {
+  padding: 18px;
+}
+
+.hotel-info h3 {
+  color: #1f2937;
+  margin-bottom: 10px;
+}
+
+.hotel-info p {
+  margin: 8px 0;
+  color: #555;
+}
+
+.price {
+  color: #2563eb;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.amenities {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 15px 0;
+}
+
+.amenities span {
+  background: #eef4ff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.hotel-info button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.hotel-info button:hover {
+  background: #1d4ed8;
+}

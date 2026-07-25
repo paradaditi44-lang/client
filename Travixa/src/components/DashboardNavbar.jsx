@@ -1,27 +1,29 @@
+import { Link } from "react-router-dom";
 import "../styles/DashboardNavbar.css";
 
-function DashboardNavbar() {
+function DashboardNavbar({ theme, toggleTheme }) {
   return (
     <nav className="dashboard-navbar">
-
-      <div className="logo">
-        ✈️ <span>Travexa</span>
-      </div>
+      <Link to="/" className="logo">
+        ✈️ Travexa
+      </Link>
 
       <ul className="nav-links">
-        <li>Dashboard</li>
-        <li>Plan Trip</li>
-        <li>Hotels</li>
-        <li>Weather</li>
-        <li>Maps</li>
-        <li>Explore</li>
+        <li><Link to="/dashboard">Plan Trip</Link></li>
+        <li><Link to="/hotels">Hotels</Link></li>
+        <li><Link to="/weather">Weather</Link></li>
+        <li><Link to="/maps">Maps</Link></li>
+        <li><Link to="/about">About</Link></li>
       </ul>
 
-      <div className="profile">
-        🔔
-        <span>👤 Aditi ▼</span>
-      </div>
+      <div className="nav-right">
+        <span>🔔</span>
+        <span>👤 Aditi</span>
 
+        <button className="theme-toggle" onClick={toggleTheme}>
+          {theme === "light" ? "🌙" : "☀️"}
+        </button>
+      </div>
     </nav>
   );
 }

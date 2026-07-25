@@ -1,25 +1,4 @@
-.planner-container{
-    max-width:1300px;
-    margin:50px auto;
-    padding:0 30px;
 
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:35px;
-}
-
-.planner-card{
-    background:#fff;
-    padding:35px;
-    border-radius:20px;
-
-    box-shadow:0 15px 35px rgba(0,0,0,.1);
-}
-
-.planner-card h2{
-    margin-bottom:25px;
-    color:#2563eb;
-}
 
 .planner-card label{
     display:block;
@@ -56,4 +35,83 @@
 
 .planner-card button:hover{
     background:#1d4ed8;
+}.planner-container{
+    max-width:1300px;
+    margin:50px auto;
+    padding:0 30px;
+
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:35px;
+}
+
+.planner-card{
+    background:#fff;
+    padding:35px;
+    border-radius:20px;
+
+    box-shadow:0 15px 35px rgba(0,0,0,.1);
+}
+
+.planner-card h2{
+    margin-bottom:25px;
+    color:#2563eb;
+}
+select{
+
+    width:100%;
+    padding:14px;
+
+    border-radius:12px;
+
+    border:1px solid #ddd;
+
+    font-size:16px;
+
+    margin-bottom:20px;
+}
+
+.interest-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:10px;
+
+    margin-top:10px;
+}
+
+.interest{
+
+    padding:12px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#e5e7eb;
+
+    cursor:pointer;
+
+    transition:.3s;
+}
+
+.interest:hover{
+
+    background:#2563eb;
+
+    color:white;
+}
+
+.active{
+
+    background:#2563eb;
+
+    color:white;
+}
+
+.generate-btn{
+
+    margin-top:30px;
 }
