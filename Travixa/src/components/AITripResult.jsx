@@ -1,357 +1,269 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/AITripResult.css";
 
-function AITripResult({ trip }) {
-  if (!trip) return null;
+function AITripResult() {
+  const navigate = useNavigate();
 
-  const destination = trip.destination.toLowerCase();
+  const [trip, setTrip] = useState(null);
 
-  let itinerary = [];
+  useEffect(() => {
+    const savedTrip = localStorage.getItem("travexaTrip");
 
-  // ==========================
-  // JAPAN
-  // ==========================
-  if (destination.includes("japan")) {
-    itinerary = [
-      {
-        day: "📅 Day 1 – Arrival & City Tour",
-        morning: [
-          "🏨 Check into your hotel",
-          "🗼 Visit Tokyo Tower",
-        ],
-        afternoon: [
-          "🚶 Explore Shibuya Crossing",
-          "🐕 Visit Hachiko Statue",
-        ],
-        evening: [
-          "🍣 Sushi Dinner",
-          "🌆 Walk around Shinjuku",
-        ],
-      },
-      {
-        day: "📅 Day 2 – Nature & Relaxation",
-        morning: [
-          "⛰ Visit Mt. Fuji",
-        ],
-        afternoon: [
-          "🌊 Explore Lake Kawaguchi",
-        ],
-        evening: [
-          "♨ Relax at a Japanese Onsen",
-        ],
-      },
-      {
-        day: "📅 Day 3 – Culture & Shopping",
-        morning: [
-          "⛩ Visit Fushimi Inari Shrine",
-        ],
-        afternoon: [
-          "🎋 Walk through Bamboo Forest",
-        ],
-        evening: [
-          "🛍 Shop at Nishiki Market",
-        ],
-      },
-    ];
+    if (savedTrip) {
+      setTrip(JSON.parse(savedTrip));
+    }
+  }, []);
+
+  if (!trip) {
+    return (
+      <div className="result-empty">
+
+        <h2>No trip found ✈️</h2>
+
+        <p>
+          Please create your trip first.
+        </p>
+
+        <button onClick={() => navigate("/plan-trip")}>
+          Plan a Trip
+        </button>
+
+      </div>
+    );
   }
 
-  // ==========================
-  // LONDON
-  // ==========================
-  else if (
-    destination.includes("london") ||
-    destination.includes("uk") ||
-    destination.includes("england")
-  ) {
-    itinerary = [
-      {
-        day: "📅 Day 1 – Royal London",
-        morning: [
-          "👑 Buckingham Palace",
-          "📸 Changing of Guards",
-        ],
-        afternoon: [
-          "🕰 Big Ben",
-          "🏛 Westminster Abbey",
-        ],
-        evening: [
-          "🎡 London Eye",
-          "🍽 Dinner beside River Thames",
-        ],
-      },
-      {
-        day: "📅 Day 2 – History",
-        morning: [
-          "🌉 Tower Bridge",
-        ],
-        afternoon: [
-          "🏰 Tower of London",
-        ],
-        evening: [
-          "🚢 Thames River Cruise",
-        ],
-      },
-      {
-        day: "📅 Day 3 – Shopping",
-        morning: [
-          "🌳 Hyde Park",
-        ],
-        afternoon: [
-          "🛍 Oxford Street",
-        ],
-        evening: [
-          "🎭 Covent Garden",
-        ],
-      },
-    ];
-  }
+  const itinerary = [
+    {
+      day: 1,
+      title: "Arrival & Local Exploration",
+      icon: "✈️",
+      activities: [
+        "Arrive at your destination",
+        "Check in to your hotel",
+        "Explore nearby attractions",
+        "Enjoy a local dinner",
+      ],
+    },
+    {
+      day: 2,
+      title: "Explore the Highlights",
+      icon: "📸",
+      activities: [
+        "Visit the most popular attraction",
+        "Explore local streets",
+        "Try traditional food",
+        "Enjoy an evening experience",
+      ],
+    },
+    {
+      day: 3,
+      title: "Adventure & Experiences",
+      icon: "🏔️",
+      activities: [
+        "Start your adventure activity",
+        "Visit a scenic location",
+        "Take photos and explore",
+        "Relax in the evening",
+      ],
+    },
+    {
+      day: 4,
+      title: "Culture & Local Life",
+      icon: "🏛️",
+      activities: [
+        "Visit a cultural attraction",
+        "Explore local markets",
+        "Try traditional cuisine",
+        "Enjoy the local atmosphere",
+      ],
+    },
+    {
+      day: 5,
+      title: "Relax & Departure",
+      icon: "🌅",
+      activities: [
+        "Enjoy a relaxed morning",
+        "Buy souvenirs",
+        "Check out from the hotel",
+        "Begin your journey back home",
+      ],
+    },
+  ];
 
-  // ==========================
-  // PARIS
-  // ==========================
-  else if (
-    destination.includes("paris") ||
-    destination.includes("france")
-  ) {
-    itinerary = [
-      {
-        day: "📅 Day 1 – Paris Highlights",
-        morning: [
-          "🗼 Eiffel Tower",
-        ],
-        afternoon: [
-          "🚢 Seine River Cruise",
-        ],
-        evening: [
-          "🥐 French Dinner",
-        ],
-      },
-      {
-        day: "📅 Day 2 – Art & Culture",
-        morning: [
-          "🎨 Louvre Museum",
-        ],
-        afternoon: [
-          "⛪ Notre-Dame Cathedral",
-        ],
-        evening: [
-          "☕ Paris Café",
-        ],
-      },
-      {
-        day: "📅 Day 3 – Fun",
-        morning: [
-          "🎢 Disneyland Paris",
-        ],
-        afternoon: [
-          "🛍 Champs-Élysées",
-        ],
-        evening: [
-          "🌃 Night Walk",
-        ],
-      },
-    ];
-  }
-
-  // ==========================
-  // DUBAI
-  // ==========================
-  else if (destination.includes("dubai")) {
-    itinerary = [
-      {
-        day: "📅 Day 1 – City Tour",
-        morning: [
-          "🏙 Burj Khalifa",
-        ],
-        afternoon: [
-          "🛍 Dubai Mall",
-        ],
-        evening: [
-          "🎵 Dubai Fountain Show",
-        ],
-      },
-      {
-        day: "📅 Day 2 – Desert Adventure",
-        morning: [
-          "🏜 Desert Safari",
-        ],
-        afternoon: [
-          "🐪 Camel Ride",
-        ],
-        evening: [
-          "🍖 BBQ Dinner",
-        ],
-      },
-      {
-        day: "📅 Day 3 – Beaches",
-        morning: [
-          "🌴 Palm Jumeirah",
-        ],
-        afternoon: [
-          "🚤 Marina Cruise",
-        ],
-        evening: [
-          "🌅 JBR Beach",
-        ],
-      },
-    ];
-  }
-
-  // ==========================
-  // GOA
-  // ==========================
-  else if (destination.includes("goa")) {
-    itinerary = [
-      {
-        day: "📅 Day 1 – Beaches",
-        morning: [
-          "🏖 Baga Beach",
-        ],
-        afternoon: [
-          "🌅 Calangute Beach",
-        ],
-        evening: [
-          "🍤 Seafood Dinner",
-        ],
-      },
-      {
-        day: "📅 Day 2 – Heritage",
-        morning: [
-          "⛪ Basilica of Bom Jesus",
-        ],
-        afternoon: [
-          "🏰 Fort Aguada",
-        ],
-        evening: [
-          "🛍 Local Market",
-        ],
-      },
-      {
-        day: "📅 Day 3 – Adventure",
-        morning: [
-          "🚤 Water Sports",
-        ],
-        afternoon: [
-          "🌴 Candolim Beach",
-        ],
-        evening: [
-          "🎉 Beach Party",
-        ],
-      },
-    ];
-  }
-
-  // ==========================
-  // DEFAULT
-  // ==========================
-  else {
-    itinerary = [
-      {
-        day: "📅 Day 1",
-        morning: [
-          "🏨 Check into hotel",
-        ],
-        afternoon: [
-          "🌍 Explore the city",
-        ],
-        evening: [
-          "🍽 Enjoy local cuisine",
-        ],
-      },
-      {
-        day: "📅 Day 2",
-        morning: [
-          "🏛 Visit famous attractions",
-        ],
-        afternoon: [
-          "📸 Sightseeing",
-        ],
-        evening: [
-          "🛍 Shopping",
-        ],
-      },
-      {
-        day: "📅 Day 3",
-        morning: [
-          "☕ Visit local cafés",
-        ],
-        afternoon: [
-          "🌅 Relax and explore",
-        ],
-        evening: [
-          "🎉 Enjoy your final day",
-        ],
-      },
-    ];
-  }
+  const days = itinerary.slice(0, Number(trip.days));
 
   return (
-    <div className="ai-result-card">
-      <h2>🤖 AI Travel Plan</h2>
+    <div className="trip-result-page">
 
-      <div className="trip-info-grid">
-        <div className="info-box">
-          <h4>📍 Destination</h4>
-          <p>{trip.destination}</p>
-        </div>
+      {/* HEADER */}
 
-        <div className="info-box">
-          <h4>📅 Dates</h4>
+      <section className="result-hero">
+
+        <div>
+
+          <span className="ai-badge">
+            ✨ YOUR AI TRIP PLAN
+          </span>
+
+          <h1>
+            Your {trip.destination} Adventure
+          </h1>
+
           <p>
-            {trip.startDate} - {trip.endDate}
+            A personalised travel plan created
+            according to your preferences.
           </p>
+
         </div>
 
-        <div className="info-box">
-          <h4>👥 Travelers</h4>
-          <p>{trip.travelers}</p>
-        </div>
+      </section>
 
-        <div className="info-box">
-          <h4>💰 Budget</h4>
-          <p>₹{trip.budget}</p>
-        </div>
 
-        <div className="info-box">
-          <h4>✈ Travel Style</h4>
-          <p>{trip.travelStyle}</p>
-        </div>
+      {/* TRIP SUMMARY */}
 
-        <div className="info-box">
-          <h4>❤️ Interests</h4>
-          <p>{trip.interests.join(", ")}</p>
-        </div>
-      </div>
+      <main className="result-container">
 
-      <h2 className="itinerary-title">🗺 Suggested Itinerary</h2>
+        <div className="trip-summary">
 
-      <div className="days-grid">
-        {itinerary.map((day, index) => (
-          <div className="day-card" key={index}>
-            <h3>{day.day}</h3>
-
-            <h4>🌅 Morning</h4>
-            <ul>
-              {day.morning.map((place, i) => (
-                <li key={i}>{place}</li>
-              ))}
-            </ul>
-
-            <h4>🍜 Afternoon</h4>
-            <ul>
-              {day.afternoon.map((place, i) => (
-                <li key={i}>{place}</li>
-              ))}
-            </ul>
-
-            <h4>🌃 Evening</h4>
-            <ul>
-              {day.evening.map((place, i) => (
-                <li key={i}>{place}</li>
-              ))}
-            </ul>
+          <div>
+            <span>📍 DESTINATION</span>
+            <strong>{trip.destination}</strong>
           </div>
-        ))}
-      </div>
+
+          <div>
+            <span>📅 DATE</span>
+            <strong>{trip.travelDate}</strong>
+          </div>
+
+          <div>
+            <span>🗓️ DURATION</span>
+            <strong>{trip.days} Days</strong>
+          </div>
+
+          <div>
+            <span>👥 TRAVELLERS</span>
+            <strong>{trip.travellers} People</strong>
+          </div>
+
+          <div>
+            <span>💰 BUDGET</span>
+            <strong>{trip.budget}</strong>
+          </div>
+
+          <div>
+            <span>🎒 STYLE</span>
+            <strong>{trip.travelStyle}</strong>
+          </div>
+
+        </div>
+
+
+        {/* ITINERARY */}
+
+        <div className="itinerary-header">
+
+          <div>
+            <span>YOUR JOURNEY</span>
+
+            <h2>
+              {trip.days}-Day Itinerary
+            </h2>
+          </div>
+
+          <button
+            onClick={() => navigate("/plan-trip")}
+          >
+            ← Edit Trip
+          </button>
+
+        </div>
+
+
+        <div className="timeline">
+
+          {days.map((day) => (
+
+            <div
+              className="day-card"
+              key={day.day}
+            >
+
+              <div className="day-number">
+                <span>DAY</span>
+                <strong>{day.day}</strong>
+              </div>
+
+              <div className="day-content">
+
+                <div className="day-title">
+
+                  <span>
+                    {day.icon}
+                  </span>
+
+                  <h3>
+                    {day.title}
+                  </h3>
+
+                </div>
+
+                <div className="activities">
+
+                  {day.activities.map(
+                    (activity, index) => (
+
+                      <div
+                        className="activity"
+                        key={index}
+                      >
+
+                        <span className="activity-dot">
+                          ✓
+                        </span>
+
+                        <span>
+                          {activity}
+                        </span>
+
+                      </div>
+
+                    )
+                  )}
+
+                </div>
+
+              </div>
+
+            </div>
+
+          ))}
+
+        </div>
+
+
+        {/* BOTTOM */}
+
+        <div className="result-actions">
+
+          <button
+            className="secondary-btn"
+            onClick={() => navigate("/plan-trip")}
+          >
+            🔄 Plan Another Trip
+          </button>
+
+          <button
+            className="primary-btn"
+            onClick={() => window.print()}
+          >
+            🖨️ Save / Print Trip
+          </button>
+
+        </div>
+
+      </main>
+
     </div>
   );
 }

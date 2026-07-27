@@ -1,43 +1,37 @@
+/* Remove default browser spacing */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: Arial, Helvetica, sans-serif;
+
+  background: #f8fafc;
+
+  color: #172554;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  text-decoration: none;
 }
 
 #root {
   min-height: 100vh;
-}
-
-.app {
-  min-height: 100vh;
-  transition: all 0.4s ease;
-}
-
-/* Light Theme */
-.app.light {
-  background: #f8fafc;
-  color: #111827;
-}
-
-/* Dark Theme */
-.app.dark {
-  background: #111827;
-  color: white;
-}
-.light{
-    background:#ffffff;
-    color:#111827;
-    min-height:100vh;
-    transition:0.4s;
-}
-
-.dark{
-    background:#111827;
-    color:white;
-    min-height:100vh;
-    transition:0.4s;
 }

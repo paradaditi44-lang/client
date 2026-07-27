@@ -1,51 +1,183 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/Login.css";
 
 function Login() {
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState(
+    localStorage.getItem("travexaUserEmail") || ""
+  );
+
+  const [password, setPassword] = useState("");
+
+  const [error, setError] = useState("");
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+
+    setError("");
+
+    if (!email.trim()) {
+      setError("Please enter your email.");
+      return;
+    }
+
+    if (!email.includes("@")) {
+      setError("Please enter a valid email.");
+      return;
+    }
+
+    if (!password.trim()) {
+      setError("Please enter your password.");
+      return;
+    }
+
+    /*
+      Frontend login for now.
+      Backend authentication can replace this later.
+    */
+
+    localStorage.setItem("travexaLoggedIn", "true");
+
+    /*
+      If username doesn't exist for some reason,
+      create a default name from email.
+    */
+    if (!localStorage.getItem("travexaUserName")) {
+
+      const emailName = email
+        .split("@")[0]
+        .replace(/[0-9]/g, "")
+        .trim();
+
+      const defaultName =
+        emailName.charAt(0).toUpperCase() +
+        emailName.slice(1);
+
+      localStorage.setItem(
+        "travexaUserName",
+        defaultName || "Traveller"
+      );
+    }
+
+    localStorage.setItem("travexaUserEmail", email);
+
+    /* Login → Plan Trip */
+    navigate("/plan-trip");
+  };
+
+
   return (
-    <div className="login-page">
+    <main className="login-page">
 
-     <div className="login-left">
-    <div className="login-left-content">
-        <h1>✈️ Travexa</h1>
-        <h2>Travel Smarter with AI</h2>
+      {/* LEFT TRAVEL IMAGE */}
 
-        <p>
-            Plan your dream vacation with personalized AI itineraries,
-            discover amazing destinations, book hotels, and get live
-            weather updates — all in one place.
-        </p>
-    </div>
-</div>
-      <div className="login-right">
+      <div className="login-image-section">
 
-        <div className="login-box">
+        <div className="login-image-overlay"></div>
 
-          <h2>Welcome Back 👋</h2>
+        <div className="login-image-content">
 
-          <p>Login to continue your journey.</p>
+          <div className="login-logo">
+            ✈️ Travexa
+          </div>
 
-          <input
-            type="email"
-            placeholder="Enter your email"
-          />
+          <div className="login-travel-icon">
+            🌍
+          </div>
 
-          <input
-            type="password"
-            placeholder="Enter your password"
-          />
+          <h1>
+            Welcome
+            <br />
+            <span>Back</span>
+          </h1>
 
-          <button>Login</button>
+          <p>
+            Your next adventure is waiting.
+            Sign in to continue planning smarter
+            journeys with Travexa.
+          </p>
 
-          <span>
-            Don't have an account?
-            <a href="#"> Register</a>
-          </span>
+          <div className="login-tags">
+
+            <span>🗺️ Plan</span>
+
+            <span>🏨 Discover</span>
+
+            <span>✈️ Explore</span>
+
+          </div>
 
         </div>
 
       </div>
 
-    </div>
+
+      {/* LOGIN FORM */}
+
+      <div className="login-form-section">
+
+        <div className="login-card">
+
+          <div className="login-icon">
+            🔐
+          </div>
+
+          <h2>Welcome Back</h2>
+
+          <p className="login-subtitle">
+            Login to your Travexa account
+          </p>
+
+
+          {error && (
+            <div className="login-error">
+              {error}
+            </div>
+          )}
+
+
+          <form onSubmit={handleLogin}>
+
+            <input
+              type="email"
+              placeholder="Email Address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+
+            <button type="submit">
+              Login to Travexa →
+            </button>
+
+          </form>
+
+
+          <p className="login-register-text">
+            Don't have an account?
+
+            <button
+              type="button"
+              onClick={() => navigate("/register")}
+            >
+              Create Account
+            </button>
+
+          </p>
+
+        </div>
+
+      </div>
+
+    </main>
   );
 }
 

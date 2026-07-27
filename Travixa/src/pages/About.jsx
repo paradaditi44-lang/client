@@ -1,12 +1,211 @@
+import { useNavigate } from "react-router-dom";
+import "../styles/About.css";
+
 function About() {
+
+  const navigate = useNavigate();
+
   return (
-    <div style={{ padding: "40px", textAlign: "center" }}>
-      <h1>About Travexa</h1>
-      <p>
-        Travexa is an AI-powered travel planner that helps users plan trips,
-        discover hotels, check weather, and explore destinations.
-      </p>
-    </div>
+    <main className="about-page">
+
+      {/* Hero */}
+
+      <section className="about-hero">
+
+        <div className="about-badge">
+          🌍 ABOUT TRAVEXA
+        </div>
+
+        <h1>
+          Travel planning,
+          <br />
+          <span>reimagined.</span>
+        </h1>
+
+        <p>
+          Travexa is a smart travel platform designed to make
+          discovering and planning your next journey easier,
+          faster and more personalised.
+        </p>
+
+      </section>
+
+
+      {/* Mission */}
+
+      <section className="about-mission">
+
+        <div className="mission-label">
+          OUR MISSION
+        </div>
+
+        <h2>
+          We believe planning a trip
+          <br />
+          should be part of the adventure.
+        </h2>
+
+        <p>
+          Instead of jumping between different websites and apps,
+          Travexa brings important travel tools together in one
+          simple experience.
+        </p>
+
+      </section>
+
+
+      {/* Features */}
+
+      <section className="about-features">
+
+        <div className="about-card">
+
+          <div className="about-card-icon">
+            🤖
+          </div>
+
+          <h3>
+            Smarter Planning
+          </h3>
+
+          <p>
+            Use intelligent travel planning to create journeys
+            based on your destination, preferences and interests.
+          </p>
+
+        </div>
+
+
+        <div className="about-card">
+
+          <div className="about-card-icon">
+            🗺️
+          </div>
+
+          <h3>
+            Everything Together
+          </h3>
+
+          <p>
+            Explore maps, weather, hotels and travel information
+            from one convenient platform.
+          </p>
+
+        </div>
+
+
+        <div className="about-card">
+
+          <div className="about-card-icon">
+            ✨
+          </div>
+
+          <h3>
+            Personalised Experience
+          </h3>
+
+          <p>
+            Travexa is designed around your travel style,
+            interests and the kind of experience you want.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      {/* How it works */}
+
+      <section className="how-section">
+
+        <div className="mission-label">
+          HOW TRAVEXA WORKS
+        </div>
+
+        <h2>
+          From idea to itinerary.
+        </h2>
+
+
+        <div className="steps">
+
+          <div className="step">
+
+            <span>01</span>
+
+            <div>
+              <h3>Tell us your idea</h3>
+
+              <p>
+                Choose where you want to go and tell us
+                what kind of experience you want.
+              </p>
+            </div>
+
+          </div>
+
+
+          <div className="step">
+
+            <span>02</span>
+
+            <div>
+              <h3>Explore your options</h3>
+
+              <p>
+                Check hotels, weather, maps and other
+                useful travel information.
+              </p>
+            </div>
+
+          </div>
+
+
+          <div className="step">
+
+            <span>03</span>
+
+            <div>
+              <h3>Start your journey</h3>
+
+              <p>
+                Get your travel plan ready and enjoy
+                your adventure.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      {/* CTA */}
+
+      <section className="about-cta">
+
+        <div>
+
+          <span>
+            READY TO EXPLORE?
+          </span>
+
+          <h2>
+            Your next adventure
+            <br />
+            starts here.
+          </h2>
+
+        </div>
+
+        <button onClick={() => navigate("/plan-trip")}>
+          Plan My Trip →
+        </button>
+
+      </section>
+
+    </main>
   );
 }
 

@@ -1,72 +1,172 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/Register.css";
 
 function Register() {
+  const navigate = useNavigate();
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [error, setError] = useState("");
+
+  const handleRegister = (e) => {
+    e.preventDefault();
+
+    setError("");
+
+    if (!name.trim()) {
+      setError("Please enter your name.");
+      return;
+    }
+
+    if (!email.trim()) {
+      setError("Please enter your email.");
+      return;
+    }
+
+    if (!email.includes("@")) {
+      setError("Please enter a valid email.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must contain at least 6 characters.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    /* Save user information */
+    localStorage.setItem("travexaUserName", name.trim());
+    localStorage.setItem("travexaUserEmail", email.trim());
+
+    /*
+      This is only frontend authentication for now.
+      Your backend friend can replace this later.
+    */
+    localStorage.setItem("travexaRegistered", "true");
+
+    /* After registration → Login */
+    navigate("/login");
+  };
+
   return (
-    <div className="register-page">
+    <main className="register-page">
 
-      {/* Left Side */}
+      <div className="register-image-section">
 
-      <div className="register-left">
+        <div className="register-image-overlay"></div>
 
-        <div className="register-left-content">
+        <div className="register-image-content">
 
-          <h1>✈️ Travexa</h1>
+          <div className="register-logo">
+            ✈️ Travexa
+          </div>
 
-          <h2>Start Your Journey Today</h2>
+          <div className="register-travel-icon">
+            🌍
+          </div>
+
+          <h1>
+            Start Your
+            <br />
+            <span>Journey</span>
+            <br />
+            Today
+          </h1>
 
           <p>
-            Join Travexa and explore the world with AI-powered travel planning,
-            personalized itineraries, hotel recommendations, and live weather updates.
+            Join Travexa and explore the world with
+            AI-powered travel planning, personalised
+            itineraries, hotel recommendations and
+            live travel information.
           </p>
 
         </div>
 
       </div>
 
-      {/* Right Side */}
 
-      <div className="register-right">
+      <div className="register-form-section">
 
-        <div className="register-box">
+        <div className="register-card">
 
-          <div className="user-icon">👤</div>
+          <div className="register-icon">
+            👤
+          </div>
 
           <h2>Create Account</h2>
 
-          <p>Create your Travexa account</p>
+          <p className="register-subtitle">
+            Create your Travexa account
+          </p>
 
-          <input
-            type="text"
-            placeholder="Full Name"
-          />
 
-          <input
-            type="email"
-            placeholder="Email Address"
-          />
+          {error && (
+            <div className="register-error">
+              {error}
+            </div>
+          )}
 
-          <input
-            type="password"
-            placeholder="Password"
-          />
 
-          <input
-            type="password"
-            placeholder="Confirm Password"
-          />
+          <form onSubmit={handleRegister}>
 
-          <button>Create Account</button>
+            <input
+              type="text"
+              placeholder="Full Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
 
-          <span>
+            <input
+              type="email"
+              placeholder="Email Address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+
+            <input
+              type="password"
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+
+            <button type="submit">
+              Create Account
+            </button>
+
+          </form>
+
+
+          <p className="register-login-text">
             Already have an account?
-            <a href="#"> Login</a>
-          </span>
+            <button
+              type="button"
+              onClick={() => navigate("/login")}
+            >
+              Login
+            </button>
+          </p>
 
         </div>
 
       </div>
 
-    </div>
+    </main>
   );
 }
 

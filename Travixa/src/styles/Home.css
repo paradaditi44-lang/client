@@ -1,193 +1,713 @@
-/* ===========================
-   HOME
-=========================== */
+/* =========================================================
+   HOME PAGE
+========================================================= */
 
-.home {
-    min-height: 100vh;
-    text-align: center;
-    padding: 70px 20px;
-    position: relative;
-    overflow: hidden;
-
-    background: red;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-
-    color: white;
+.home-page {
+  width: 100%;
+  overflow-x: hidden;
+  background: #f6f9ff;
 }
 
-/* ===========================
-   HEADING
-=========================== */
 
-.home h1 {
-    font-size: 55px;
-    color: #38bdf8;
-    margin-bottom: 20px;
+/* =========================================================
+   HERO
+========================================================= */
+
+.home-hero {
+  min-height: calc(100vh - 88px);
+  position: relative;
+
+  background-image:
+    url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2200&q=90");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  align-items: center;
+
+  overflow: hidden;
 }
 
-.home p {
-    width: 60%;
-    margin: 25px auto;
-    font-size: 20px;
-    line-height: 1.6;
+
+/* Dark overlay */
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(4, 20, 45, 0.90),
+      rgba(4, 20, 45, 0.64),
+      rgba(4, 20, 45, 0.25)
+    );
+
+  z-index: 1;
 }
 
-/* ===========================
-   BUTTON
-=========================== */
 
-.home button {
-    background: #2563eb;
-    color: white;
-    border: none;
-    padding: 15px 35px;
-    border-radius: 30px;
-    font-size: 18px;
-    cursor: pointer;
-    transition: 0.3s;
+/* Decorative glow */
+
+.home-hero::after {
+  content: "";
+
+  position: absolute;
+
+  width: 500px;
+  height: 500px;
+
+  right: -180px;
+  top: 80px;
+
+  background: rgba(72, 142, 255, 0.18);
+
+  border-radius: 50%;
+
+  filter: blur(90px);
+
+  z-index: 1;
 }
 
-.home button:hover {
-    background: #1d4ed8;
-    transform: translateY(-3px);
+
+/* =========================================================
+   HERO CONTENT
+========================================================= */
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+
+  max-width: 1150px;
+
+  width: 100%;
+
+  margin: 0 auto;
+
+  padding: 90px 70px 110px;
+
+  color: white;
 }
 
-/* ===========================
-   CARDS
-=========================== */
 
-.cards {
-    width: 80%;
-    margin: 60px auto;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 25px;
+/* Badge */
+
+.hero-badge {
+  display: inline-flex;
+
+  align-items: center;
+
+  padding: 11px 18px;
+
+  margin-bottom: 28px;
+
+  border: 1px solid rgba(255,255,255,0.35);
+
+  border-radius: 30px;
+
+  background: rgba(255,255,255,0.10);
+
+  backdrop-filter: blur(12px);
+
+  font-size: 15px;
+
+  font-weight: 600;
+
+  letter-spacing: 0.3px;
 }
 
-.card {
-    background: rgba(30,41,59,0.88);
-    backdrop-filter: blur(8px);
-    padding: 30px;
-    border-radius: 18px;
-    box-shadow: 0 8px 20px rgba(0,0,0,.35);
-    transition: .3s;
+
+/* Main heading */
+
+.hero-content h1 {
+  margin: 0;
+
+  max-width: 850px;
+
+  font-size: clamp(52px, 6vw, 88px);
+
+  line-height: 0.98;
+
+  font-weight: 800;
+
+  letter-spacing: -3px;
 }
 
-.card:hover {
-    transform: translateY(-8px);
+
+.hero-content h1 span {
+  color: #69a9ff;
 }
 
-.card h2 {
-    color: #38bdf8;
-    margin-bottom: 15px;
+
+/* Description */
+
+.hero-content > p {
+  max-width: 700px;
+
+  margin: 32px 0;
+
+  font-size: 19px;
+
+  line-height: 1.8;
+
+  color: rgba(255,255,255,0.88);
 }
 
-.card p {
-    width: 100%;
-    margin: 0;
-    font-size: 18px;
+
+/* =========================================================
+   HERO BUTTONS
+========================================================= */
+
+.hero-actions {
+  display: flex;
+
+  gap: 16px;
+
+  margin-top: 30px;
 }
 
-/* ===========================
-   LIGHT THEME
-=========================== */
 
-.light .home {
-    background:
-        linear-gradient(rgba(255,255,255,0.45), rgba(255,255,255,0.45)),
-        url("../assets/travel-bg.jpg");
+.hero-actions button {
+  border: none;
 
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
+  min-width: 175px;
 
-    color: #111827;
+  padding: 16px 24px;
+
+  border-radius: 14px;
+
+  font-size: 16px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.3s ease;
 }
 
-.light .home h1 {
-    color: #2563eb;
+
+.hero-primary {
+  color: white;
+
+  background: #2563eb;
+
+  box-shadow: 0 12px 35px rgba(37,99,235,0.4);
 }
 
-.light .home p {
-    color: #374151;
+
+.hero-primary:hover {
+  transform: translateY(-3px);
+
+  background: #1d4ed8;
+
+  box-shadow: 0 18px 40px rgba(37,99,235,0.55);
 }
 
-.light .card {
-    background: rgba(255,255,255,0.90);
-    color: #111827;
-    box-shadow: 0 8px 20px rgba(0,0,0,.15);
+
+.hero-primary span {
+  margin-left: 12px;
+
+  font-size: 20px;
 }
 
-.light .card h2 {
-    color: #2563eb;
+
+.hero-secondary {
+  color: white;
+
+  background: rgba(255,255,255,0.10);
+
+  border: 1px solid rgba(255,255,255,0.35) !important;
+
+  backdrop-filter: blur(10px);
 }
 
-.light .home button {
-    background: #2563eb;
-    color: white;
+
+.hero-secondary:hover {
+  transform: translateY(-3px);
+
+  background: rgba(255,255,255,0.20);
 }
 
-/* ===========================
-   DARK THEME
-=========================== */
 
-.dark .home {
-    background:
-        linear-gradient(rgba(15,23,42,0.70), rgba(15,23,42,0.70)),
-        url("../assets/travel-bg.jpg");
+/* =========================================================
+   STATS
+========================================================= */
 
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
+.hero-stats {
+  display: flex;
 
-    color: white;
+  gap: 65px;
+
+  margin-top: 65px;
 }
 
-.dark .home h1 {
-    color: #60a5fa;
+
+.hero-stat {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
 }
 
-.dark .home p {
-    color: #d1d5db;
+
+.hero-stat strong {
+  font-size: 26px;
+
+  color: white;
 }
 
-.dark .card {
-    background: rgba(30,41,59,0.88);
-    color: white;
-    box-shadow: 0 8px 20px rgba(0,0,0,.45);
+
+.hero-stat span {
+  font-size: 13px;
+
+  color: rgba(255,255,255,0.70);
+
+  text-transform: uppercase;
+
+  letter-spacing: 1px;
 }
 
-.dark .card h2 {
-    color: #60a5fa;
+
+/* =========================================================
+   SCROLL
+========================================================= */
+
+.scroll-indicator {
+  position: absolute;
+
+  z-index: 3;
+
+  bottom: 25px;
+
+  right: 60px;
+
+  color: rgba(255,255,255,0.75);
+
+  text-align: center;
+
+  font-size: 12px;
+
+  letter-spacing: 1px;
+
+  text-transform: uppercase;
 }
 
-.dark .home button {
-    background: #3b82f6;
-    color: white;
+
+.scroll-indicator div {
+  margin-top: 6px;
+
+  font-size: 22px;
+
+  animation: scrollDown 1.5s infinite;
 }
 
-/* ===========================
+
+@keyframes scrollDown {
+
+  0% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(6px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+
+}
+
+
+/* =========================================================
+   FEATURES
+========================================================= */
+
+.home-features {
+  padding: 120px 7%;
+
+  background:
+    radial-gradient(
+      circle at 10% 10%,
+      rgba(37,99,235,0.08),
+      transparent 30%
+    ),
+
+    #f7faff;
+}
+
+
+.section-title {
+  max-width: 750px;
+
+  margin-bottom: 60px;
+}
+
+
+.section-title > span {
+  color: #2563eb;
+
+  font-size: 13px;
+
+  font-weight: 800;
+
+  letter-spacing: 2px;
+}
+
+
+.section-title h2 {
+  margin: 18px 0;
+
+  font-size: clamp(40px, 5vw, 64px);
+
+  line-height: 1.05;
+
+  color: #14245a;
+
+  letter-spacing: -2px;
+}
+
+
+.section-title h2 em {
+  color: #2563eb;
+
+  font-style: normal;
+}
+
+
+.section-title p {
+  color: #64748b;
+
+  font-size: 18px;
+
+  line-height: 1.7;
+}
+
+
+/* =========================================================
+   FEATURE GRID
+========================================================= */
+
+.feature-grid {
+  max-width: 1250px;
+
+  margin: auto;
+
+  display: grid;
+
+  grid-template-columns: 1.4fr 1fr 1fr;
+
+  gap: 22px;
+}
+
+
+.feature-card {
+  position: relative;
+
+  min-height: 320px;
+
+  padding: 35px;
+
+  background: white;
+
+  border: 1px solid #e5eaf4;
+
+  border-radius: 25px;
+
+  box-shadow: 0 15px 45px rgba(30,60,120,0.07);
+
+  transition: 0.35s ease;
+
+  overflow: hidden;
+}
+
+
+.feature-card:hover {
+  transform: translateY(-8px);
+
+  box-shadow: 0 25px 55px rgba(30,60,120,0.13);
+
+  border-color: #c9d9ff;
+}
+
+
+.feature-large {
+  grid-row: span 2;
+
+  min-height: 665px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff,
+      #eef5ff
+    );
+}
+
+
+.feature-number {
+  position: absolute;
+
+  right: 25px;
+
+  top: 22px;
+
+  color: #dbe7ff;
+
+  font-size: 45px;
+
+  font-weight: 800;
+}
+
+
+.feature-icon {
+  width: 62px;
+
+  height: 62px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 18px;
+
+  background: #eaf2ff;
+
+  font-size: 30px;
+
+  margin-bottom: 28px;
+}
+
+
+.feature-card h3 {
+  color: #14245a;
+
+  font-size: 25px;
+
+  margin-bottom: 15px;
+}
+
+
+.feature-card p {
+  color: #64748b;
+
+  font-size: 15px;
+
+  line-height: 1.8;
+
+  max-width: 390px;
+}
+
+
+.feature-card button {
+  margin-top: 25px;
+
+  border: none;
+
+  background: transparent;
+
+  color: #2563eb;
+
+  font-size: 15px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   CTA
+========================================================= */
+
+.home-cta {
+  position: relative;
+
+  padding: 120px 20px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #0d1b3d,
+      #1746a2
+    );
+
+  overflow: hidden;
+
+  text-align: center;
+
+  color: white;
+}
+
+
+.cta-glow {
+  position: absolute;
+
+  width: 500px;
+
+  height: 500px;
+
+  background: rgba(74,144,255,0.25);
+
+  border-radius: 50%;
+
+  filter: blur(100px);
+
+  top: -250px;
+
+  left: 50%;
+
+  transform: translateX(-50%);
+}
+
+
+.cta-content {
+  position: relative;
+
+  z-index: 2;
+}
+
+
+.cta-content > span {
+  font-size: 13px;
+
+  font-weight: 700;
+
+  letter-spacing: 2px;
+
+  color: #a9caff;
+}
+
+
+.cta-content h2 {
+  margin: 22px 0;
+
+  font-size: clamp(40px, 5vw, 65px);
+
+  line-height: 1.05;
+}
+
+
+.cta-content h2 strong {
+  color: #73adff;
+}
+
+
+.cta-content p {
+  color: rgba(255,255,255,0.75);
+
+  font-size: 17px;
+
+  margin-bottom: 30px;
+}
+
+
+.cta-content button {
+  padding: 16px 30px;
+
+  border: none;
+
+  border-radius: 13px;
+
+  background: white;
+
+  color: #1755d1;
+
+  font-weight: 800;
+
+  font-size: 16px;
+
+  cursor: pointer;
+
+  transition: 0.3s ease;
+}
+
+
+.cta-content button:hover {
+  transform: translateY(-3px);
+
+  box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+}
+
+
+/* =========================================================
    RESPONSIVE
-=========================== */
+========================================================= */
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
 
-    .home h1 {
-        font-size: 38px;
-    }
+  .hero-content {
+    padding: 70px 35px 100px;
+  }
 
-    .home p {
-        width: 90%;
-        font-size: 18px;
-    }
+  .feature-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 
-    .cards {
-        width: 95%;
-        grid-template-columns: 1fr;
-    }
+  .feature-large {
+    grid-row: auto;
+
+    min-height: 400px;
+  }
+
+  .hero-stats {
+    gap: 30px;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .hero-content {
+    padding: 60px 22px 100px;
+  }
+
+  .hero-content h1 {
+    font-size: 48px;
+
+    letter-spacing: -2px;
+  }
+
+  .hero-content > p {
+    font-size: 16px;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .hero-actions button {
+    width: 100%;
+  }
+
+  .hero-stats {
+    gap: 22px;
+  }
+
+  .hero-stat strong {
+    font-size: 20px;
+  }
+
+  .hero-stat span {
+    font-size: 10px;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-features {
+    padding: 80px 20px;
+  }
+
+  .scroll-indicator {
+    display: none;
+  }
+
 }
