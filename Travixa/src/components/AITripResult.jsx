@@ -1,3 +1,4 @@
+import MapView from "./MapView";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/AITripResult.css";
@@ -6,13 +7,49 @@ function AITripResult() {
   const navigate = useNavigate();
 
   const [trip, setTrip] = useState(null);
-
+  const [currentLocation, setCurrentLocation] = useState("");
+const [locationError, setLocationError] = useState("");
+const [distance, setDistance] = useState("");
+const [duration, setDuration] = useState("");
+const [travelMode, setTravelMode] = useState("driving");
+const [loading, setLoading] = useState(false);
   useEffect(() => {
     const savedTrip = localStorage.getItem("travexaTrip");
 
     if (savedTrip) {
       setTrip(JSON.parse(savedTrip));
     }
+    if ("geolocation" in navigator) {
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      const { latitude, longitude } = position.coords;
+
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+        );
+
+        const data = await response.json();
+
+        const location =
+          data.address.city ||
+          data.address.town ||
+          data.address.village ||
+          data.address.state ||
+          "Current Location";
+
+        setCurrentLocation(location);
+      } catch (err) {
+        setLocationError("Unable to detect location.");
+      }
+    },
+    () => {
+      setLocationError(
+        "Location permission denied."
+      );
+    }
+  );
+}
   }, []);
 
   if (!trip) {
@@ -121,7 +158,13 @@ function AITripResult() {
 
 
       {/* TRIP SUMMARY */}
+<div>
+  <span>📍 STARTING POINT</span>
 
+  <strong>
+    {currentLocation || "Detecting..."}
+  </strong>
+</div>
       <main className="result-container">
 
         <div className="trip-summary">
@@ -240,7 +283,28 @@ function AITripResult() {
           ))}
 
         </div>
+<section className="map-result-section">
 
+  <div className="section-title">
+    <h2>🗺 Route Planner</h2>
+    <p>
+      View the route, estimated distance and travel time.
+    </p>
+  </div>
+
+  <MapView
+    from="Pune"
+    to={trip.destination}
+    setLoading={setLoading}
+    distance={distance}
+    setDistance={setDistance}
+    duration={duration}
+    setDuration={setDuration}
+    travelMode={travelMode}
+    setTravelMode={setTravelMode}
+  />
+
+</section>
 
         {/* BOTTOM */}
 

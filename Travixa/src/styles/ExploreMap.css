@@ -1,0 +1,12 @@
+.explore-map{
+
+    margin-top:35px;
+
+    border-radius:22px;
+
+    overflow:hidden;
+
+    box-shadow:0 15px 40px rgba(0,0,0,.12);
+
+    border:1px solid #e5e7eb;
+}
