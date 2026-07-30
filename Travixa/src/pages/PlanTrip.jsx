@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import API from "../api/api";
 import "../styles/PlanTrip.css";
 
 function PlanTrip() {
@@ -13,6 +14,16 @@ function PlanTrip() {
     budget: "",
     travelStyle: "",
   });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const token = localStorage.getItem("travexaToken");
+    if (!token) {
+      navigate("/login");
+    }
+  }, [navigate]);
 
   const budgets = [
     {
@@ -51,8 +62,18 @@ function PlanTrip() {
     });
   };
 
-  const handleGenerate = (e) => {
+  const handleGenerate = async (e) => {
     e.preventDefault();
+
+    if (loading) return;
+
+    setError("");
+
+    const token = localStorage.getItem("travexaToken");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
     if (
       !trip.destination ||
@@ -60,15 +81,81 @@ function PlanTrip() {
       !trip.budget ||
       !trip.travelStyle
     ) {
-      alert("Please complete all trip details.");
+      setError("Please complete all trip details.");
       return;
     }
 
-    // Save trip details
-    localStorage.setItem("travexaTrip", JSON.stringify(trip));
+    // Calculate endDate based on travelDate (startDate) and days count
+    const startDateStr = trip.travelDate;
+    const daysNum = Number(trip.days) || 1;
+    const startDateObj = new Date(startDateStr);
+    const endDateObj = new Date(startDateObj);
+    endDateObj.setDate(startDateObj.getDate() + daysNum - 1);
+    const endDateStr = endDateObj.toISOString().split("T")[0];
 
-    // Go to result page
-    navigate("/trip-result");
+    // Determine numeric budget if possible
+    let numericBudget;
+    if (!isNaN(parseFloat(trip.budget))) {
+      numericBudget = parseFloat(trip.budget);
+    } else if (trip.budget === "budget") {
+      numericBudget = 15000;
+    } else if (trip.budget === "moderate") {
+      numericBudget = 40000;
+    } else if (trip.budget === "luxury") {
+      numericBudget = 100000;
+    }
+
+    const payload = {
+      destination: trip.destination.trim(),
+      startDate: startDateStr,
+      endDate: endDateStr,
+      numberOfTravelers: Number(trip.travellers) || 1,
+      preferences: {
+        travelStyle: trip.travelStyle,
+        budgetCategory: trip.budget,
+      },
+    };
+
+    if (numericBudget !== undefined) {
+      payload.budget = numericBudget;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await API.post("/trips", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data && response.data.trip) {
+        const createdTrip = response.data.trip;
+        localStorage.setItem("travexaTrip", JSON.stringify(createdTrip));
+        navigate("/trip-result", { state: { trip: createdTrip } });
+      }
+    } catch (err) {
+      if (err.response) {
+        if (err.response.status === 401) {
+          localStorage.removeItem("travexaToken");
+          navigate("/login");
+          return;
+        }
+        const data = err.response.data;
+        if (data.message) {
+          setError(data.message);
+        } else if (data.errors && Array.isArray(data.errors)) {
+          const errorMsgs = data.errors.map((e) => e.msg || e.message).join(", ");
+          setError(errorMsgs || "Validation error");
+        } else {
+          setError("Failed to create trip. Server error.");
+        }
+      } else {
+        setError("Server error. Please check your connection.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -107,6 +194,24 @@ function PlanTrip() {
       {/* FORM */}
 
       <main className="trip-planner">
+
+        {error && (
+          <div
+            className="register-error"
+            style={{
+              padding: "14px 18px",
+              marginBottom: "20px",
+              borderRadius: "12px",
+              background: "#fff1f2",
+              color: "#dc2626",
+              border: "1px solid #fecdd3",
+              fontWeight: "500",
+              fontSize: "14px",
+            }}
+          >
+            ⚠️ {error}
+          </div>
+        )}
 
         <form onSubmit={handleGenerate}>
 
@@ -394,8 +499,9 @@ function PlanTrip() {
             <button
               type="submit"
               className="generate-trip-btn"
+              disabled={loading}
             >
-              ✨ Generate My Trip →
+              {loading ? "✨ Generating Trip..." : "✨ Generate My Trip →"}
             </button>
 
           </div>

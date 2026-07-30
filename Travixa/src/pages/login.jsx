@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Login.css";
+import API from "../api/api";
+
 
 function Login() {
   const navigate = useNavigate();
@@ -13,59 +15,45 @@ function Login() {
 
   const [error, setError] = useState("");
 
-  const handleLogin = (e) => {
-    e.preventDefault();
+  const handleLogin = async (e) => {
+  e.preventDefault();
+  setError("");
 
-    setError("");
+  if (!email.trim()) {
+    setError("Please enter your email.");
+    return;
+  }
 
-    if (!email.trim()) {
-      setError("Please enter your email.");
-      return;
-    }
+  if (!password.trim()) {
+    setError("Please enter your password.");
+    return;
+  }
 
-    if (!email.includes("@")) {
-      setError("Please enter a valid email.");
-      return;
-    }
+  try {
+    const response = await API.post("/auth/login", {
+      email,
+      password,
+    });
 
-    if (!password.trim()) {
-      setError("Please enter your password.");
-      return;
-    }
+    const { token, user } = response.data;
 
-    /*
-      Frontend login for now.
-      Backend authentication can replace this later.
-    */
-
+    // Save authentication
+    localStorage.setItem("travexaToken", token);
     localStorage.setItem("travexaLoggedIn", "true");
 
-    /*
-      If username doesn't exist for some reason,
-      create a default name from email.
-    */
-    if (!localStorage.getItem("travexaUserName")) {
+    // Save user details
+    localStorage.setItem("travexaUserName", user.name);
+    localStorage.setItem("travexaUserEmail", user.email);
 
-      const emailName = email
-        .split("@")[0]
-        .replace(/[0-9]/g, "")
-        .trim();
-
-      const defaultName =
-        emailName.charAt(0).toUpperCase() +
-        emailName.slice(1);
-
-      localStorage.setItem(
-        "travexaUserName",
-        defaultName || "Traveller"
-      );
-    }
-
-    localStorage.setItem("travexaUserEmail", email);
-
-    /* Login → Plan Trip */
     navigate("/plan-trip");
-  };
+  } catch (err) {
+    if (err.response) {
+      setError(err.response.data.message || "Login failed");
+    } else {
+      setError("Unable to connect to server.");
+    }
+  }
+};
 
 
   return (

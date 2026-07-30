@@ -1,7 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import API from "../api/api";
 import "../styles/PlannerForm.css";
 
 function PlannerForm({ setGeneratedTrip }) {
+  const navigate = useNavigate();
+
   const [trip, setTrip] = useState({
     destination: "",
     startDate: "",
@@ -11,6 +15,9 @@ function PlannerForm({ setGeneratedTrip }) {
     travelStyle: "",
     interests: [],
   });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const interestsList = [
     "Nature",
@@ -43,26 +50,101 @@ function PlannerForm({ setGeneratedTrip }) {
     }
   };
 
-  
-const generateTrip = () => {
-  if (
-    !trip.destination ||
-    !trip.startDate ||
-    !trip.endDate ||
-    !trip.budget ||
-    !trip.travelStyle
-  ) {
-    alert("Please fill all the required fields.");
-    return;
-  }
-  setGeneratedTrip(trip);
-};
+  const generateTrip = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (loading) return;
 
+    setError("");
+
+    const token = localStorage.getItem("travexaToken");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    if (
+      !trip.destination ||
+      !trip.startDate ||
+      !trip.endDate ||
+      !trip.budget ||
+      !trip.travelStyle
+    ) {
+      setError("Please fill all the required fields.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const payload = {
+        destination: trip.destination.trim(),
+        startDate: trip.startDate,
+        endDate: trip.endDate,
+        budget: Number(trip.budget) || 0,
+        numberOfTravelers: Number(trip.travelers) || 1,
+        preferences: {
+          travelStyle: trip.travelStyle,
+          interests: trip.interests,
+        },
+      };
+
+      const res = await API.post("/trips", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.data && res.data.trip) {
+        const createdTrip = res.data.trip;
+        localStorage.setItem("travexaTrip", JSON.stringify(createdTrip));
+        if (setGeneratedTrip) {
+          setGeneratedTrip(createdTrip);
+        }
+      }
+    } catch (err) {
+      if (err.response) {
+        if (err.response.status === 401) {
+          localStorage.removeItem("travexaToken");
+          navigate("/login");
+          return;
+        }
+        const data = err.response.data;
+        if (data.message) {
+          setError(data.message);
+        } else if (data.errors && Array.isArray(data.errors)) {
+          const errorMsgs = data.errors.map((e) => e.msg || e.message).join(", ");
+          setError(errorMsgs || "Validation error");
+        } else {
+          setError("Failed to generate trip. Server error.");
+        }
+      } else {
+        setError("Server error. Please check your connection.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="planner-card">
 
       <h2>✨ AI Trip Planner</h2>
+
+      {error && (
+        <div
+          className="planner-error"
+          style={{
+            padding: "10px 14px",
+            marginBottom: "14px",
+            borderRadius: "8px",
+            background: "#fff1f2",
+            color: "#dc2626",
+            fontSize: "13px",
+          }}
+        >
+          ⚠️ {error}
+        </div>
+      )}
 
       <label>📍 Destination</label>
       <input
@@ -143,8 +225,9 @@ const generateTrip = () => {
       <button
         className="generate-btn"
         onClick={generateTrip}
+        disabled={loading}
       >
-        ✨ Generate AI Trip
+        {loading ? "✨ Generating..." : "✨ Generate AI Trip"}
       </button>
 
     </div>
