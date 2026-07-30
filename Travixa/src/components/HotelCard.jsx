@@ -1,34 +1,84 @@
+import React from "react";
 import "../styles/HotelCard.css";
 
+// Deterministic gradient accent picker so cards feel varied and premium
+// without using any external images, stock photos, or placeholders.
+const ACCENTS = [
+  { grad: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", glow: "rgba(118,75,162,0.35)" },
+  { grad: "linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)", glow: "rgba(6,182,212,0.35)" },
+  { grad: "linear-gradient(135deg, #f97316 0%, #db2777 100%)", glow: "rgba(219,39,119,0.35)" },
+  { grad: "linear-gradient(135deg, #059669 0%, #2563eb 100%)", glow: "rgba(5,150,105,0.35)" },
+  { grad: "linear-gradient(135deg, #7c3aed 0%, #db2777 100%)", glow: "rgba(124,58,237,0.35)" },
+  { grad: "linear-gradient(135deg, #0ea5e9 0%, #22c55e 100%)", glow: "rgba(14,165,233,0.35)" },
+];
+
+function pickAccent(name = "") {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return ACCENTS[Math.abs(hash) % ACCENTS.length];
+}
+
 function HotelCard({
-  image,
   name,
   location,
-  rating,
-  price,
+  rating = "4.5",
+  userRatingsTotal,
+  price = "Check Price",
+  website,
+  mapsUrl,
 }) {
-  const hotelImage =
-    image ||
-    "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800";
+  const accent = pickAccent(name || "hotel");
+
+  const googleMapsSearchUrl =
+    mapsUrl ||
+    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      name + " " + location
+    )}`;
+
+  const googleHotelSearchUrl =
+    website ||
+    `https://www.google.com/search?q=${encodeURIComponent(
+      name + " " + location + " official website"
+    )}`;
 
   return (
     <div className="hotel-card">
-      <div className="hotel-preview">
-  <h1>🏨</h1>
-  <p>Hotel Information Available</p>
+      {/* Premium image-free header */}
+      <div
+        className="hotel-header-visual"
+        style={{ background: accent.grad, "--accent-glow": accent.glow }}
+      >
+        <div className="hotel-header-pattern" />
 
-  <span className="rating-badge">
-    ⭐ {rating}
-  </span>
-</div>
+        <span className="rating-badge">
+          ⭐ {rating}
+          {userRatingsTotal ? ` (${userRatingsTotal})` : ""}
+        </span>
 
-      <div className="hotel-info">
-        <h3>{name}</h3>
+        <div className="hotel-icon-wrap">
+          <span className="hotel-icon" role="img" aria-label="Hotel">
+            🏨
+          </span>
+        </div>
 
-        <p className="location">
-          📍 {location}
+        <h3 className="hotel-name-header" title={name}>
+          {name}
+        </h3>
+
+        <p className="hotel-address-header">
+          <span className="loc-icon">📍</span>
+          <span className="addr-text">{location}</span>
         </p>
 
+        <span className="photos-google-badge">
+          📷 Photos available on Google
+        </span>
+      </div>
+
+      {/* Hotel Information Details */}
+      <div className="hotel-info">
         <p className="price">
           {price}
           {price !== "Check Price" && <span> / night</span>}
@@ -42,45 +92,24 @@ function HotelCard({
         </div>
 
         <div className="hotel-buttons">
-          <button
-            className="details-btn"
-            onClick={() =>
-              alert(
-                `🏨 ${name}
-
-📍 ${location}
-
-⭐ Rating: ${rating}
-
-💰 ${price}`
-              )
-            }
-          >
-            View Details
-          </button>
-
           <a
-            href={`https://www.google.com/search?q=${encodeURIComponent(
-  name + " " + location
-)}`}
+            href={googleHotelSearchUrl}
             target="_blank"
             rel="noreferrer"
             className="book-btn"
           >
             🔍 View Hotel
           </a>
-        </div>
 
-        <a
-          href={`https://www.google.com/maps/search/${encodeURIComponent(
-            name + " " + location
-          )}`}
-          target="_blank"
-          rel="noreferrer"
-          className="map-link"
-        >
-          📍 View on Google Maps
-        </a>
+          <a
+            href={googleMapsSearchUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="map-btn"
+          >
+            📍 View on Google Maps
+          </a>
+        </div>
       </div>
     </div>
   );

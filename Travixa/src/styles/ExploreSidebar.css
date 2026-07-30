@@ -1,0 +1,257 @@
+.explore-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 22px;
+  padding: 20px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+  min-height: 500px;
+  max-height: 720px;
+}
+
+/* ---------- Stats header ---------- */
+
+.sidebar-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.stat-block {
+  background: linear-gradient(135deg, #eef4ff 0%, #f5f3ff 100%);
+  border-radius: 14px;
+  padding: 12px 10px;
+  text-align: center;
+}
+
+.stat-block-wide {
+  grid-column: 1 / -1;
+}
+
+.stat-number {
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #2563eb;
+  margin-bottom: 2px;
+}
+
+.stat-icon-value {
+  font-size: 1.6rem;
+}
+
+.stat-text-value {
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stat-caption {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+/* ---------- Selected place detail card ---------- */
+
+.place-detail-card {
+  position: relative;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 18px 16px 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.place-detail-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #f1f5f9;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  line-height: 1;
+  font-size: 16px;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.place-detail-close:hover {
+  background: #e2e8f0;
+}
+
+.place-detail-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+}
+
+.place-detail-card h3 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  color: #1e293b;
+}
+
+.place-detail-category {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.place-detail-address {
+  margin: 0 0 14px;
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.place-detail-btn {
+  display: block;
+  text-align: center;
+  padding: 10px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+  color: white;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-decoration: none;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.place-detail-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* ---------- Place list ---------- */
+
+.sidebar-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 4px;
+}
+
+.sidebar-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-list::-webkit-scrollbar-thumb {
+  background: #dbeafe;
+  border-radius: 10px;
+}
+
+.place-list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  padding: 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: 0.2s ease;
+}
+
+.place-list-item:hover {
+  border-color: #dbeafe;
+  transform: translateX(2px);
+}
+
+.place-list-item.active {
+  border-color: #2563eb;
+  background: #eef4ff;
+}
+
+.place-list-icon {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.place-list-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.place-list-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.place-list-address {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- Status states (loading / empty) ---------- */
+
+.sidebar-status {
+  text-align: center;
+  padding: 40px 12px;
+  color: #64748b;
+}
+
+.sidebar-status h4 {
+  color: #1e293b;
+  margin: 8px 0 4px;
+  font-size: 0.95rem;
+}
+
+.sidebar-status p {
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+.sidebar-status-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.sidebar-spinner {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid #dbeafe;
+  border-top-color: #2563eb;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,8 +1,18 @@
-.maps-page{
+.maps-page {
+  max-width: 1400px;
+  margin: auto;
+  padding: 40px 20px 60px;
+}
 
-    max-width:1300px;
+.explore-body {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  align-items: stretch;
+}
 
-    margin:auto;
-
-    padding:40px 20px;
+@media (max-width: 900px) {
+  .explore-body {
+    grid-template-columns: 1fr;
+  }
 }

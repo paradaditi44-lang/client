@@ -4,7 +4,7 @@
 
 .hotels-header {
   text-align: center;
-  margin-bottom: 35px;
+  margin-bottom: 28px;
 }
 
 .hotels-header h1 {
@@ -31,6 +31,7 @@
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 25px;
 }
+
 .search-box {
   display: flex;
   justify-content: center;
@@ -43,16 +44,18 @@
   padding: 12px 24px;
   border: none;
   border-radius: 10px;
-  background: #2563eb;
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
   color: white;
   cursor: pointer;
   font-size: 15px;
   font-weight: 600;
-  transition: 0.3s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
 }
 
 .search-btn:hover {
-  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.4);
 }
 
 .hotel-search {
@@ -64,4 +67,126 @@
   text-align: center;
   color: #64748b;
   width: 100%;
+}
+
+/* ---------- Search statistics bar ---------- */
+
+.search-stats-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin: 0 0 30px;
+}
+
+.stat-pill {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 14px;
+  padding: 12px 20px;
+  min-width: 130px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.stat-pill:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.1);
+}
+
+.stat-pill-wide {
+  min-width: 190px;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #2563eb;
+  margin-bottom: 2px;
+}
+
+.stat-value-name {
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+  margin: 0 auto 2px;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+/* ---------- Empty state ---------- */
+
+.empty-state {
+  grid-column: 1 / -1;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 22px;
+  padding: 60px 30px;
+  text-align: center;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.empty-state-icon {
+  font-size: 3.2rem;
+  margin-bottom: 14px;
+  filter: drop-shadow(0 6px 10px rgba(37, 99, 235, 0.25));
+  animation: float-icon 3s ease-in-out infinite;
+}
+
+@keyframes float-icon {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.empty-state h2 {
+  color: #1f2937;
+  font-size: 1.4rem;
+  margin: 0 0 10px;
+}
+
+.empty-state p {
+  color: #64748b;
+  font-size: 0.95rem;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.empty-state-suggestions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.empty-state-suggestions span {
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #eef4ff 0%, #e0e7ff 100%);
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.empty-state-suggestions span:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.2);
 }

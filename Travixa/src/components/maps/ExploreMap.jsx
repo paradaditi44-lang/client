@@ -1,279 +1,137 @@
-import { useEffect, useState } from "react";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
-  useMap,
-} from "react-leaflet";
+import { useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "../../styles/ExploreMap.css";
 
-// ==============================
-// Fix Leaflet marker icons
-// ==============================
+// Default India-center view when nothing has been searched yet
+const DEFAULT_CENTER = [20.5937, 78.9629];
+const DEFAULT_ZOOM = 5;
 
-delete L.Icon.Default.prototype._getIconUrl;
-
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-
-  iconUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-
-  shadowUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+// Search-origin marker (city / current location pin)
+const originIcon = L.divIcon({
+  className: "origin-marker",
+  html: `<div class="origin-marker-dot"><span>📍</span></div>`,
+  iconSize: [36, 36],
+  iconAnchor: [18, 34],
 });
 
-// ==============================
-// Category Mapping
-// ==============================
+// Build a category-colored marker icon
+function buildCategoryIcon(category, isSelected) {
+  return L.divIcon({
+    className: "category-marker",
+    html: `<div class="category-marker-dot${isSelected ? " selected" : ""}" style="background:${category.color}">
+             <span>${category.icon}</span>
+           </div>`,
+    iconSize: isSelected ? [40, 40] : [32, 32],
+    iconAnchor: isSelected ? [20, 20] : [16, 16],
+  });
+}
 
-const categoryMap = {
-  Attractions: {
-    key: "tourism",
-    value: "attraction",
-  },
-
-  Restaurants: {
-    key: "amenity",
-    value: "restaurant",
-  },
-
-  Cafes: {
-    key: "amenity",
-    value: "cafe",
-  },
-
-  Hotels: {
-    key: "tourism",
-    value: "hotel",
-  },
-
-  Parks: {
-    key: "leisure",
-    value: "park",
-  },
-
-  Petrol: {
-    key: "amenity",
-    value: "fuel",
-  },
-
-  Hospitals: {
-    key: "amenity",
-    value: "hospital",
-  },
-
-  ATM: {
-    key: "amenity",
-    value: "atm",
-  },
-
-  Railway: {
-    key: "railway",
-    value: "station",
-  },
-
-  Shopping: {
-    key: "shop",
-    value: "mall",
-  },
-};
-// ==============================
-// Fly animation
-// ==============================
-
-function ChangeView({ center }) {
+// Smoothly fly the map to a new center whenever it changes
+function FlyToPosition({ center, zoom }) {
   const map = useMap();
 
   useEffect(() => {
-    map.flyTo(center, 13, {
-      duration: 2,
-    });
-  }, [center, map]);
+    if (!center) return;
+    map.flyTo(center, zoom ?? 13, { duration: 1.4 });
+  }, [center, zoom, map]);
 
   return null;
 }
 
-// ==============================
-// Main Component
-// ==============================
-
 function ExploreMap({
-  searchPlace,
-  selectedCategory,
-  userLocation,
+  position,
   places,
-  setPlaces,
+  selectedCategory,
+  selectedPlace,
+  setSelectedPlace,
+  loading,
+  hasSearched,
+  locationLabel,
 }) {
-  const [position, setPosition] = useState([
-    20.5937,
-    78.9629,
-  ]);
-
-  // ===========================
-  // Search City
-  // ===========================
-
-  useEffect(() => {
-    if (!searchPlace) return;
-
-    async function loadLocation() {
-      try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-            searchPlace
-          )}&limit=1`
-        );
-
-        const data = await response.json();
-
-        if (data.length === 0) return;
-
-        const lat = parseFloat(data[0].lat);
-        const lon = parseFloat(data[0].lon);
-
-        setPosition([lat, lon]);
-
-        // ===========================
-        // Load nearby places
-        // ===========================
-
-        const category =
-          categoryMap[selectedCategory] ||
-          categoryMap.tourism;
-
-        const query = `
-[out:json];
-(
-node["${category.key}"="${category.value}"](around:5000,${lat},${lon});
-way["${category.key}"="${category.value}"](around:5000,${lat},${lon});
-relation["${category.key}"="${category.value}"](around:5000,${lat},${lon});
-);
-out center;
-`;
-console.log("Selected Category:", selectedCategory);
-console.log("Latitude:", lat);
-console.log("Longitude:", lon);
-       const nearbyResponse = await fetch(
-  "https://overpass-api.de/api/interpreter",
-  {
-    method: "POST",
-    body: query,
-  }
-);
-
-const nearbyData = await nearbyResponse.json();
-
-// Check what the API returns
-console.log("Nearby Places:", nearbyData);
-
-setPlaces(
-  nearbyData.elements || []
-);
-      } catch (error) {
-        console.log(error);
-      }
-    }
-
-    loadLocation();
-  }, [
-    searchPlace,
-    selectedCategory,
-    setPlaces,
-  ]);
-
-  // ===========================
-  // Current Location
-  // ===========================
-
-  useEffect(() => {
-    if (userLocation) {
-      setPosition(userLocation);
-    }
-  }, [userLocation]);
+  const mapCenter = position || DEFAULT_CENTER;
+  const flyTarget = selectedPlace
+    ? [selectedPlace.lat, selectedPlace.lon]
+    : position;
+  const flyZoom = selectedPlace ? 16 : position ? 13 : DEFAULT_ZOOM;
 
   return (
-    <div className="explore-map">
-
+    <div className="explore-map-wrap">
       <MapContainer
-        center={position}
-        zoom={5}
-        style={{
-          width: "100%",
-          height: "600px",
-          borderRadius: "18px",
-        }}
+        center={mapCenter}
+        zoom={DEFAULT_ZOOM}
+        className="explore-map"
+        scrollWheelZoom
       >
         <TileLayer
           attribution="&copy; OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        <ChangeView center={position} />
+        <FlyToPosition center={flyTarget} zoom={flyZoom} />
 
-        {/* Search Marker */}
-
-        <Marker position={position}>
-          <Popup>
-            <strong>
-              {searchPlace || "Current Location"}
-            </strong>
-          </Popup>
-        </Marker>
-
-        {/* Nearby Places */}
+        {position && (
+          <Marker position={position} icon={originIcon}>
+            <Popup>
+              <strong>{locationLabel || "Searched Location"}</strong>
+            </Popup>
+          </Marker>
+        )}
 
         {places.map((place) => {
-          const lat =
-            place.lat || place.center?.lat;
-
-          const lon =
-            place.lon || place.center?.lon;
-
-          if (!lat || !lon) return null;
+          const isSelected = selectedPlace?.id === place.id;
 
           return (
             <Marker
               key={place.id}
-              position={[lat, lon]}
+              position={[place.lat, place.lon]}
+              icon={buildCategoryIcon(selectedCategory, isSelected)}
+              eventHandlers={{
+                click: () => setSelectedPlace(place),
+              }}
             >
               <Popup>
-
-                <h3>
-                  {place.tags?.name ||
-                    "Unnamed Place"}
-                </h3>
-
-                <p>
-                  Category:
-                  {" "}
-                  {selectedCategory}
-                </p>
-
-                {place.tags?.addr_street && (
-                  <p>
-                    {place.tags.addr_street}
+                <div className="map-popup">
+                  <h3>{place.name}</h3>
+                  <p className="map-popup-category">
+                    {selectedCategory.icon} {selectedCategory.label}
                   </p>
-                )}
+                  <p className="map-popup-address">{place.address}</p>
 
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${lat},${lon}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Open in Google Maps
-                </a>
-
+<a
+  href={`https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lon}`}
+  target="_blank"
+  rel="noreferrer"
+  className="map-popup-link"
+>
+  Open in Google Maps
+</a>
+                </div>
               </Popup>
             </Marker>
           );
         })}
       </MapContainer>
 
+      {!hasSearched && (
+        <div className="map-overlay">
+          <div className="map-overlay-card">
+            <span className="map-overlay-icon">🧭</span>
+            <h3>Search a location to start exploring</h3>
+            <p>Try a city, district, state, or country above.</p>
+          </div>
+        </div>
+      )}
+
+      {loading && (
+        <div className="map-overlay map-overlay-loading">
+          <div className="map-overlay-card">
+            <span className="map-spinner" />
+            <h3>Finding nearby places...</h3>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
