@@ -1,6 +1,7 @@
 .trip-result-page {
   min-height: 100vh;
   background: #f5f8ff;
+  padding-top: 35px;
   padding-bottom: 70px;
 }
 
@@ -54,12 +55,8 @@
 
 .result-container {
   max-width: 1050px;
-
-  margin: -65px auto 0;
-
+  margin: 35px auto 0;
   padding: 0 20px;
-
-  position: relative;
 }
 
 
@@ -67,11 +64,9 @@
 
 .trip-summary {
   background: white;
-
-  border-radius: 22px;
-
-  padding: 25px;
-
+  border-radius: 24px;
+  padding: 30px;
+  border: 1px solid #e5e7eb;
   display: grid;
 
   grid-template-columns:
@@ -84,11 +79,16 @@
 }
 
 .trip-summary div {
-  padding: 15px;
-
+  padding: 18px;
   background: #f8fafc;
+  border-radius: 16px;
+  border: 1px solid #edf2f7;
+  transition: all 0.3s ease;
+}
 
-  border-radius: 13px;
+.trip-summary div:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.08);
 }
 
 .trip-summary span {
@@ -139,7 +139,7 @@
 
   font-size: 30px;
 
-  margin: 6px 0;
+ margin: 35px auto 0;
 }
 
 .itinerary-header button {
@@ -423,4 +423,27 @@
     flex-direction: column;
   }
 
+}
+/* Starting Point */
+
+.starting-point {
+  max-width: 1050px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+
+.starting-point span {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+}
+
+.starting-point strong {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: #172554;
 }

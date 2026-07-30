@@ -31,3 +31,37 @@
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 25px;
 }
+.search-box {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+.search-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.search-btn:hover {
+  background: #1d4ed8;
+}
+
+.hotel-search {
+  flex: 1;
+  max-width: 500px;
+}
+
+.hotel-grid h2 {
+  text-align: center;
+  color: #64748b;
+  width: 100%;
+}

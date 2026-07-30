@@ -64,3 +64,85 @@
 .hotel-info button:hover {
   background: #1d4ed8;
 }
+.hotel-buttons{
+    display:flex;
+    gap:10px;
+    margin-top:15px;
+}
+
+.details-btn,
+.book-btn{
+    flex:1;
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.details-btn{
+    background:#eef4ff;
+    color:#2563eb;
+}
+
+.book-btn{
+    background:#2563eb;
+    color:white;
+}
+
+.details-btn:hover{
+    background:#dbeafe;
+}
+
+.book-btn:hover{
+    background:#1d4ed8;
+}
+
+.map-link{
+    display:block;
+    margin-top:15px;
+    text-align:center;
+    color:#2563eb;
+    text-decoration:none;
+    font-weight:600;
+}
+
+.map-link:hover{
+    text-decoration:underline;
+}
+.loading-card{
+    width:100%;
+    background:white;
+    border-radius:15px;
+    padding:40px;
+    text-align:center;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
+
+.loading-card h3{
+    color:#2563eb;
+}
+
+.loading-card p{
+    color:#666;
+}
+.hotel-preview {
+  height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #f5f7fa;
+  border-bottom: 1px solid #eee;
+}
+
+.hotel-preview h1 {
+  font-size: 4rem;
+  margin: 0;
+}
+
+.hotel-preview p {
+  margin-top: 10px;
+  color: #666;
+  font-weight: 500;
+}

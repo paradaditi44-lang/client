@@ -56,7 +56,13 @@ const [loading, setLoading] = useState(false);
     return (
       <div className="result-empty">
 
-        <h2>No trip found ✈️</h2>
+        <div className="loading-card">
+    <h2>🏨 No Hotels Found</h2>
+
+    <p>
+        Try searching another city.
+    </p>
+</div>
 
         <p>
           Please create your trip first.
@@ -135,34 +141,15 @@ const [loading, setLoading] = useState(false);
 
       {/* HEADER */}
 
-      <section className="result-hero">
-
-        <div>
-
-          <span className="ai-badge">
-            ✨ YOUR AI TRIP PLAN
-          </span>
-
-          <h1>
-            Your {trip.destination} Adventure
-          </h1>
-
-          <p>
-            A personalised travel plan created
-            according to your preferences.
-          </p>
-
-        </div>
-
-      </section>
-
-
+     
       {/* TRIP SUMMARY */}
-<div>
+<div className="starting-point">
   <span>📍 STARTING POINT</span>
 
   <strong>
-    {currentLocation || "Detecting..."}
+    {locationError
+      ? locationError
+      : currentLocation || "Detecting..."}
   </strong>
 </div>
       <main className="result-container">
@@ -292,8 +279,9 @@ const [loading, setLoading] = useState(false);
     </p>
   </div>
 
+  {currentLocation ? (
   <MapView
-    from="Pune"
+    from={currentLocation}
     to={trip.destination}
     setLoading={setLoading}
     distance={distance}
@@ -303,6 +291,9 @@ const [loading, setLoading] = useState(false);
     travelMode={travelMode}
     setTravelMode={setTravelMode}
   />
+) : (
+  <p>📍 Detecting your current location...</p>
+)}
 
 </section>
 
