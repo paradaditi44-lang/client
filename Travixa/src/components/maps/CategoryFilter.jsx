@@ -1,41 +1,28 @@
 import "../../styles/CategoryFilter.css";
 
-const categories = [
-  { icon: "📸", name: "Attractions" },
-  { icon: "🍽", name: "Restaurants" },
-  { icon: "☕", name: "Cafes" },
-  { icon: "🏨", name: "Hotels" },
-  { icon: "🛍", name: "Shopping" },
-  { icon: "🌳", name: "Parks" },
-  { icon: "⛽", name: "Petrol" },
-  { icon: "🏥", name: "Hospitals" },
-  { icon: "🏧", name: "ATM" },
-  { icon: "🚉", name: "Railway" },
-];
-
-function CategoryFilter() {
+function CategoryFilter({ categories, selectedCategory, onSelect }) {
   return (
     <div className="category-section">
-
       <h2>Explore Categories</h2>
 
       <div className="category-grid">
+        {categories.map((category) => {
+          const isActive = category.id === selectedCategory?.id;
 
-        {categories.map((item) => (
-          <button
-            key={item.name}
-            className="category-card"
-          >
-            <span className="category-icon">
-              {item.icon}
-            </span>
-
-            <span>{item.name}</span>
-          </button>
-        ))}
-
+          return (
+            <button
+              key={category.id}
+              type="button"
+              className={`category-card ${isActive ? "active" : ""}`}
+              style={isActive ? { "--cat-color": category.color } : undefined}
+              onClick={() => onSelect(category)}
+            >
+              <span className="category-icon">{category.icon}</span>
+              <span>{category.label}</span>
+            </button>
+          );
+        })}
       </div>
-
     </div>
   );
 }

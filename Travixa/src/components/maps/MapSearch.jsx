@@ -1,94 +1,42 @@
 import "../../styles/MapSearch.css";
 
-function MapSearch({
-  searchInput,
-  setSearchInput,
-  onSearch,
-  setUserLocation,
-}) {
-    const getCurrentLocation = () => {
-
-  if (!navigator.geolocation) {
-    alert("Geolocation is not supported.");
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-
-    (position) => {
-
-      setUserLocation([
-        position.coords.latitude,
-        position.coords.longitude,
-      ]);
-
-    },
-
-    () => {
-      alert("Unable to get your location.");
-    }
-
-  );
-
-};
+function MapSearch({ searchInput, setSearchInput, onSearch, onUseLocation }) {
   return (
     <div className="map-search-container">
-
       <div className="map-hero">
-        <span className="hero-badge">
-          🌍 EXPLORE THE WORLD
-        </span>
+        <span className="hero-badge">🧭 EXPLORE NEARBY</span>
 
-        <h1>Discover Amazing Places</h1>
+        <h1>Discover What's Around You</h1>
 
         <p>
-          Search destinations, attractions, restaurants,
-          parks and much more around you.
+          Search any city, district, state, or country and explore nearby
+          attractions, restaurants, hotels, and more on the map.
         </p>
       </div>
 
       <div className="search-box">
-
-        <span className="search-icon">
-          🔍
-        </span>
+        <span className="search-icon">🔍</span>
 
         <input
           type="text"
-          placeholder="Search places, cities or attractions..."
-         value={searchInput}
-
-onChange={(e)=>
-
-setSearchInput(e.target.value)
-
-}
+          placeholder="Search places, cities, districts, states or countries..."
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              onSearch();
+            }
+          }}
         />
 
-<button
-onClick={onSearch}
->
-onKeyDown={(e)=>{
+        <button type="button" onClick={onSearch}>
+          Search
+        </button>
 
-if(e.key==="Enter"){
-
-onSearch();
-
-}
-
-}}
-Search
-
-</button>
-<button
-  className="location-btn"
-  onClick={getCurrentLocation}
->
-  📍 Use My Location
-</button>
-
+        <button type="button" className="location-btn" onClick={onUseLocation}>
+          📍 Use My Location
+        </button>
       </div>
-
     </div>
   );
 }
