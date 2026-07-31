@@ -18,12 +18,8 @@
 }
 
 .hotel-search {
-  width: 60%;
+  flex: 1;
   max-width: 500px;
-  padding: 12px 18px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  font-size: 16px;
 }
 
 .hotel-grid {
@@ -35,9 +31,13 @@
 .search-box {
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 12px;
-  margin-top: 20px;
-  margin-bottom: 30px;
+
+  width: 65%;
+  max-width: 700px;
+
+  margin: 20px auto 30px;
 }
 
 .search-btn {
