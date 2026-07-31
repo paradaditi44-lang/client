@@ -45,7 +45,7 @@ function Login() {
     localStorage.setItem("travexaUserName", user.name);
     localStorage.setItem("travexaUserEmail", user.email);
 
-    navigate("/plan-trip");
+    navigate("/dashboard");
   } catch (err) {
     if (err.response) {
       setError(err.response.data.message || "Login failed");

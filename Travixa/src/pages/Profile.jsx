@@ -1,380 +1,212 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import API from "../services/api";
 import "../styles/Profile.css";
 
 function Profile() {
-  const [isEditing, setIsEditing] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const navigate = useNavigate();
 
-  const [profile, setProfile] = useState({
-    name: "Travexa Traveller",
-    email: "traveller@example.com",
-    phone: "",
-    location: "",
-    travelStyle: "Adventure",
+  const [userName, setUserName] = useState("Travexa Traveler");
+  const [userEmail, setUserEmail] = useState("traveller@example.com");
+
+  const [stats, setStats] = useState({
+    totalTrips: 0,
+    upcomingTrips: 0,
   });
+  const [loadingStats, setLoadingStats] = useState(true);
 
-  const [formData, setFormData] = useState(profile);
-
-  // Load saved profile
   useEffect(() => {
-    const savedProfile = localStorage.getItem("travexaProfile");
+    // 1. Read user details from localStorage
+    const storedName = localStorage.getItem("travexaUserName");
+    const storedEmail = localStorage.getItem("travexaUserEmail");
 
-    if (savedProfile) {
-      const data = JSON.parse(savedProfile);
+    if (storedName) setUserName(storedName);
+    if (storedEmail) setUserEmail(storedEmail);
 
-      setProfile(data);
-      setFormData(data);
-    }
+    // 2. Fetch trips from GET /api/trips and calculate total & upcoming trips
+    const fetchTripStats = async () => {
+      try {
+        setLoadingStats(true);
+        const token =
+          localStorage.getItem("travexaToken") || localStorage.getItem("token");
+
+        if (!token) {
+          setLoadingStats(false);
+          return;
+        }
+
+        const response = await API.get("/trips", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const trips = response.data?.trips || [];
+
+        // Calculate today's date at start of day
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const totalTrips = trips.length;
+        const upcomingTrips = trips.filter((trip) => {
+          if (!trip.startDate) return false;
+          const startDate = new Date(trip.startDate);
+          return startDate >= today;
+        }).length;
+
+        setStats({
+          totalTrips,
+          upcomingTrips,
+        });
+      } catch (error) {
+        console.error("Error fetching trip statistics:", error);
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+
+    fetchTripStats();
   }, []);
 
-  // Handle input
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  // 3. Logout action
+  const handleLogout = () => {
+    localStorage.removeItem("travexaToken");
+    localStorage.removeItem("token");
+    localStorage.removeItem("travexaLoggedIn");
+    localStorage.removeItem("travexaUserName");
+    localStorage.removeItem("travexaUserEmail");
+    localStorage.removeItem("travexaTrip");
+    localStorage.removeItem("travexaProfile");
 
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-
-    setSaved(false);
+    navigate("/login");
   };
 
-  // Save profile
-  const handleSave = (e) => {
-    e.preventDefault();
-
-    if (!formData.name.trim()) {
-      alert("Please enter your name.");
-      return;
+  const getInitials = (name) => {
+    if (!name) return "T";
+    const parts = name.trim().split(" ");
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
     }
-
-    if (!formData.email.trim()) {
-      alert("Please enter your email.");
-      return;
-    }
-
-    if (!formData.email.includes("@")) {
-      alert("Please enter a valid email address.");
-      return;
-    }
-
-    setProfile(formData);
-
-    localStorage.setItem(
-      "travexaProfile",
-      JSON.stringify(formData)
-    );
-
-    setIsEditing(false);
-    setSaved(true);
-  };
-
-  // Cancel editing
-  const handleCancel = () => {
-    setFormData(profile);
-    setIsEditing(false);
+    return name.substring(0, 2).toUpperCase();
   };
 
   return (
     <main className="profile-page">
-
       {/* Header */}
-
       <section className="profile-header">
-
         <div>
-          <span className="profile-label">
-            TRAVEXA ACCOUNT
-          </span>
-
-          <h1>Your Profile</h1>
-
-          <p>
-            Manage your personal information and travel preferences.
-          </p>
+          <span className="profile-label">TRAVEXA ACCOUNT</span>
+          <h1>User Profile</h1>
+          <p>View your account information and travel history statistics.</p>
         </div>
-
-        {!isEditing && (
-          <button
-            className="edit-profile-btn"
-            onClick={() => {
-              setIsEditing(true);
-              setSaved(false);
-            }}
-          >
-            ✏️ Edit Profile
-          </button>
-        )}
-
       </section>
 
-
-      {/* Profile Card */}
-
+      {/* Main Profile Container */}
       <section className="profile-container">
-
+        {/* Profile Main Card */}
         <div className="profile-card">
-
-          {/* Avatar */}
-
+          {/* User Info Avatar & Header */}
           <div className="profile-top">
-
-            <div className="profile-avatar">
-              {profile.name
-                ? profile.name.charAt(0).toUpperCase()
-                : "T"}
-            </div>
-
+            <div className="profile-avatar">{getInitials(userName)}</div>
             <div>
-              <h2>{profile.name}</h2>
-
-              <p>
-                {profile.email}
-              </p>
-
-              <span className="traveller-badge">
-                ✈️ Traveller
-              </span>
+              <h2>{userName}</h2>
+              <p>{userEmail}</p>
+              <span className="traveller-badge">✈️ Travexa Explorer</span>
             </div>
-
           </div>
 
-
-          {/* Saved message */}
-
-          {saved && (
-            <div className="saved-message">
-              ✓ Profile updated successfully!
-            </div>
-          )}
-
-
-          {/* Form */}
-
-          <form onSubmit={handleSave}>
-
-            <div className="profile-grid">
-
-              {/* Name */}
-
-              <div className="profile-field">
-
-                <label>FULL NAME</label>
-
-                {isEditing ? (
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="Enter your name"
-                  />
-                ) : (
-                  <div className="profile-value">
-                    👤 {profile.name || "Not added"}
-                  </div>
-                )}
-
-              </div>
-
-
-              {/* Email */}
-
-              <div className="profile-field">
-
-                <label>EMAIL ADDRESS</label>
-
-                {isEditing ? (
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="Enter your email"
-                  />
-                ) : (
-                  <div className="profile-value">
-                    📧 {profile.email || "Not added"}
-                  </div>
-                )}
-
-              </div>
-
-
-              {/* Phone */}
-
-              <div className="profile-field">
-
-                <label>PHONE NUMBER</label>
-
-                {isEditing ? (
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="Enter phone number"
-                  />
-                ) : (
-                  <div className="profile-value">
-                    📱 {profile.phone || "Not added"}
-                  </div>
-                )}
-
-              </div>
-
-
-              {/* Location */}
-
-              <div className="profile-field">
-
-                <label>LOCATION</label>
-
-                {isEditing ? (
-                  <input
-                    type="text"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleChange}
-                    placeholder="e.g. Nashik, India"
-                  />
-                ) : (
-                  <div className="profile-value">
-                    📍 {profile.location || "Not added"}
-                  </div>
-                )}
-
-              </div>
-
+          {/* User Info Grid */}
+          <div className="profile-grid">
+            <div className="profile-field">
+              <label>FULL NAME</label>
+              <div className="profile-value">👤 {userName}</div>
             </div>
 
+            <div className="profile-field">
+              <label>EMAIL ADDRESS</label>
+              <div className="profile-value">📧 {userEmail}</div>
+            </div>
+          </div>
 
-            {/* Travel style */}
-
-            <div className="travel-preference">
-
-              <div>
-
-                <label>TRAVEL STYLE</label>
-
-                <p>
-                  What type of trips do you enjoy?
-                </p>
-
-              </div>
-
-
-              {isEditing ? (
-
-                <select
-                  name="travelStyle"
-                  value={formData.travelStyle}
-                  onChange={handleChange}
-                >
-
-                  <option value="Adventure">
-                    🏔️ Adventure
-                  </option>
-
-                  <option value="Relaxation">
-                    🌴 Relaxation
-                  </option>
-
-                  <option value="Culture">
-                    🏛️ Culture
-                  </option>
-
-                  <option value="Food">
-                    🍜 Food & Cafés
-                  </option>
-
-                  <option value="Luxury">
-                    💎 Luxury
-                  </option>
-
-                </select>
-
-              ) : (
-
-                <div className="travel-style-display">
-                  ✨ {profile.travelStyle}
+          {/* Travel Statistics Section */}
+          <div className="stats-section">
+            <div className="section-subtitle">📊 Travel Statistics</div>
+            <div className="stats-grid">
+              <div className="profile-stat-card">
+                <div className="stat-icon">🧳</div>
+                <div className="stat-info">
+                  <h3>{loadingStats ? "..." : stats.totalTrips}</h3>
+                  <p>Total Trips Created</p>
                 </div>
-
-              )}
-
-            </div>
-
-
-            {/* Buttons */}
-
-            {isEditing && (
-
-              <div className="profile-actions">
-
-                <button
-                  type="button"
-                  className="cancel-btn"
-                  onClick={handleCancel}
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  className="save-btn"
-                >
-                  💾 Save Changes
-                </button>
-
               </div>
 
-            )}
+              <div className="profile-stat-card">
+                <div className="stat-icon">🗓️</div>
+                <div className="stat-info">
+                  <h3>{loadingStats ? "..." : stats.upcomingTrips}</h3>
+                  <p>Upcoming Trips</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-          </form>
+          {/* Account Management Section */}
+          <div className="account-section">
+            <div className="section-subtitle">⚙️ Account Settings</div>
+            <div className="account-actions">
+              <button
+                className="btn-edit-disabled"
+                disabled
+                title="Profile editing is coming soon"
+              >
+                ✏️ Edit Profile (Coming Soon)
+              </button>
 
+              <button className="btn-logout" onClick={handleLogout}>
+                🚪 Logout
+              </button>
+            </div>
+          </div>
         </div>
 
-
-        {/* Side card */}
-
+        {/* Side Card */}
         <aside className="profile-side-card">
-
-          <div className="side-icon">
-            ✨
-          </div>
-
-          <h3>
-            Personalise your travels
-          </h3>
-
+          <div className="side-icon">✨</div>
+          <h3>Plan Your Next Adventure</h3>
           <p>
-            Keep your travel preferences updated so Travexa
-            can create better recommendations for you.
+            Travexa AI creates tailored, day-by-day travel itineraries based on your preferences.
           </p>
 
           <div className="profile-benefits">
-
             <div>
-              <span>✓</span>
-              Personalised trips
+              <span>✓</span> Personalised AI itineraries
             </div>
-
             <div>
-              <span>✓</span>
-              Better recommendations
+              <span>✓</span> Live hotel & weather data
             </div>
-
             <div>
-              <span>✓</span>
-              Faster trip planning
+              <span>✓</span> Instant route mapping
             </div>
-
           </div>
 
+          <button
+            onClick={() => navigate("/plan-trip")}
+            style={{
+              marginTop: "25px",
+              width: "100%",
+              background: "white",
+              color: "#1d4ed8",
+              border: "none",
+              padding: "13px",
+              borderRadius: "12px",
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            ✨ Plan New Trip
+          </button>
         </aside>
-
       </section>
-
     </main>
   );
 }

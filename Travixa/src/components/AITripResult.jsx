@@ -1,6 +1,7 @@
 import MapView from "./MapView";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { generateItineraryPDF } from "../utils/generatePDF";
 import "../styles/AITripResult.css";
 
 function AITripResult({ trip: propTrip }) {
@@ -361,9 +362,9 @@ function AITripResult({ trip: propTrip }) {
 
           <button
             className="primary-btn"
-            onClick={() => window.print()}
+            onClick={() => generateItineraryPDF(trip, days, displayDays)}
           >
-            🖨️ Save / Print Trip
+            📄 Download Itinerary PDF
           </button>
 
         </div>

@@ -145,16 +145,28 @@ const WeatherCard = ({ defaultCity = 'Seoul', apiKey = '', className = '' }) => 
       const geoData = await geoRes.json();
 
       if (geoData.results && geoData.results.length > 0) {
-        const bestMatch = geoData.results[0];
+        const queryLower = searchTarget.toLowerCase().trim();
+        const rawLower = targetQuery.toLowerCase().trim();
+
+        // 1. Prefer an exact city name match (case-insensitive)
+        const exactMatch = geoData.results.find(
+          (item) =>
+            item.name &&
+            (item.name.toLowerCase().trim() === queryLower ||
+              item.name.toLowerCase().trim() === rawLower)
+        );
+
+        // 2. Use exact match if exists, otherwise fall back to first result
+        const bestMatch = exactMatch || geoData.results[0];
         latitude = bestMatch.latitude;
         longitude = bestMatch.longitude;
         placeName = bestMatch.name;
         countryCode = bestMatch.country_code || bestMatch.country;
       } else {
-        // Method B: OpenStreetMap Nominatim Fuzzy Geocoding Fallback (Handles typos & regions)
+        // Method B: OpenStreetMap Nominatim Fuzzy Geocoding Fallback
         const nomUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
           targetQuery
-        )}&format=json&limit=1`;
+        )}&format=json&limit=5`;
 
         const nomRes = await fetch(nomUrl, {
           headers: { 'Accept-Language': 'en' }
@@ -162,7 +174,16 @@ const WeatherCard = ({ defaultCity = 'Seoul', apiKey = '', className = '' }) => 
         const nomData = await nomRes.json();
 
         if (nomData && nomData.length > 0) {
-          const nomMatch = nomData[0];
+          const queryLower = searchTarget.toLowerCase().trim();
+          const rawLower = targetQuery.toLowerCase().trim();
+
+          const exactNomMatch = nomData.find((item) => {
+            if (!item.display_name) return false;
+            const firstName = item.display_name.split(',')[0].toLowerCase().trim();
+            return firstName === queryLower || firstName === rawLower;
+          });
+
+          const nomMatch = exactNomMatch || nomData[0];
           latitude = parseFloat(nomMatch.lat);
           longitude = parseFloat(nomMatch.lon);
           // Split display name for clean city formatting
@@ -170,7 +191,7 @@ const WeatherCard = ({ defaultCity = 'Seoul', apiKey = '', className = '' }) => 
           placeName = nameParts[0].trim();
           countryCode = nameParts[nameParts.length - 1].trim().slice(0, 2).toUpperCase();
         } else {
-          throw new Error(`Location "${targetQuery}" not found. Please check location name.`);
+          throw new Error('City not found. Please enter a valid city name.');
         }
       }
 
@@ -181,7 +202,7 @@ const WeatherCard = ({ defaultCity = 'Seoul', apiKey = '', className = '' }) => 
       const data = await weatherRes.json();
 
       if (!data.current_weather) {
-        throw new Error('Unable to retrieve weather for this location.');
+        throw new Error('City not found. Please enter a valid city name.');
       }
 
       const current = data.current_weather;
@@ -222,7 +243,7 @@ const WeatherCard = ({ defaultCity = 'Seoul', apiKey = '', className = '' }) => 
 
       setWeatherData(formattedData);
     } catch (err) {
-      setError(err.message || 'Location not found. Try searching a major city or capital.');
+      setError(err.message || 'City not found. Please enter a valid city name.');
     } finally {
       setLoading(false);
     }

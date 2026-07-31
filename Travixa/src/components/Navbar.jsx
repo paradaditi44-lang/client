@@ -59,6 +59,15 @@ function Navbar() {
           Home
         </button>
 
+        {loggedIn && (
+          <button
+            className={location.pathname === "/dashboard" ? "active" : ""}
+            onClick={() => navigate("/dashboard")}
+          >
+            Dashboard
+          </button>
+        )}
+
 
         <button
           className={
