@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { generateItineraryPDF } from "../utils/generatePDF";
+import PackingChecklist from "./PackingChecklist";
 import "../styles/AITripResult.css";
 
 function AITripResult({ trip: propTrip }) {
@@ -320,6 +321,13 @@ function AITripResult({ trip: propTrip }) {
           ))}
 
         </div>
+
+        {/* AI PACKING CHECKLIST */}
+        <PackingChecklist
+          destination={trip.destination}
+          travelStyle={displayStyle}
+          duration={displayDays}
+        />
 
         {/* BOTTOM */}
 
