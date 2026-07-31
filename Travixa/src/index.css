@@ -1,4 +1,7 @@
-/* Remove default browser spacing */
+/* =========================
+   RESET
+========================= */
+
 * {
   margin: 0;
   padding: 0;
@@ -10,11 +13,12 @@ html {
 }
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Poppins", Arial, sans-serif;
+  transition: all 0.35s ease;
+}
 
-  background: #f8fafc;
-
-  color: #172554;
+#root {
+  min-height: 100vh;
 }
 
 button,
@@ -32,6 +36,254 @@ a {
   text-decoration: none;
 }
 
-#root {
-  min-height: 100vh;
+
+/* =========================
+      LIGHT THEME
+========================= */
+
+:root {
+
+  --bg: #f5f7fb;
+
+  --card: #ffffff;
+
+  --navbar: rgba(255,255,255,.92);
+
+  --primary: #2563eb;
+
+  --primaryHover:#1d4ed8;
+
+  --text: #1e293b;
+
+  --textLight:#64748b;
+
+  --border:#dbe4ee;
+
+  --shadow:0 12px 35px rgba(0,0,0,.08);
+
+}
+
+
+/* =========================
+      DARK THEME
+========================= */
+
+.dark {
+
+  --bg:#0f172a;
+
+  --card:#1e293b;
+
+  --navbar:#111827;
+
+  --primary:#3b82f6;
+
+  --primaryHover:#60a5fa;
+
+  --text:#f8fafc;
+
+  --textLight:#cbd5e1;
+
+  --border:#334155;
+
+  --shadow:0 12px 35px rgba(0,0,0,.45);
+
+}
+
+
+/* =========================
+        BODY
+========================= */
+
+body{
+
+  background:var(--bg);
+
+  color:var(--text);
+
+}
+
+
+/* =========================
+       COMMON PAGES
+========================= */
+
+.home-page,
+.register-page,
+.login-page,
+.plantrip-page,
+.profile-page,
+.about-page,
+.dashboard-page,
+.weather-page,
+.hotel-page,
+.maps-page{
+
+  background:var(--bg);
+
+  color:var(--text);
+
+  min-height:100vh;
+
+  transition:.35s;
+
+}
+
+
+/* =========================
+        CARDS
+========================= */
+
+.card,
+.feature-card,
+.plantrip-container,
+.trip-card,
+.ai-result-card,
+.profile-card,
+.about-card,
+.login-box,
+.register-box{
+
+  background:var(--card);
+
+  color:var(--text);
+
+  border:1px solid var(--border);
+
+  box-shadow:var(--shadow);
+
+  transition:.35s;
+
+}
+
+
+/* =========================
+        INPUTS
+========================= */
+
+input,
+textarea,
+select{
+
+  background:var(--card);
+
+  color:var(--text);
+
+  border:1px solid var(--border);
+
+  outline:none;
+
+  transition:.3s;
+
+}
+
+input::placeholder{
+
+  color:var(--textLight);
+
+}
+
+textarea::placeholder{
+
+  color:var(--textLight);
+
+}
+
+
+/* =========================
+        BUTTONS
+========================= */
+
+.primary-btn{
+
+  background:var(--primary);
+
+  color:white;
+
+}
+
+.primary-btn:hover{
+
+  background:var(--primaryHover);
+
+}
+
+.secondary-btn{
+
+  background:transparent;
+
+  color:var(--text);
+
+  border:1px solid var(--border);
+
+}
+
+
+/* =========================
+        TEXT
+========================= */
+
+h1,h2,h3,h4,h5{
+
+  color:var(--text);
+
+}
+
+p,
+span{
+
+  color:var(--textLight);
+
+}
+
+
+/* =========================
+        NAVBAR
+========================= */
+
+.navbar{
+
+  background:var(--navbar);
+
+  color:var(--text);
+
+  backdrop-filter:blur(10px);
+
+}
+
+.navbar button{
+
+  color:var(--text);
+
+}
+
+.navbar button:hover{
+
+  color:var(--primary);
+
+}
+
+.navbar-theme{
+
+  color:var(--text);
+
+}
+
+
+/* =========================
+      SCROLLBAR
+========================= */
+
+::-webkit-scrollbar{
+
+  width:8px;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+  background:var(--primary);
+
+  border-radius:20px;
+
 }

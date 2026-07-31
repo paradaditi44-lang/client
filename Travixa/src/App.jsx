@@ -20,24 +20,20 @@ function App() {
       <Navbar />
 
       <Routes>
-        {/* Home */}
         <Route path="/" element={<Home />} />
 
-        {/* Authentication */}
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
 
-        {/* Dashboard */}
         <Route path="/dashboard" element={<Dashboard />} />
 
-        {/* Travel Features */}
         <Route path="/plan-trip" element={<PlanTrip />} />
         <Route path="/trip-result" element={<AITripResult />} />
+
         <Route path="/hotels" element={<Hotels />} />
         <Route path="/weather" element={<Weather />} />
         <Route path="/maps" element={<Maps />} />
 
-        {/* Other */}
         <Route path="/about" element={<About />} />
         <Route path="/profile" element={<Profile />} />
       </Routes>

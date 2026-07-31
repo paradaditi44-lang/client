@@ -1,338 +1,281 @@
-/* =========================================================
+/* ===========================
    NAVBAR
-========================================================= */
+=========================== */
 
 .navbar {
-  height: 88px;
-
   width: 100%;
-
-  box-sizing: border-box;
-
-  padding: 0 4%;
+  height: 80px;
 
   display: flex;
-
   align-items: center;
+  justify-content: space-between;
 
-  gap: 40px;
+  padding: 0 50px;
 
-  background: linear-gradient(
-    90deg,
-    #2563eb,
-    #2056d5
-  );
-
-  color: white;
-
-  position: relative;
-
+  position: sticky;
+  top: 0;
   z-index: 1000;
 
-  box-shadow:
-    0 5px 25px rgba(20,60,140,0.15);
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+
+  transition: 0.3s;
 }
 
-
-/* =========================================================
-   LOGO
-========================================================= */
+/* Logo */
 
 .navbar-logo {
   font-size: 28px;
-
   font-weight: 800;
+  color: var(--primary);
 
   cursor: pointer;
 
-  white-space: nowrap;
-
-  margin-right: auto;
+  transition: .3s;
 }
 
-
-/* =========================================================
-   MENU
-========================================================= */
-
-.navbar-menu {
-  display: flex;
-
-  align-items: center;
-
-  gap: 28px;
+.navbar-logo:hover{
+    transform: scale(1.05);
 }
 
+/* Menu */
 
-.navbar-menu button {
-  position: relative;
-
-  border: none;
-
-  background: transparent;
-
-  color: rgba(255,255,255,0.95);
-
-  font-size: 15px;
-
-  font-weight: 600;
-
-  cursor: pointer;
-
-  padding: 8px 0;
+.navbar-menu{
+    display:flex;
+    align-items:center;
+    gap:18px;
 }
 
+.navbar-menu button{
 
-.navbar-menu button::after {
-  content: "";
+    background:none;
+    border:none;
 
-  position: absolute;
+    color:var(--text);
 
-  left: 0;
+    font-size:15px;
+    font-weight:600;
 
-  bottom: 0;
+    padding:10px 16px;
 
-  width: 0;
+    border-radius:10px;
 
-  height: 2px;
+    transition:.3s;
 
-  background: white;
-
-  transition: 0.25s ease;
-}
-
-
-.navbar-menu button:hover::after,
-.navbar-menu button.active::after {
-  width: 100%;
-}
-
-
-/* =========================================================
-   RIGHT
-========================================================= */
-
-.navbar-right {
-  display: flex;
-
-  align-items: center;
-
-  gap: 12px;
-}
-
-
-/* LOGIN */
-
-.navbar-login {
-  border: none;
-
-  padding: 11px 25px;
-
-  border-radius: 25px;
-
-  background: rgba(255,255,255,0.16);
-
-  color: white;
-
-  font-size: 14px;
-
-  font-weight: 700;
-
-  cursor: pointer;
-
-  border: 1px solid rgba(255,255,255,0.2);
-}
-
-
-/* =========================================================
-   SMALL PROFILE
-========================================================= */
-
-.navbar-profile {
-  display: flex;
-
-  align-items: center;
-
-  gap: 8px;
-
-  padding: 5px 10px;
-
-  border: none;
-
-  border-radius: 12px;
-
-  background: transparent;
-
-  color: white;
-
-  cursor: pointer;
-}
-
-
-.navbar-profile:hover {
-  background: rgba(255,255,255,0.12);
-}
-
-
-.profile-icon {
-  width: 34px;
-
-  height: 34px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  border-radius: 50%;
-
-  background: rgba(255,255,255,0.18);
-
-  font-size: 19px;
-}
-
-
-.profile-name {
-  font-size: 14px;
-
-  font-weight: 700;
-
-  max-width: 90px;
-
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-
-  white-space: nowrap;
-}
-
-
-/* =========================================================
-   LOGOUT
-========================================================= */
-
-.navbar-logout {
-  padding: 10px 18px;
-
-  border-radius: 22px;
-
-  border: 1px solid rgba(255,255,255,0.35);
-
-  background: transparent;
-
-  color: white;
-
-  font-size: 13px;
-
-  font-weight: 700;
-
-  cursor: pointer;
-
-  transition: 0.25s ease;
-}
-
-
-.navbar-logout:hover {
-  background: white;
-
-  color: #2563eb;
-}
-
-
-/* =========================================================
-   THEME
-========================================================= */
-
-.navbar-theme {
-  width: 38px;
-
-  height: 38px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  border: none;
-
-  background: transparent;
-
-  color: white;
-
-  font-size: 20px;
-
-  cursor: pointer;
-}
-
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
-
-@media (max-width: 1000px) {
-
-  .navbar {
-    gap: 20px;
-
-    padding: 0 20px;
-  }
-
-  .navbar-menu {
-    gap: 15px;
-  }
-
-  .navbar-menu button {
-    font-size: 13px;
-  }
+    cursor:pointer;
 
 }
 
+.navbar-menu button:hover{
 
-@media (max-width: 800px) {
+    background:var(--primary);
 
-  .navbar {
-    height: auto;
-
-    min-height: 75px;
-
-    flex-wrap: wrap;
-
-    padding: 15px 20px;
-  }
-
-  .navbar-logo {
-    margin-right: 0;
-  }
-
-  .navbar-menu {
-    order: 3;
-
-    width: 100%;
-
-    justify-content: center;
-
-    overflow-x: auto;
-
-    padding-bottom: 5px;
-  }
+    color:white;
 
 }
 
+.navbar-menu .active{
 
-@media (max-width: 550px) {
+    background:var(--primary);
 
-  .profile-name {
-    display: none;
-  }
-
-  .navbar-logout {
-    padding: 8px 12px;
-  }
-
-  .navbar-menu {
-    gap: 18px;
-  }
+    color:white;
 
 }
+
+/* Right Side */
+
+.navbar-right{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+}
+
+/* Login */
+
+.navbar-login{
+
+    padding:10px 18px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:var(--primary);
+
+    color:white;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.navbar-login:hover{
+
+    transform:translateY(-2px);
+
+}
+
+/* Profile */
+
+.navbar-profile{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    padding:10px 16px;
+
+    border:1px solid var(--border);
+
+    border-radius:12px;
+
+    background:var(--card);
+
+    color:var(--text);
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.navbar-profile:hover{
+
+    background:var(--primary);
+
+    color:white;
+
+}
+
+/* Logout */
+
+.navbar-logout{
+
+    padding:10px 16px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#ef4444;
+
+    color:white;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.navbar-logout:hover{
+
+    background:#dc2626;
+
+}
+
+/* Theme Button */
+
+.navbar-theme{
+
+    width:46px;
+
+    height:46px;
+
+    border-radius:50%;
+
+    border:1px solid var(--border);
+
+    background:var(--card);
+
+    color:var(--text);
+
+    font-size:20px;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.navbar-theme:hover{
+
+    background:var(--primary);
+
+    color:white;
+
+    transform:rotate(180deg);
+
+}
+
+/* Mobile */
+
+@media(max-width:950px){
+
+.navbar{
+
+padding:15px 20px;
+
+flex-wrap:wrap;
+
+height:auto;
+
+}
+
+.navbar-menu{
+
+width:100%;
+
+justify-content:center;
+
+margin-top:15px;
+
+flex-wrap:wrap;
+
+}
+
+.navbar-right{
+
+margin-top:15px;
+
+width:100%;
+
+justify-content:center;
+
+}
+
+}
+
+@media(max-width:600px){
+
+.navbar-logo{
+
+font-size:24px;
+
+}
+
+.navbar-menu{
+
+gap:10px;
+
+}
+
+.navbar-menu button{
+
+font-size:14px;
+
+padding:8px 12px;
+
+}
+
+}   
