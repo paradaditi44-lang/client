@@ -1,48 +1,56 @@
+/* =====================================================
+   EXPLORE CATEGORIES FILTER STYLES
+===================================================== */
+
 .category-section {
-  margin: 10px 0 40px;
+  margin: 24px 0 28px;
 }
 
 .category-section h2 {
-  margin-bottom: 20px;
-  color: #1e293b;
-  font-size: 24px;
-  font-weight: 700;
+  margin-bottom: 16px;
+  color: #0f172a;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
 }
 
 .category-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 16px;
 }
 
 .category-card {
-  background: white;
-  border: 2px solid transparent;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
   border-radius: 18px;
-  padding: 20px;
+  padding: 16px 14px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-  transition: 0.25s ease;
-  font-weight: 600;
+  gap: 8px;
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.06);
+  transition: all 0.3s ease;
+  font-weight: 700;
+  font-size: 13.5px;
   color: #334155;
+  outline: none;
 }
 
 .category-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 15px 35px rgba(37, 99, 235, 0.18);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(2, 132, 199, 0.14);
+  border-color: #38bdf8;
 }
 
 .category-card.active {
-  border-color: var(--cat-color, #2563eb);
-  background: color-mix(in srgb, var(--cat-color, #2563eb) 8%, white);
-  color: var(--cat-color, #2563eb);
-  box-shadow: 0 12px 28px color-mix(in srgb, var(--cat-color, #2563eb) 30%, transparent);
+  border-color: var(--cat-color, #0284c7);
+  background: #f0f9ff;
+  color: var(--cat-color, #0284c7);
+  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.2);
 }
 
 .category-icon {
-  font-size: 32px;
+  font-size: 28px;
 }

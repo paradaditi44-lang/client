@@ -1,68 +1,79 @@
-import MapView from "./MapView";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { generateItineraryPDF } from "../utils/generatePDF";
+import PackingChecklist from "./PackingChecklist";
 import "../styles/AITripResult.css";
 
-function AITripResult() {
+function AITripResult({ trip: propTrip }) {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [trip, setTrip] = useState(null);
+  const [trip, setTrip] = useState(propTrip || location?.state?.trip || null);
   const [currentLocation, setCurrentLocation] = useState("");
-const [locationError, setLocationError] = useState("");
-const [distance, setDistance] = useState("");
-const [duration, setDuration] = useState("");
-const [travelMode, setTravelMode] = useState("driving");
-const [loading, setLoading] = useState(false);
+  const [locationError, setLocationError] = useState("");
+  const [distance, setDistance] = useState("");
+  const [duration, setDuration] = useState("");
+  const [travelMode, setTravelMode] = useState("driving");
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
-    const savedTrip = localStorage.getItem("travexaTrip");
-
-    if (savedTrip) {
-      setTrip(JSON.parse(savedTrip));
-    }
-    if ("geolocation" in navigator) {
-  navigator.geolocation.getCurrentPosition(
-    async (position) => {
-      const { latitude, longitude } = position.coords;
-
-      try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
-        );
-
-        const data = await response.json();
-
-        const location =
-          data.address.city ||
-          data.address.town ||
-          data.address.village ||
-          data.address.state ||
-          "Current Location";
-
-        setCurrentLocation(location);
-      } catch (err) {
-        setLocationError("Unable to detect location.");
+    if (propTrip) {
+      setTrip(propTrip);
+    } else if (location?.state?.trip) {
+      setTrip(location.state.trip);
+    } else {
+      const savedTrip = localStorage.getItem("travexaTrip");
+      if (savedTrip) {
+        try {
+          setTrip(JSON.parse(savedTrip));
+        } catch (e) {
+          console.error(e);
+        }
       }
-    },
-    () => {
-      setLocationError(
-        "Location permission denied."
+    }
+
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+
+          try {
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+            );
+
+            const data = await response.json();
+
+            const loc =
+              data.address.city ||
+              data.address.town ||
+              data.address.village ||
+              data.address.state ||
+              "Current Location";
+
+            setCurrentLocation(loc);
+          } catch (err) {
+            setLocationError("Unable to detect location.");
+          }
+        },
+        () => {
+          setLocationError("Location permission denied.");
+        }
       );
     }
-  );
-}
-  }, []);
+  }, [propTrip, location]);
 
   if (!trip) {
     return (
       <div className="result-empty">
 
         <div className="loading-card">
-    <h2>🏨 No Hotels Found</h2>
+          <h2>🏨 No Trip Found</h2>
 
-    <p>
-        Try searching another city.
-    </p>
-</div>
+          <p>
+            Please plan your trip to generate an itinerary.
+          </p>
+        </div>
 
         <p>
           Please create your trip first.
@@ -76,7 +87,62 @@ const [loading, setLoading] = useState(false);
     );
   }
 
-  const itinerary = [
+  // Parse or format backend itinerary string into day objects
+  const parseItinerary = (itineraryText) => {
+    if (!itineraryText) return [];
+
+    if (Array.isArray(itineraryText)) return itineraryText;
+
+    if (typeof itineraryText === "string") {
+      const dayIcons = ["✈️", "📸", "🏔️", "🏛️", "🌅", "🎒", "🚗", "🌟"];
+      const dayRegex = /(?:Day\s+\d+|###\s*Day\s+\d+|\*\*Day\s+\d+\*\*)/i;
+
+      if (dayRegex.test(itineraryText)) {
+        const parts = itineraryText
+          .split(/(?=(?:Day\s+\d+|###\s*Day\s+\d+|\*\*Day\s+\d+\*\*))/i)
+          .filter(Boolean);
+
+        return parts.map((part, index) => {
+          const lines = part
+            .trim()
+            .split("\n")
+            .map((l) => l.trim())
+            .filter(Boolean);
+
+          let titleLine = lines[0] ? lines[0].replace(/^#+\s*/, "").replace(/\*\*/g, "") : `Day ${index + 1}`;
+          const activities = lines
+            .slice(1)
+            .map((l) => l.replace(/^[-*•\d.]+\s*/, "").replace(/\*\*/g, ""))
+            .filter(Boolean);
+
+          return {
+            day: index + 1,
+            title: titleLine.replace(/^Day\s+\d+[:\s-]*/i, "") || "Day Overview",
+            icon: dayIcons[index % dayIcons.length],
+            activities: activities.length > 0 ? activities : [part],
+          };
+        });
+      } else {
+        const lines = itineraryText
+          .split("\n")
+          .map((l) => l.trim())
+          .filter(Boolean);
+
+        return [
+          {
+            day: 1,
+            title: "AI Generated Itinerary",
+            icon: "✨",
+            activities: lines.map((l) => l.replace(/^[-*•\d.]+\s*/, "").replace(/\*\*/g, "")),
+          },
+        ];
+      }
+    }
+
+    return [];
+  };
+
+  const defaultItinerary = [
     {
       day: 1,
       title: "Arrival & Local Exploration",
@@ -99,59 +165,44 @@ const [loading, setLoading] = useState(false);
         "Enjoy an evening experience",
       ],
     },
-    {
-      day: 3,
-      title: "Adventure & Experiences",
-      icon: "🏔️",
-      activities: [
-        "Start your adventure activity",
-        "Visit a scenic location",
-        "Take photos and explore",
-        "Relax in the evening",
-      ],
-    },
-    {
-      day: 4,
-      title: "Culture & Local Life",
-      icon: "🏛️",
-      activities: [
-        "Visit a cultural attraction",
-        "Explore local markets",
-        "Try traditional cuisine",
-        "Enjoy the local atmosphere",
-      ],
-    },
-    {
-      day: 5,
-      title: "Relax & Departure",
-      icon: "🌅",
-      activities: [
-        "Enjoy a relaxed morning",
-        "Buy souvenirs",
-        "Check out from the hotel",
-        "Begin your journey back home",
-      ],
-    },
   ];
 
-  const days = itinerary.slice(0, Number(trip.days));
+  const days = trip.itinerary
+    ? parseItinerary(trip.itinerary)
+    : defaultItinerary;
+
+  const calculateDays = () => {
+    if (trip.days) return trip.days;
+    if (trip.startDate && trip.endDate) {
+      const start = new Date(trip.startDate);
+      const end = new Date(trip.endDate);
+      const diffTime = Math.abs(end - start);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays || 1;
+    }
+    return days.length || 5;
+  };
+
+  const displayDays = calculateDays();
+  const displayTravelers = trip.numberOfTravelers || trip.travellers || trip.travelers || 1;
+  const displayBudget = typeof trip.budget === "number" ? `₹${trip.budget.toLocaleString()}` : (trip.budget || "N/A");
+  const displayStyle = trip.preferences?.travelStyle || trip.travelStyle || "General";
+  const displayDate = trip.startDate || trip.travelDate || "N/A";
 
   return (
     <div className="trip-result-page">
 
-      {/* HEADER */}
-
-     
       {/* TRIP SUMMARY */}
-<div className="starting-point">
-  <span>📍 STARTING POINT</span>
+      <div className="starting-point">
+        <span>📍 STARTING POINT</span>
 
-  <strong>
-    {locationError
-      ? locationError
-      : currentLocation || "Detecting..."}
-  </strong>
-</div>
+        <strong>
+          {locationError
+            ? locationError
+            : currentLocation || "Detecting..."}
+        </strong>
+      </div>
+
       <main className="result-container">
 
         <div className="trip-summary">
@@ -163,27 +214,27 @@ const [loading, setLoading] = useState(false);
 
           <div>
             <span>📅 DATE</span>
-            <strong>{trip.travelDate}</strong>
+            <strong>{displayDate}</strong>
           </div>
 
           <div>
             <span>🗓️ DURATION</span>
-            <strong>{trip.days} Days</strong>
+            <strong>{displayDays} Days</strong>
           </div>
 
           <div>
             <span>👥 TRAVELLERS</span>
-            <strong>{trip.travellers} People</strong>
+            <strong>{displayTravelers} People</strong>
           </div>
 
           <div>
             <span>💰 BUDGET</span>
-            <strong>{trip.budget}</strong>
+            <strong>{displayBudget}</strong>
           </div>
 
           <div>
             <span>🎒 STYLE</span>
-            <strong>{trip.travelStyle}</strong>
+            <strong>{displayStyle}</strong>
           </div>
 
         </div>
@@ -197,7 +248,7 @@ const [loading, setLoading] = useState(false);
             <span>YOUR JOURNEY</span>
 
             <h2>
-              {trip.days}-Day Itinerary
+              {displayDays}-Day Itinerary
             </h2>
           </div>
 
@@ -229,7 +280,7 @@ const [loading, setLoading] = useState(false);
                 <div className="day-title">
 
                   <span>
-                    {day.icon}
+                    {day.icon || "📍"}
                   </span>
 
                   <h3>
@@ -270,32 +321,13 @@ const [loading, setLoading] = useState(false);
           ))}
 
         </div>
-<section className="map-result-section">
 
-  <div className="section-title">
-    <h2>🗺 Route Planner</h2>
-    <p>
-      View the route, estimated distance and travel time.
-    </p>
-  </div>
-
-  {currentLocation ? (
-  <MapView
-    from={currentLocation}
-    to={trip.destination}
-    setLoading={setLoading}
-    distance={distance}
-    setDistance={setDistance}
-    duration={duration}
-    setDuration={setDuration}
-    travelMode={travelMode}
-    setTravelMode={setTravelMode}
-  />
-) : (
-  <p>📍 Detecting your current location...</p>
-)}
-
-</section>
+        {/* AI PACKING CHECKLIST */}
+        <PackingChecklist
+          destination={trip.destination}
+          travelStyle={displayStyle}
+          duration={displayDays}
+        />
 
         {/* BOTTOM */}
 
@@ -310,9 +342,9 @@ const [loading, setLoading] = useState(false);
 
           <button
             className="primary-btn"
-            onClick={() => window.print()}
+            onClick={() => generateItineraryPDF(trip, days, displayDays)}
           >
-            🖨️ Save / Print Trip
+            📄 Download Itinerary PDF
           </button>
 
         </div>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import API from "../api/api";
 import "../styles/Register.css";
 
 function Register() {
@@ -11,11 +12,13 @@ function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
 
     setError("");
+    setSuccess("");
 
     if (!name.trim()) {
       setError("Please enter your name.");
@@ -42,18 +45,33 @@ function Register() {
       return;
     }
 
-    /* Save user information */
-    localStorage.setItem("travexaUserName", name.trim());
-    localStorage.setItem("travexaUserEmail", email.trim());
+    try {
+      const response = await API.post("/auth/register", {
+        name: name.trim(),
+        email: email.trim(),
+        password: password,
+      });
 
-    /*
-      This is only frontend authentication for now.
-      Your backend friend can replace this later.
-    */
-    localStorage.setItem("travexaRegistered", "true");
+      setSuccess(response.data?.message || "User registered successfully");
 
-    /* After registration → Login */
-    navigate("/login");
+      setTimeout(() => {
+        navigate("/login");
+      }, 1000);
+    } catch (err) {
+      if (err.response && err.response.data) {
+        const data = err.response.data;
+        if (data.message) {
+          setError(data.message);
+        } else if (data.errors && Array.isArray(data.errors)) {
+          const errorMsgs = data.errors.map((e) => e.msg || e.message).join(", ");
+          setError(errorMsgs || "Validation error");
+        } else {
+          setError("Server error");
+        }
+      } else {
+        setError("Server error");
+      }
+    }
   };
 
   return (
@@ -111,6 +129,22 @@ function Register() {
           {error && (
             <div className="register-error">
               {error}
+            </div>
+          )}
+
+          {success && (
+            <div
+              className="register-success"
+              style={{
+                padding: "12px 15px",
+                marginBottom: "18px",
+                borderRadius: "10px",
+                background: "#ecfdf5",
+                color: "#059669",
+                fontSize: "14px",
+              }}
+            >
+              {success}
             </div>
           )}
 

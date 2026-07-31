@@ -1,17 +1,37 @@
-.maps-page {
-  max-width: 1400px;
-  margin: auto;
-  padding: 40px 20px 60px;
+/* =====================================================
+   VIBRANT TRAVEL MAPS PAGE STYLES
+   Color Palette:
+   - Ocean Blue: #0284C7
+   - Sky Blue: #38BDF8
+   - Turquoise: #06B6D4
+   - Background: #F8FAFC
+===================================================== */
+
+.maps-page-root {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  padding-bottom: 60px;
+}
+
+.maps-wrapper {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 24px;
 }
 
 .explore-body {
   display: grid;
-  grid-template-columns: 340px 1fr;
-  gap: 24px;
+  grid-template-columns: 350px 1fr;
+  gap: 28px;
   align-items: stretch;
 }
 
 @media (max-width: 900px) {
+  .maps-wrapper {
+    padding: 24px 16px;
+  }
   .explore-body {
     grid-template-columns: 1fr;
   }
