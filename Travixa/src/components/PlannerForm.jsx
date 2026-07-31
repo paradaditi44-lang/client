@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import API from "../api/api";
 import "../styles/PlannerForm.css";
 
-function PlannerForm({ setGeneratedTrip }) {
+function PlannerForm({ setGeneratedTrip, onDestinationChange }) {
   const navigate = useNavigate();
 
   const [trip, setTrip] = useState({
@@ -28,19 +28,23 @@ function PlannerForm({ setGeneratedTrip }) {
   ];
 
   const handleInput = (e) => {
-    setTrip({
+    const { name, value } = e.target;
+    const updatedTrip = {
       ...trip,
-      [e.target.name]: e.target.value,
-    });
+      [name]: value,
+    };
+    setTrip(updatedTrip);
+
+    if (name === "destination" && onDestinationChange) {
+      onDestinationChange(value);
+    }
   };
 
   const handleInterest = (interest) => {
     if (trip.interests.includes(interest)) {
       setTrip({
         ...trip,
-        interests: trip.interests.filter(
-          (item) => item !== interest
-        ),
+        interests: trip.interests.filter((item) => item !== interest),
       });
     } else {
       setTrip({
@@ -56,7 +60,8 @@ function PlannerForm({ setGeneratedTrip }) {
 
     setError("");
 
-    const token = localStorage.getItem("travexaToken");
+    const token =
+      localStorage.getItem("travexaToken") || localStorage.getItem("token");
     if (!token) {
       navigate("/login");
       return;
@@ -69,7 +74,7 @@ function PlannerForm({ setGeneratedTrip }) {
       !trip.budget ||
       !trip.travelStyle
     ) {
-      setError("Please fill all the required fields.");
+      setError("Please fill in all required fields to generate your itinerary.");
       return;
     }
 
@@ -105,6 +110,7 @@ function PlannerForm({ setGeneratedTrip }) {
       if (err.response) {
         if (err.response.status === 401) {
           localStorage.removeItem("travexaToken");
+          localStorage.removeItem("token");
           navigate("/login");
           return;
         }
@@ -126,110 +132,159 @@ function PlannerForm({ setGeneratedTrip }) {
   };
 
   return (
-    <div className="planner-card">
-
-      <h2>✨ AI Trip Planner</h2>
+    <div className="planner-card-glass">
+      <div className="planner-card-header">
+        <span className="planner-badge">✨ STEP 1 OF 2</span>
+        <h2>Plan Your Trip Details</h2>
+        <p className="planner-subtext">Fill in your travel preferences below.</p>
+      </div>
 
       {error && (
-        <div
-          className="planner-error"
-          style={{
-            padding: "10px 14px",
-            marginBottom: "14px",
-            borderRadius: "8px",
-            background: "#fff1f2",
-            color: "#dc2626",
-            fontSize: "13px",
-          }}
-        >
-          ⚠️ {error}
+        <div className="planner-error-alert">
+          <span>⚠️ {error}</span>
         </div>
       )}
 
-      <label>📍 Destination</label>
-      <input
-        type="text"
-        name="destination"
-        placeholder="Enter city or country"
-        value={trip.destination}
-        onChange={handleInput}
-      />
+      <form onSubmit={generateTrip} className="planner-form-grid">
+        {/* Destination */}
+        <div className="form-group full-width">
+          <label htmlFor="destination">📍 DESTINATION</label>
+          <div className="input-group">
+            <span className="input-icon">📍</span>
+            <input
+              id="destination"
+              type="text"
+              name="destination"
+              placeholder="e.g. Paris, Tokyo, Mumbai, London"
+              value={trip.destination}
+              onChange={handleInput}
+            />
+          </div>
+        </div>
 
-      <label>📅 Start Date</label>
-      <input
-        type="date"
-        name="startDate"
-        value={trip.startDate}
-        onChange={handleInput}
-      />
+        {/* Start Date */}
+        <div className="form-group">
+          <label htmlFor="startDate">📅 START DATE</label>
+          <div className="input-group">
+            <span className="input-icon">📅</span>
+            <input
+              id="startDate"
+              type="date"
+              name="startDate"
+              value={trip.startDate}
+              onChange={handleInput}
+            />
+          </div>
+        </div>
 
-      <label>📅 End Date</label>
-      <input
-        type="date"
-        name="endDate"
-        value={trip.endDate}
-        onChange={handleInput}
-      />
+        {/* End Date */}
+        <div className="form-group">
+          <label htmlFor="endDate">📅 END DATE</label>
+          <div className="input-group">
+            <span className="input-icon">📅</span>
+            <input
+              id="endDate"
+              type="date"
+              name="endDate"
+              value={trip.endDate}
+              onChange={handleInput}
+            />
+          </div>
+        </div>
 
-      <label>👥 Travelers</label>
-      <input
-        type="number"
-        name="travelers"
-        min="1"
-        value={trip.travelers}
-        onChange={handleInput}
-      />
+        {/* Travelers */}
+        <div className="form-group">
+          <label htmlFor="travelers">👥 TRAVELERS</label>
+          <div className="input-group">
+            <span className="input-icon">👥</span>
+            <input
+              id="travelers"
+              type="number"
+              name="travelers"
+              min="1"
+              max="20"
+              placeholder="2"
+              value={trip.travelers}
+              onChange={handleInput}
+            />
+          </div>
+        </div>
 
-      <label>💰 Budget</label>
-      <input
-        type="number"
-        name="budget"
-        placeholder="₹50,000"
-        value={trip.budget}
-        onChange={handleInput}
-      />
+        {/* Budget */}
+        <div className="form-group">
+          <label htmlFor="budget">💰 BUDGET (₹)</label>
+          <div className="input-group">
+            <span className="input-icon">💰</span>
+            <input
+              id="budget"
+              type="number"
+              name="budget"
+              placeholder="e.g. 50000"
+              value={trip.budget}
+              onChange={handleInput}
+            />
+          </div>
+        </div>
 
-      <label>✈ Travel Style</label>
-      <select
-        name="travelStyle"
-        value={trip.travelStyle}
-        onChange={handleInput}
-      >
-        <option value="">Select</option>
-        <option value="Adventure">Adventure</option>
-        <option value="Luxury">Luxury</option>
-        <option value="Family">Family</option>
-        <option value="Solo">Solo</option>
-        <option value="Relax">Relax</option>
-      </select>
+        {/* Travel Style */}
+        <div className="form-group full-width">
+          <label htmlFor="travelStyle">🎒 TRAVEL STYLE</label>
+          <div className="input-group">
+            <span className="input-icon">🎒</span>
+            <select
+              id="travelStyle"
+              name="travelStyle"
+              value={trip.travelStyle}
+              onChange={handleInput}
+            >
+              <option value="">Select your travel style</option>
+              <option value="Adventure">🏔️ Adventure & Outdoors</option>
+              <option value="Luxury">👑 Luxury & Comfort</option>
+              <option value="Family">👨‍👩‍👧‍👦 Family Friendly</option>
+              <option value="Solo">🎒 Solo Traveler</option>
+              <option value="Relax">🌅 Relax & Unwind</option>
+            </select>
+          </div>
+        </div>
 
-      <label>❤️ Interests</label>
+        {/* Interests Badges */}
+        <div className="form-group full-width">
+          <label>❤️ INTERESTS & PREFERENCES</label>
+          <div className="interest-badges-grid">
+            {interestsList.map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={
+                  trip.interests.includes(item)
+                    ? "interest-badge active"
+                    : "interest-badge"
+                }
+                onClick={() => handleInterest(item)}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        </div>
 
-      <div className="interest-grid">
-        {interestsList.map((item) => (
+        {/* Submit Button */}
+        <div className="form-group full-width">
           <button
-            key={item}
-            type="button"
-            className={
-              trip.interests.includes(item)
-                ? "interest active"
-                : "interest"
-            }
-            onClick={() => handleInterest(item)}
+            type="submit"
+            className="btn-generate-gradient"
+            disabled={loading}
           >
-            {item}
+            {loading ? (
+              <span className="btn-loading-state">
+                <span className="spinner-dot"></span> Generating AI Itinerary...
+              </span>
+            ) : (
+              "✨ Generate AI Trip"
+            )}
           </button>
-        ))}
-      </div>
-
-      <button
-        className="generate-btn"
-        onClick={generateTrip}
-        disabled={loading}
-      >
-        {loading ? "✨ Generating..." : "✨ Generate AI Trip"}
-      </button>
-
+        </div>
+      </form>
     </div>
   );
 }

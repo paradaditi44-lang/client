@@ -1,22 +1,19 @@
 import { useState, useEffect } from "react";
 import API from "../services/api";
-import "../styles/Dashboard.css";
-
-
-import HeroSection from "../components/HeroSection";
 import PlannerForm from "../components/PlannerForm";
 import MapCard from "../components/MapCard";
-
 import DestinationCard from "../components/DestinationCard";
 import AISuggestions from "../components/AISuggestions";
 import AITripResult from "../components/AITripResult";
 import Footer from "../components/Footer";
 import SuccessPopup from "../components/SuccessPopup";
+import "../styles/PlanTrip.css";
 
-function PlanTrip({ theme, toggleTheme }) {
+function PlanTrip() {
   const [generatedTrip, setGeneratedTrip] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
+  const [destinationPreview, setDestinationPreview] = useState("");
 
   const [trips, setTrips] = useState([]);
   const [loadingTrips, setLoadingTrips] = useState(true);
@@ -28,6 +25,10 @@ function PlanTrip({ theme, toggleTheme }) {
       setTripError("");
       const token =
         localStorage.getItem("travexaToken") || localStorage.getItem("token");
+      if (!token) {
+        setLoadingTrips(false);
+        return;
+      }
       const response = await API.get("/trips", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -46,30 +47,42 @@ function PlanTrip({ theme, toggleTheme }) {
     fetchTrips();
   }, []);
 
-  const handleGenerateTrip = (trip) => {
-    setLoading(true);
-
-    setTimeout(() => {
-      setGeneratedTrip(trip);
-      setLoading(false);
-    }, 3000);
-  };
-
   return (
-    <div className={`dashboard ${theme || "light"}`}>
-      
-      <div className="dashboard-container">
-        <HeroSection />
+    <main className="plan-trip-root">
+      {/* Background Animated Gradient Orbs */}
+      <div className="background-blobs">
+        <div className="blob blob-1"></div>
+        <div className="blob blob-2"></div>
+        <div className="blob blob-3"></div>
+      </div>
 
-        {/* Top Section */}
-        <div className="top-section">
-          <PlannerForm
-            setGeneratedTrip={(trip) => {
-              setGeneratedTrip(trip);
-              setShowPopup(true);
-            }}
-          />
-          <MapCard />
+      <div className="plan-trip-wrapper">
+        {/* Page Heading Banner */}
+        <header className="plan-trip-hero">
+          <span className="hero-eyebrow">✨ AI TRAVEL PLANNER</span>
+          <h1>Craft Your Next Unforgettable Journey</h1>
+          <p>
+            Tell Travexa AI where you want to go, your dates, and budget. Our intelligent engine will curate a custom day-by-day travel plan just for you.
+          </p>
+        </header>
+
+        {/* Two-Column Responsive Workspace */}
+        <div className="planner-workspace-grid">
+          {/* Left Column: Form */}
+          <div className="planner-left-panel">
+            <PlannerForm
+              onDestinationChange={(dest) => setDestinationPreview(dest)}
+              setGeneratedTrip={(trip) => {
+                setGeneratedTrip(trip);
+                setShowPopup(true);
+              }}
+            />
+          </div>
+
+          {/* Right Column: Live Map Preview */}
+          <div className="planner-right-panel">
+            <MapCard destination={destinationPreview} />
+          </div>
         </div>
 
         {/* Loading / Empty State / AI Result */}
@@ -84,33 +97,30 @@ function PlanTrip({ theme, toggleTheme }) {
         ) : generatedTrip ? (
           <AITripResult trip={generatedTrip} />
         ) : (
-          <div className="empty-state">
-            <div className="empty-icon">🤖</div>
-            <h2>Your AI Travel Plan will appear here</h2>
+          <div className="empty-state-glass">
+            <div className="empty-icon-glow">🤖</div>
+            <h2>Your AI Travel Itinerary Will Appear Here</h2>
             <p>
-              Fill out the planner form and click
+              Fill out the trip details above and click
               <br />
-              <strong>✨ Generate AI Trip</strong>
+              <strong style={{ color: "#38bdf8" }}>✨ Generate AI Trip</strong>
               <br />
-              to create your personalized itinerary.
+              to create your complete travel plan.
             </p>
-            <span>🌍 Ready to explore the world?</span>
+            <span className="empty-badge">🌍 Ready to explore the world?</span>
           </div>
         )}
 
-        {/* Dashboard Cards */}
+        {/* Popular Destinations & AI Suggestions Grid */}
         <div className="dashboard-grid">
           <DestinationCard />
           <AISuggestions />
         </div>
       </div>
 
-      <SuccessPopup
-        show={showPopup}
-        onClose={() => setShowPopup(false)}
-      />
+      <SuccessPopup show={showPopup} onClose={() => setShowPopup(false)} />
       <Footer />
-    </div>
+    </main>
   );
 }
 

@@ -1,4 +1,3 @@
-import MapView from "./MapView";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { generateItineraryPDF } from "../utils/generatePDF";
@@ -321,33 +320,6 @@ function AITripResult({ trip: propTrip }) {
           ))}
 
         </div>
-
-        <section className="map-result-section">
-
-          <div className="section-title">
-            <h2>🗺 Route Planner</h2>
-            <p>
-              View the route, estimated distance and travel time.
-            </p>
-          </div>
-
-          {currentLocation ? (
-            <MapView
-              from={currentLocation}
-              to={trip.destination}
-              setLoading={setLoading}
-              distance={distance}
-              setDistance={setDistance}
-              duration={duration}
-              setDuration={setDuration}
-              travelMode={travelMode}
-              setTravelMode={setTravelMode}
-            />
-          ) : (
-            <p>📍 Detecting your current location...</p>
-          )}
-
-        </section>
 
         {/* BOTTOM */}
 

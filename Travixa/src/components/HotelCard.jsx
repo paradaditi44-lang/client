@@ -1,23 +1,33 @@
 import React from "react";
 import "../styles/HotelCard.css";
 
-// Deterministic gradient accent picker so cards feel varied and premium
-// without using any external images, stock photos, or placeholders.
-const ACCENTS = [
-  { grad: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", glow: "rgba(118,75,162,0.35)" },
-  { grad: "linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)", glow: "rgba(6,182,212,0.35)" },
-  { grad: "linear-gradient(135deg, #f97316 0%, #db2777 100%)", glow: "rgba(219,39,119,0.35)" },
-  { grad: "linear-gradient(135deg, #059669 0%, #2563eb 100%)", glow: "rgba(5,150,105,0.35)" },
-  { grad: "linear-gradient(135deg, #7c3aed 0%, #db2777 100%)", glow: "rgba(124,58,237,0.35)" },
-  { grad: "linear-gradient(135deg, #0ea5e9 0%, #22c55e 100%)", glow: "rgba(14,165,233,0.35)" },
+const HOTEL_IMAGES = [
+  "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
+  "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800",
+  "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800",
+  "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800",
+  "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800",
+  "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800",
+  "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800",
+  "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800",
 ];
 
-function pickAccent(name = "") {
+function getHotelImage(name = "") {
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-  return ACCENTS[Math.abs(hash) % ACCENTS.length];
+  const idx = Math.abs(hash) % HOTEL_IMAGES.length;
+  return HOTEL_IMAGES[idx];
+}
+
+function getPriceEstimate(name = "") {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const priceVal = 2500 + (Math.abs(hash) % 75) * 100;
+  return `₹${new Intl.NumberFormat("en-IN").format(priceVal)}`;
 }
 
 function HotelCard({
@@ -29,8 +39,6 @@ function HotelCard({
   website,
   mapsUrl,
 }) {
-  const accent = pickAccent(name || "hotel");
-
   const googleMapsSearchUrl =
     mapsUrl ||
     `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
@@ -43,71 +51,62 @@ function HotelCard({
       name + " " + location + " official website"
     )}`;
 
+  const hotelImage = getHotelImage(name);
+  const displayPrice = price === "Check Price" ? getPriceEstimate(name) : price;
+
   return (
-    <div className="hotel-card">
-      {/* Premium image-free header */}
-      <div
-        className="hotel-header-visual"
-        style={{ background: accent.grad, "--accent-glow": accent.glow }}
-      >
-        <div className="hotel-header-pattern" />
-
-        <span className="rating-badge">
-          ⭐ {rating}
-          {userRatingsTotal ? ` (${userRatingsTotal})` : ""}
-        </span>
-
-        <div className="hotel-icon-wrap">
-          <span className="hotel-icon" role="img" aria-label="Hotel">
-            🏨
+    <div className="hotel-card-redesign">
+      {/* Large Hotel Image Cover */}
+      <div className="hotel-image-wrap">
+        <img src={hotelImage} alt={name} className="hotel-cover-image" />
+        <div className="hotel-badges-overlay">
+          <span className="hotel-rating-badge">
+            ⭐ {rating} {userRatingsTotal ? `(${userRatingsTotal})` : ""}
+          </span>
+          <span className="hotel-price-badge">
+            💰 {displayPrice} <span className="per-night">/ night</span>
           </span>
         </div>
+      </div>
 
-        <h3 className="hotel-name-header" title={name}>
+      {/* Hotel Card Body */}
+      <div className="hotel-card-body">
+        <h3 className="hotel-title" title={name}>
           {name}
         </h3>
 
-        <p className="hotel-address-header">
-          <span className="loc-icon">📍</span>
+        <p className="hotel-location-text">
+          <span className="loc-pin">📍</span>
           <span className="addr-text">{location}</span>
         </p>
 
-        <span className="photos-google-badge">
-          📷 Photos available on Google
-        </span>
-      </div>
-
-      {/* Hotel Information Details */}
-      <div className="hotel-info">
-        <p className="price">
-          {price}
-          {price !== "Check Price" && <span> / night</span>}
-        </p>
-
-        <div className="amenities">
-          <span>📶 Free WiFi</span>
-          <span>🍽 Breakfast</span>
-          <span>🏊 Pool</span>
-          <span>🚗 Parking</span>
+        {/* Amenities Chips */}
+        <div className="amenities-chips">
+          <span className="amenity-chip">📶 Free WiFi</span>
+          <span className="amenity-chip">🏊 Pool</span>
+          <span className="amenity-chip">🍽️ Breakfast</span>
+          <span className="amenity-chip">🚗 Parking</span>
         </div>
 
-        <div className="hotel-buttons">
+        {/* Action Buttons */}
+        <div className="hotel-card-actions">
           <a
             href={googleHotelSearchUrl}
             target="_blank"
             rel="noreferrer"
-            className="book-btn"
+            className="btn-book-now"
           >
-            🔍 View Hotel
+            Book Now →
           </a>
 
           <a
             href={googleMapsSearchUrl}
             target="_blank"
             rel="noreferrer"
-            className="map-btn"
+            className="btn-view-map"
+            title="View on Google Maps"
           >
-            📍 View on Google Maps
+            📍 Map
           </a>
         </div>
       </div>

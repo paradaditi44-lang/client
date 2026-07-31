@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
-import "../styles/Dashboard.css";
 import Footer from "../components/Footer";
+import "../styles/Dashboard.css";
 
-function Dashboard({ theme, toggleTheme }) {
+function Dashboard() {
   const navigate = useNavigate();
   const [userName, setUserName] = useState("Explorer");
   const [trips, setTrips] = useState([]);
@@ -21,7 +21,7 @@ function Dashboard({ theme, toggleTheme }) {
   };
 
   const formatDateRange = (startDateStr, endDateStr) => {
-    if (!startDateStr) return "Flexible Date";
+    if (!startDateStr) return "Flexible Dates";
     const start = new Date(startDateStr);
     const startFormatted = isNaN(start.getTime())
       ? startDateStr
@@ -40,6 +40,36 @@ function Dashboard({ theme, toggleTheme }) {
           year: "numeric",
         });
     return `${startFormatted} - ${endFormatted}`;
+  };
+
+  const calculateDays = (trip) => {
+    if (trip.days) return trip.days;
+    if (trip.startDate && trip.endDate) {
+      const start = new Date(trip.startDate);
+      const end = new Date(trip.endDate);
+      const diffTime = Math.abs(end - start);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays > 0 ? diffDays : 1;
+    }
+    return 3;
+  };
+
+  const getDestinationImage = (destination) => {
+    if (!destination) return "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800";
+    const destLower = destination.toLowerCase();
+    if (destLower.includes("paris") || destLower.includes("france"))
+      return "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800";
+    if (destLower.includes("tokyo") || destLower.includes("japan"))
+      return "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800";
+    if (destLower.includes("mumbai") || destLower.includes("india"))
+      return "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800";
+    if (destLower.includes("london") || destLower.includes("uk"))
+      return "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800";
+    if (destLower.includes("bali") || destLower.includes("indonesia"))
+      return "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800";
+    if (destLower.includes("york") || destLower.includes("usa"))
+      return "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=800";
+    return "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800";
   };
 
   const handleDeleteTrip = async () => {
@@ -82,6 +112,10 @@ function Dashboard({ theme, toggleTheme }) {
         setTripError("");
         const token =
           localStorage.getItem("travexaToken") || localStorage.getItem("token");
+        if (!token) {
+          setLoadingTrips(false);
+          return;
+        }
         const response = await API.get("/trips", {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -101,206 +135,193 @@ function Dashboard({ theme, toggleTheme }) {
     fetchTrips();
   }, []);
 
+  // Compute statistics
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const totalTrips = trips.length;
+  const upcomingTrips = trips.filter((t) => {
+    if (!t.startDate) return false;
+    const start = new Date(t.startDate);
+    return start >= today;
+  }).length;
+
+  const uniqueCountries = new Set(
+    trips.map((t) => (t.destination ? t.destination.split(",").pop().trim() : "")).filter(Boolean)
+  ).size;
+
+  const totalBudgetPlanned = trips.reduce(
+    (acc, t) => acc + (Number(t.budget) || 0),
+    0
+  );
+
   return (
-    <div className={`dashboard ${theme || "light"}`}>
-      <main className="dashboard-container">
-        {/* Welcome Section */}
-        <section
-          style={{
-            background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
-            color: "white",
-            padding: "35px 40px",
-            borderRadius: "20px",
-            marginBottom: "40px",
-            boxShadow: "0 10px 25px rgba(37, 99, 235, 0.2)",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "20px",
-          }}
-        >
-          <div>
-            <span
-              style={{
-                fontSize: "14px",
-                textTransform: "uppercase",
-                letterSpacing: "1px",
-                opacity: 0.9,
-                fontWeight: 600,
-              }}
-            >
-              ✨ Welcome Back
-            </span>
-            <h1
-              style={{
-                fontSize: "32px",
-                margin: "8px 0",
-                fontWeight: 700,
-              }}
-            >
-              Hello, {userName}! 👋
-            </h1>
-            <p style={{ margin: 0, opacity: 0.9, fontSize: "16px" }}>
-              Ready to plan your next extraordinary adventure with Travexa?
-            </p>
+    <div className="dashboard-root">
+      <main className="dashboard-wrapper">
+        {/* Welcome Hero Banner */}
+        <section className="dashboard-hero-card">
+          <div className="hero-content">
+            <h1>Welcome Back 👋, {userName}!</h1>
+            <p>Ready for your next adventure?</p>
+          </div>
+          <button className="btn-plan-hero" onClick={() => navigate("/plan-trip")}>
+            ✨ + Plan New Trip
+          </button>
+        </section>
+
+        {/* Statistics Cards Grid */}
+        <section className="stats-dashboard-grid">
+          <div className="stat-box">
+            <div className="stat-icon-wrapper icon-blue">🧳</div>
+            <div>
+              <span className="stat-number">{loadingTrips ? "..." : totalTrips}</span>
+              <span className="stat-label">Total Trips</span>
+            </div>
+          </div>
+
+          <div className="stat-box">
+            <div className="stat-icon-wrapper icon-cyan">🗓️</div>
+            <div>
+              <span className="stat-number">{loadingTrips ? "..." : upcomingTrips}</span>
+              <span className="stat-label">Upcoming Trips</span>
+            </div>
+          </div>
+
+          <div className="stat-box">
+            <div className="stat-icon-wrapper icon-emerald">🌍</div>
+            <div>
+              <span className="stat-number">
+                {loadingTrips ? "..." : (uniqueCountries || (totalTrips > 0 ? 1 : 0))}
+              </span>
+              <span className="stat-label">Countries Visited</span>
+            </div>
+          </div>
+
+          <div className="stat-box">
+            <div className="stat-icon-wrapper icon-orange">💰</div>
+            <div>
+              <span className="stat-number">
+                {loadingTrips ? "..." : `₹${new Intl.NumberFormat("en-IN").format(totalBudgetPlanned)}`}
+              </span>
+              <span className="stat-label">Budget Planned</span>
+            </div>
           </div>
         </section>
 
-        {/* My Trips Header */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "25px",
-          }}
-        >
-          <h2 style={{ fontSize: "24px", fontWeight: 700, margin: 0 }}>
-            🧳 My Trips
-          </h2>
-          <button
-            onClick={() => navigate("/plan-trip")}
-            style={{
-              background: "#2563eb",
-              color: "white",
-              border: "none",
-              padding: "10px 20px",
-              borderRadius: "10px",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
+        {/* My Trips Header Bar */}
+        <div className="dashboard-section-header">
+          <div>
+            <span className="section-eyebrow">YOUR SAVED ITINERARIES</span>
+            <h2>My Trips ({trips.length})</h2>
+          </div>
+          <button className="btn-plan-secondary" onClick={() => navigate("/plan-trip")}>
             + Plan New Trip
           </button>
         </div>
 
-        {/* Loading State */}
+        {/* Loading / Error / Empty States / Trips Grid */}
         {loadingTrips ? (
-          <div className="loading-card">
-            <h2>⏳ Fetching your trips...</h2>
+          <div className="dashboard-loading-card">
+            <div className="loading-spinner"></div>
+            <h2>Fetching your trips...</h2>
             <p>Please wait while we load your planned adventures.</p>
           </div>
         ) : tripError ? (
-          <div className="empty-state">
-            <div className="empty-icon">⚠️</div>
+          <div className="dashboard-empty-card">
+            <div className="empty-illustration">⚠️</div>
             <h2>Unable to load trips</h2>
             <p>{tripError}</p>
-            <button
-              onClick={() => navigate("/plan-trip")}
-              style={{
-                marginTop: "20px",
-                background: "#2563eb",
-                color: "white",
-                border: "none",
-                padding: "12px 24px",
-                borderRadius: "10px",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
+            <button className="btn-plan-hero" onClick={() => navigate("/plan-trip")}>
               ✨ Plan New Trip
             </button>
           </div>
         ) : trips.length === 0 ? (
-          /* Empty State */
-          <div className="empty-state">
-            <div className="empty-icon">🗺️</div>
+          <div className="dashboard-empty-card">
+            <div className="empty-illustration">🧳✈️🗺️</div>
             <h2>No trips planned yet</h2>
             <p>
               You haven't created any travel itineraries yet.
               <br />
               Let Travexa AI build your personalized trip in seconds!
             </p>
-            <span>🌍 Ready to explore the world?</span>
-            <button
-              onClick={() => navigate("/plan-trip")}
-              style={{
-                marginTop: "25px",
-                background: "#2563eb",
-                color: "white",
-                border: "none",
-                padding: "14px 28px",
-                borderRadius: "12px",
-                fontWeight: 700,
-                fontSize: "15px",
-                cursor: "pointer",
-              }}
-            >
+            <button className="btn-plan-hero" onClick={() => navigate("/plan-trip")}>
               ✨ Plan New Trip →
             </button>
           </div>
         ) : (
-          /* Trips List Grid */
-          <div className="my-trips-grid">
-            {trips.map((trip) => (
-              <div key={trip.id || trip._id} className="trip-card">
-                <div>
-                  <div className="trip-card-header">
-                    <h3 className="trip-card-destination">
+          <div className="vibrant-trips-grid">
+            {trips.map((trip) => {
+              const formattedBudget = !isNaN(Number(trip.budget))
+                ? `₹${new Intl.NumberFormat("en-IN").format(Number(trip.budget))}`
+                : trip.budget;
+              const daysCount = calculateDays(trip);
+              const travelStyle = trip.preferences?.travelStyle || trip.travelStyle || "General";
+
+              return (
+                <div key={trip.id || trip._id} className="vibrant-trip-card">
+                  {/* Destination Image Cover */}
+                  <div className="trip-card-image-wrap">
+                    <img
+                      src={getDestinationImage(trip.destination)}
+                      alt={trip.destination}
+                      className="trip-card-image"
+                    />
+                    <div className="trip-card-badges-top">
+                      <span className="badge-days">🗓️ {daysCount} Days</span>
+                      {trip.budget && <span className="badge-budget">{formattedBudget}</span>}
+                    </div>
+                  </div>
+
+                  {/* Card Content */}
+                  <div className="trip-card-content">
+                    <h3 className="trip-destination-title">
                       📍 {trip.destination}
                     </h3>
-                    {trip.budget && (
-                      <span className="trip-card-budget">
-                        💵 {
-                          !isNaN(Number(trip.budget))
-                            ? `₹${new Intl.NumberFormat("en-IN").format(Number(trip.budget))}`
-                            : trip.budget
-                        }
-                      </span>
-                    )}
-                  </div>
 
-                  <div className="trip-card-body">
-                    <div className="trip-card-item">
-                      <span className="trip-card-icon">📅</span>
-                      <span>{formatDateRange(trip.startDate, trip.endDate)}</span>
+                    <div className="trip-card-info-list">
+                      <div className="info-row">
+                        <span className="info-icon">📅</span>
+                        <span>{formatDateRange(trip.startDate, trip.endDate)}</span>
+                      </div>
+
+                      {trip.numberOfTravelers && (
+                        <div className="info-row">
+                          <span className="info-icon">👥</span>
+                          <span>
+                            {trip.numberOfTravelers}{" "}
+                            {trip.numberOfTravelers === 1 ? "Traveler" : "Travelers"}
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="info-row">
+                        <span className="info-icon">🎒</span>
+                        <span style={{ textTransform: "capitalize" }}>{travelStyle}</span>
+                      </div>
                     </div>
 
-                    {trip.numberOfTravelers && (
-                      <div className="trip-card-item">
-                        <span className="trip-card-icon">👥</span>
-                        <span>
-                          {trip.numberOfTravelers}{" "}
-                          {trip.numberOfTravelers === 1 ? "Traveler" : "Travelers"}
-                        </span>
-                      </div>
-                    )}
-
-                    {trip.preferences?.travelStyle && (
-                      <div className="trip-card-item">
-                        <span className="trip-card-icon">🎒</span>
-                        <span style={{ textTransform: "capitalize" }}>
-                          {trip.preferences.travelStyle}
-                        </span>
-                      </div>
-                    )}
+                    <div className="trip-card-actions-row">
+                      <button
+                        className="btn-view-details"
+                        onClick={() => {
+                          localStorage.setItem("travexaTrip", JSON.stringify(trip));
+                          navigate("/trip-result", { state: { trip } });
+                        }}
+                      >
+                        View Details →
+                      </button>
+                      <button
+                        className="btn-delete-icon"
+                        onClick={() => setTripToDelete(trip)}
+                        title="Delete Trip"
+                      >
+                        🗑️ Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-                <div>
-                  <hr className="trip-card-divider" />
-                  <div className="trip-card-actions">
-                    <button
-                      className="btn-view-itinerary"
-                      onClick={() => {
-                        localStorage.setItem("travexaTrip", JSON.stringify(trip));
-                        navigate("/trip-result", { state: { trip } });
-                      }}
-                    >
-                      View Itinerary →
-                    </button>
-                    <button
-                      className="btn-delete-trip"
-                      onClick={() => setTripToDelete(trip)}
-                      title="Delete Trip"
-                    >
-                      🗑️ Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>

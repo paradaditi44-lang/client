@@ -1,67 +1,91 @@
-/* ==========================================================================
-   Travexa Modern Expanded WeatherCard CSS - Full-Width Dashboard Layout
-   ========================================================================== */
+/* =====================================================
+   VIBRANT TRAVEL WEATHER CARD STYLES
+   Dynamic Weather Condition Gradients:
+   - Sunny: Warm Yellow/Orange (#FFFBEB / #FEF3C7)
+   - Cloudy: Soft Sky Blue (#F0F9FF / #E0F2FE)
+   - Rain: Refreshing Ocean Blue (#EFF6FF / #DBEAFE)
+   - Snow: Cool Ice Blue (#F0FDFA / #CCFBF1)
+===================================================== */
 
-/* Main Expanded Card Container */
 .twc-container {
   width: 100%;
-  max-width: 1100px; /* Expanded Full-Width Dashboard */
-  margin: 0 auto;
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: rgba(15, 23, 42, 0.78);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 28px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  color: #f8fafc;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 12px 36px rgba(2, 132, 199, 0.08);
+  color: #0f172a;
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-sizing: border-box;
+  transition: all 0.4s ease;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.twc-container * {
-  box-sizing: border-box;
+/* =====================================================
+   DYNAMIC WEATHER CONDITION GRADIENT THEMES
+===================================================== */
+
+/* 1. SUNNY / CLEAR THEME */
+.twc-container.theme-sunny {
+  background: linear-gradient(135deg, #ffffff 0%, #fffbeb 50%, #fef3c7 100%);
+  border-color: #fde68a;
+  box-shadow: 0 16px 40px rgba(245, 158, 11, 0.14);
 }
 
-/* Weather Condition Theme Accents */
-.twc-container.theme-clear {
-  box-shadow: 0 25px 60px rgba(245, 158, 11, 0.2), 0 0 35px rgba(245, 158, 11, 0.12);
-  border-color: rgba(245, 158, 11, 0.35);
+.twc-container.theme-sunny .twc-search-btn {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
 }
 
-.twc-container.theme-clouds {
-  box-shadow: 0 25px 60px rgba(99, 102, 241, 0.2), 0 0 35px rgba(99, 102, 241, 0.12);
-  border-color: rgba(99, 102, 241, 0.35);
+/* 2. CLOUDY / FOG THEME */
+.twc-container.theme-cloudy {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 50%, #e0f2fe 100%);
+  border-color: #bae6fd;
+  box-shadow: 0 16px 40px rgba(2, 132, 199, 0.14);
 }
 
+.twc-container.theme-cloudy .twc-search-btn {
+  background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+}
+
+/* 3. RAIN / STORM THEME */
 .twc-container.theme-rain {
-  box-shadow: 0 25px 60px rgba(14, 165, 233, 0.25), 0 0 35px rgba(14, 165, 233, 0.18);
-  border-color: rgba(14, 165, 233, 0.4);
+  background: linear-gradient(135deg, #ffffff 0%, #eff6ff 50%, #dbeafe 100%);
+  border-color: #bfdbfe;
+  box-shadow: 0 16px 40px rgba(37, 99, 235, 0.14);
 }
 
-.twc-container.theme-storm {
-  box-shadow: 0 25px 60px rgba(168, 85, 247, 0.25), 0 0 35px rgba(168, 85, 247, 0.18);
-  border-color: rgba(168, 85, 247, 0.4);
+.twc-container.theme-rain .twc-search-btn {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
 }
 
+/* 4. SNOW / ICE THEME */
 .twc-container.theme-snow {
-  box-shadow: 0 25px 60px rgba(56, 189, 248, 0.25), 0 0 35px rgba(255, 255, 255, 0.25);
-  border-color: rgba(186, 230, 253, 0.45);
+  background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 50%, #ccfbf1 100%);
+  border-color: #99f6e4;
+  box-shadow: 0 16px 40px rgba(13, 148, 136, 0.14);
 }
 
-/* Header & Wide Search Bar */
+.twc-container.theme-snow .twc-search-btn {
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
+}
+
+/* =====================================================
+   HEADER & SEARCH BAR
+===================================================== */
+
 .twc-header {
-  padding: 24px 32px 18px 32px;
-  background: rgba(30, 41, 59, 0.45);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 24px 28px 18px 28px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .twc-search-form {
   display: flex;
   gap: 12px;
   align-items: center;
-  width: 100%;
 }
 
 .twc-search-input-wrapper {
@@ -73,76 +97,57 @@
 
 .twc-search-icon {
   position: absolute;
-  left: 18px;
-  width: 20px;
-  height: 20px;
-  stroke: #94a3b8;
+  left: 16px;
+  font-size: 16px;
   pointer-events: none;
 }
 
 .twc-search-input {
   width: 100%;
-  padding: 14px 44px 14px 50px;
-  background: rgba(15, 23, 42, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 12px 40px 12px 44px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
   border-radius: 16px;
-  color: #ffffff;
-  font-size: 1.05rem;
+  font-size: 14.5px;
+  color: #0f172a;
   outline: none;
+  font-family: inherit;
   transition: all 0.25s ease;
 }
 
-.twc-search-input::placeholder {
-  color: #64748b;
-}
-
 .twc-search-input:focus {
-  border-color: #38bdf8;
-  background: rgba(15, 23, 42, 0.9);
-  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.22);
+  border-color: #0284c7;
+  box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
 }
 
 .twc-clear-btn {
   position: absolute;
-  right: 14px;
-  background: none;
+  right: 12px;
+  background: #cbd5e1;
   border: none;
-  color: #94a3b8;
-  font-size: 1.1rem;
-  cursor: pointer;
-  padding: 4px;
+  color: #475569;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.twc-clear-btn:hover {
-  color: #ffffff;
+  font-size: 11px;
+  cursor: pointer;
 }
 
 .twc-search-btn {
-  padding: 14px 28px;
-  background: linear-gradient(135deg, #0284c7, #2563eb);
-  border: none;
-  border-radius: 16px;
   color: #ffffff;
-  font-weight: 600;
-  font-size: 1rem;
+  border: none;
+  padding: 12px 22px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   white-space: nowrap;
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
 }
 
 .twc-search-btn:hover {
-  background: linear-gradient(135deg, #0369a1, #1d4ed8);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.45);
-}
-
-.twc-search-btn:active {
-  transform: translateY(0);
+  transform: translateY(-2px);
+  filter: brightness(1.05);
 }
 
 /* Quick Cities Pills */
@@ -152,7 +157,6 @@
   gap: 8px;
   margin-top: 14px;
   overflow-x: auto;
-  padding-bottom: 2px;
   scrollbar-width: none;
 }
 
@@ -161,52 +165,53 @@
 }
 
 .twc-quick-label {
-  font-size: 0.8rem;
+  font-size: 12px;
+  font-weight: 800;
   color: #64748b;
-  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-right: 4px;
 }
 
 .twc-chip {
-  padding: 6px 16px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 6px 14px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 20px;
-  color: #cbd5e1;
-  font-size: 0.85rem;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
 
 .twc-chip:hover {
-  background: rgba(255, 255, 255, 0.14);
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.25);
+  background: #f0f9ff;
+  border-color: #38bdf8;
+  color: #0284c7;
 }
 
 .twc-chip.active {
-  background: rgba(56, 189, 248, 0.22);
-  border-color: rgba(56, 189, 248, 0.55);
-  color: #38bdf8;
-  font-weight: 600;
+  background: #0284c7;
+  border-color: #0284c7;
+  color: #ffffff;
+  font-weight: 700;
 }
 
 /* API Key Indicator Bar */
 .twc-api-bar {
-  background: rgba(15, 23, 42, 0.5);
-  padding: 10px 32px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  font-size: 0.82rem;
+  padding: 8px 28px;
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  font-size: 12px;
 }
 
 .twc-live-badge {
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: #94a3b8;
+  gap: 8px;
+  color: #64748b;
+  font-weight: 500;
 }
 
 .twc-dot {
@@ -218,142 +223,123 @@
 
 .twc-dot.live {
   background-color: #10b981;
-  box-shadow: 0 0 10px #10b981;
+  box-shadow: 0 0 8px #10b981;
 }
 
 .twc-api-toggle-link {
   margin-left: auto;
   background: none;
   border: none;
-  color: #38bdf8;
-  font-size: 0.82rem;
+  color: #0284c7;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
   text-decoration: underline;
-  padding: 0;
-}
-
-.twc-api-toggle-link:hover {
-  color: #7dd3fc;
 }
 
 .twc-api-drawer {
   display: flex;
-  gap: 10px;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .twc-api-input {
   flex: 1;
-  padding: 8px 14px;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 10px;
-  color: #ffffff;
-  font-size: 0.85rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 12px;
 }
 
 .twc-api-save-btn {
-  padding: 8px 16px;
-  background: #38bdf8;
-  color: #0f172a;
+  padding: 8px 14px;
+  background: #0284c7;
+  color: #ffffff;
   border: none;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 0.82rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 12px;
   cursor: pointer;
 }
 
-/* Card Body - Expanded Dashboard Grid */
+/* =====================================================
+   BODY CONTENT
+===================================================== */
+
 .twc-body {
-  padding: 36px 32px;
+  padding: 24px 28px;
 }
 
-/* Loading State */
+/* Loading & Error States */
 .twc-loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 48px 0;
+  text-align: center;
+  padding: 40px 0;
 }
 
 .twc-spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #38bdf8;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 16px;
+  border: 4px solid #e0f2fe;
+  border-top-color: #0284c7;
   border-radius: 50%;
-  animation: twc-spin 0.9s linear infinite;
-  margin-bottom: 18px;
+  animation: spin 0.9s linear infinite;
 }
 
-@keyframes twc-spin {
-  to {
-    transform: rotate(360deg);
-  }
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .twc-loading-text {
-  color: #94a3b8;
-  font-size: 1rem;
-  margin: 0;
+  color: #64748b;
+  font-size: 15px;
+  font-weight: 500;
 }
 
-/* Error State */
 .twc-error-state {
   text-align: center;
-  padding: 36px 24px;
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.25);
-  border-radius: 20px;
+  padding: 30px 20px;
+  background: #fef2f2;
+  border: 1px solid #fecdd3;
+  border-radius: 18px;
 }
 
 .twc-error-icon {
-  font-size: 2.5rem;
-  margin-bottom: 10px;
+  font-size: 36px;
+  margin-bottom: 8px;
 }
 
 .twc-error-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #fca5a5;
-  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #dc2626;
+  margin: 0 0 6px 0;
 }
 
 .twc-error-msg {
-  font-size: 0.95rem;
-  color: #cbd5e1;
-  margin: 0 0 18px 0;
-  line-height: 1.4;
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 16px;
 }
 
 .twc-retry-btn {
-  padding: 10px 22px;
-  background: rgba(239, 68, 68, 0.2);
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  border-radius: 12px;
-  color: #fca5a5;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.twc-retry-btn:hover {
-  background: rgba(239, 68, 68, 0.35);
+  padding: 10px 20px;
+  background: #dc2626;
   color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13.5px;
+  cursor: pointer;
 }
 
-/* Weather Content - Expanded Horizontal Layout */
+/* Content Layout */
 .twc-content {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 20px;
 }
 
-/* Top Bar: Location & Unit Toggle */
 .twc-top-bar {
   display: flex;
   justify-content: space-between;
@@ -363,87 +349,83 @@
 .twc-city-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .twc-city-name {
-  font-size: 2.2rem;
+  font-size: 26px;
   font-weight: 800;
-  color: #ffffff;
+  color: #0f172a;
   margin: 0;
-  letter-spacing: -0.8px;
 }
 
 .twc-country-badge {
-  padding: 4px 12px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 4px 10px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #38bdf8;
-  letter-spacing: 0.8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #0284c7;
 }
 
 .twc-date-time {
-  font-size: 0.92rem;
-  color: #94a3b8;
-  margin: 6px 0 0 0;
+  font-size: 13px;
+  color: #64748b;
+  margin: 4px 0 0 0;
+  font-weight: 500;
 }
 
 /* Unit Toggle Switch */
 .twc-unit-toggle {
   display: flex;
-  background: rgba(0, 0, 0, 0.35);
-  padding: 4px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #f1f5f9;
+  padding: 3px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
 }
 
 .twc-unit-btn {
   background: none;
   border: none;
   color: #64748b;
-  padding: 6px 14px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  border-radius: 10px;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 9px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .twc-unit-btn.active {
-  background: rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+  background: #ffffff;
+  color: #0284c7;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
-/* Main Temperature Display Banner - Expanded 2-Column Dashboard Header */
+/* Main Temperature Display Banner */
 .twc-main-display {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
-  padding: 24px 32px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 20px 24px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.03);
 }
 
 .twc-temp-block {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
 }
 
 .twc-temp-value {
-  font-size: 5rem;
+  font-size: 52px;
   font-weight: 800;
   line-height: 1;
-  background: linear-gradient(180deg, #ffffff 40%, #cbd5e1 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  letter-spacing: -3px;
+  color: #0f172a;
 }
 
 .twc-temp-details {
@@ -452,9 +434,9 @@
 }
 
 .twc-condition-text {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: #f1f5f9;
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
   text-transform: capitalize;
 }
 
@@ -462,58 +444,54 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.92rem;
-  color: #94a3b8;
-  margin-top: 6px;
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 600;
+  margin-top: 4px;
 }
 
 .twc-dot-separator {
-  color: #475569;
+  color: #cbd5e1;
 }
 
-/* Weather Icon Styling */
 .twc-icon-wrapper {
-  position: relative;
-  width: 120px;
-  height: 120px;
+  width: 90px;
+  height: 90px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .twc-weather-icon {
-  width: 135px;
-  height: 135px;
+  width: 96px;
+  height: 96px;
   object-fit: contain;
-  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.45));
-  animation: twc-float 4s ease-in-out infinite;
-}
-
-@keyframes twc-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
 }
 
 .twc-fallback-icon {
-  font-size: 4rem;
+  font-size: 48px;
 }
 
 /* Feels Banner */
 .twc-feels-banner {
-  padding: 12px 20px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  font-size: 0.95rem;
-  color: #cbd5e1;
+  padding: 10px 18px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 13.5px;
+  color: #475569;
   text-align: center;
+  font-weight: 500;
 }
 
 .twc-feels-banner strong {
-  color: #38bdf8;
+  color: #0284c7;
 }
 
-/* Expanded Metrics Grid - 4 Columns on Large Screens */
+/* =====================================================
+   REDESIGNED 4-METRIC CARDS GRID
+===================================================== */
+
 .twc-metrics-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -521,58 +499,57 @@
 }
 
 .twc-metric-card {
-  padding: 20px 18px;
-  background: rgba(30, 41, 59, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 20px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  transition: transform 0.25s ease, background 0.25s ease;
+  gap: 6px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .twc-metric-card:hover {
-  background: rgba(30, 41, 59, 0.75);
-  transform: translateY(-3px);
-  border-color: rgba(255, 255, 255, 0.18);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(2, 132, 199, 0.12);
+  border-color: #38bdf8;
 }
 
 .twc-metric-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #94a3b8;
+  color: #64748b;
 }
 
 .twc-metric-icon {
-  width: 18px;
-  height: 18px;
-  stroke: #38bdf8;
+  font-size: 18px;
 }
 
 .twc-metric-label {
-  font-size: 0.82rem;
-  font-weight: 600;
+  font-size: 11.5px;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .twc-metric-value {
-  font-size: 1.35rem;
+  font-size: 20px;
   font-weight: 800;
-  color: #ffffff;
+  color: #0f172a;
 }
 
 .twc-metric-subtext {
-  font-size: 0.78rem;
-  color: #64748b;
+  font-size: 11.5px;
+  color: #94a3b8;
+  font-weight: 500;
 }
 
-/* Humidity Progress Bar */
 .twc-progress-bar {
   width: 100%;
   height: 5px;
-  background: rgba(255, 255, 255, 0.1);
+  background: #f1f5f9;
   border-radius: 5px;
   overflow: hidden;
   margin-top: 4px;
@@ -580,45 +557,29 @@
 
 .twc-progress-fill.humidity {
   height: 100%;
-  background: linear-gradient(90deg, #38bdf8, #0284c7);
+  background: linear-gradient(90deg, #0284c7, #06b6d4);
   border-radius: 5px;
-  transition: width 0.5s ease;
 }
 
-/* Responsive Scaling for Tablets and Mobile */
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .twc-metrics-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  .twc-temp-value {
-    font-size: 4.2rem;
-  }
 }
 
-@media (max-width: 600px) {
-  .twc-header, .twc-body, .twc-api-bar {
-    padding-left: 18px;
-    padding-right: 18px;
-  }
-  .twc-main-display {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-    padding: 20px;
-  }
-  .twc-temp-block {
-    gap: 16px;
-  }
-  .twc-temp-value {
-    font-size: 3.6rem;
-  }
-  .twc-metrics-grid {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 500px) {
   .twc-search-form {
     flex-direction: column;
   }
   .twc-search-btn {
     width: 100%;
+  }
+  .twc-main-display {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .twc-metrics-grid {
+    grid-template-columns: 1fr 1fr;
   }
 }
