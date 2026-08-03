@@ -1,117 +1,219 @@
+/* =====================================================
+   VIBRANT TRAVEL PLANNER FORM STYLES
+===================================================== */
 
-
-.planner-card label{
-    display:block;
-    margin-top:18px;
-    margin-bottom:8px;
-    font-weight:600;
+.planner-card-glass {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 12px 36px rgba(2, 132, 199, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.planner-card input{
-    width:100%;
-    padding:14px;
-
-    border:1px solid #ddd;
-    border-radius:12px;
-
-    font-size:16px;
+.planner-card-glass:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 44px rgba(2, 132, 199, 0.14);
 }
 
-.planner-card button{
-    width:100%;
-    margin-top:30px;
-
-    padding:15px;
-
-    border:none;
-    border-radius:12px;
-
-    background:#2563eb;
-    color:white;
-
-    font-size:18px;
-    cursor:pointer;
+.planner-card-header {
+  margin-bottom: 24px;
 }
 
-.planner-card button:hover{
-    background:#1d4ed8;
-}.planner-container{
-    max-width:1300px;
-    margin:50px auto;
-    padding:0 30px;
-
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:35px;
+.planner-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #0284c7;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  padding: 5px 14px;
+  border-radius: 20px;
+  margin-bottom: 10px;
 }
 
-.planner-card{
-    background:#fff;
-    padding:35px;
-    border-radius:20px;
-
-    box-shadow:0 15px 35px rgba(0,0,0,.1);
+.planner-card-header h2 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 6px 0;
 }
 
-.planner-card h2{
-    margin-bottom:25px;
-    color:#2563eb;
-}
-select{
-
-    width:100%;
-    padding:14px;
-
-    border-radius:12px;
-
-    border:1px solid #ddd;
-
-    font-size:16px;
-
-    margin-bottom:20px;
+.planner-subtext {
+  font-size: 14.5px;
+  color: #64748b;
+  margin: 0;
 }
 
-.interest-grid{
-
-    display:grid;
-
-    grid-template-columns:repeat(2,1fr);
-
-    gap:10px;
-
-    margin-top:10px;
+/* Error Alert */
+.planner-error-alert {
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border-radius: 14px;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #e11d48;
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.interest{
-
-    padding:12px;
-
-    border:none;
-
-    border-radius:10px;
-
-    background:#e5e7eb;
-
-    cursor:pointer;
-
-    transition:.3s;
+/* Form Grid */
+.planner-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 16px;
 }
 
-.interest:hover{
-
-    background:#2563eb;
-
-    color:white;
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.active{
-
-    background:#2563eb;
-
-    color:white;
+.form-group.full-width {
+  grid-column: 1 / -1;
 }
 
-.generate-btn{
+.form-group label {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #334155;
+  letter-spacing: 1px;
+}
 
-    margin-top:30px;
+/* Input Group with Icons & Focus Glow */
+.input-group {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 14px;
+  padding: 12px 16px;
+  gap: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.input-group:focus-within {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
+}
+
+.input-icon {
+  font-size: 18px;
+}
+
+.input-group input,
+.input-group select {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #0f172a;
+  font-size: 14.5px;
+  width: 100%;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.input-group select option {
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.input-group input::placeholder {
+  color: #94a3b8;
+}
+
+/* Interests Badges Grid */
+.interest-badges-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.interest-badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.interest-badge:hover {
+  background: #f0f9ff;
+  border-color: #38bdf8;
+  color: #0284c7;
+}
+
+.interest-badge.active {
+  background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
+  color: #ffffff;
+  font-weight: 700;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+}
+
+/* Gradient Generate Button */
+.btn-generate-gradient {
+  width: 100%;
+  padding: 16px 28px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
+  color: #ffffff;
+  font-size: 16.5px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-generate-gradient:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(6, 182, 212, 0.4);
+  filter: brightness(1.05);
+}
+
+.btn-generate-gradient:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.btn-loading-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.spinner-dot {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spinDot 0.8s linear infinite;
+}
+
+@keyframes spinDot {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Media Queries */
+@media (max-width: 600px) {
+  .planner-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .planner-card-glass {
+    padding: 24px 18px;
+  }
 }

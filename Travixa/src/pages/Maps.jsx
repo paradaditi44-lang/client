@@ -4,7 +4,8 @@ import MapSearch from "../components/maps/MapSearch";
 import CategoryFilter from "../components/maps/CategoryFilter";
 import ExploreMap from "../components/maps/ExploreMap";
 import ExploreSidebar from "../components/maps/ExploreSidebar";
-import { EXPLORE_CATEGORIES, DEFAULT_CATEGORY } from "../utils/exploreCategories";
+import Footer from "../components/Footer";
+import { EXPLORE_CATEGORIES, DEFAULT_CATEGORY } from "../utils/explorecategories";
 
 import "../styles/Maps.css";
 
@@ -18,8 +19,7 @@ function Maps() {
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(DEFAULT_CATEGORY);
 
-  // Fetch nearby places for a given coordinate + category using the
-  // Overpass API (OpenStreetMap data) — no third-party place/photo APIs.
+  // Fetch nearby places for a given coordinate + category using Overpass API
   const fetchNearbyPlaces = async (lat, lon, category) => {
     setLoading(true);
     setSelectedPlace(null);
@@ -117,7 +117,7 @@ out center 60;
     }
   };
 
-  // Use the browser's geolocation as the search origin
+  // Use browser geolocation
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser.");
@@ -151,42 +151,46 @@ out center 60;
   };
 
   return (
-    <div className="maps-page">
-      <MapSearch
-        searchInput={searchInput}
-        setSearchInput={setSearchInput}
-        onSearch={handleSearch}
-        onUseLocation={handleUseMyLocation}
-      />
-
-      <CategoryFilter
-        categories={EXPLORE_CATEGORIES}
-        selectedCategory={selectedCategory}
-        onSelect={handleCategorySelect}
-      />
-
-      <div className="explore-body">
-        <ExploreSidebar
-          loading={loading}
-          hasSearched={hasSearched}
-          places={places}
-          selectedCategory={selectedCategory}
-          locationLabel={locationLabel}
-          selectedPlace={selectedPlace}
-          setSelectedPlace={setSelectedPlace}
+    <div className="maps-page-root">
+      <main className="maps-wrapper">
+        <MapSearch
+          searchInput={searchInput}
+          setSearchInput={setSearchInput}
+          onSearch={handleSearch}
+          onUseLocation={handleUseMyLocation}
         />
 
-        <ExploreMap
-          position={position}
-          places={places}
+        <CategoryFilter
+          categories={EXPLORE_CATEGORIES}
           selectedCategory={selectedCategory}
-          selectedPlace={selectedPlace}
-          setSelectedPlace={setSelectedPlace}
-          loading={loading}
-          hasSearched={hasSearched}
-          locationLabel={locationLabel}
+          onSelect={handleCategorySelect}
         />
-      </div>
+
+        <div className="explore-body">
+          <ExploreSidebar
+            loading={loading}
+            hasSearched={hasSearched}
+            places={places}
+            selectedCategory={selectedCategory}
+            locationLabel={locationLabel}
+            selectedPlace={selectedPlace}
+            setSelectedPlace={setSelectedPlace}
+          />
+
+          <ExploreMap
+            position={position}
+            places={places}
+            selectedCategory={selectedCategory}
+            selectedPlace={selectedPlace}
+            setSelectedPlace={setSelectedPlace}
+            loading={loading}
+            hasSearched={hasSearched}
+            locationLabel={locationLabel}
+          />
+        </div>
+      </main>
+
+      <Footer />
     </div>
   );
 }

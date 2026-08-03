@@ -1,281 +1,284 @@
-/* ===========================
-   NAVBAR
-=========================== */
+
+/* =========================================================
+   TRAVEXA NAVBAR
+========================================================= */
 
 .navbar {
-  width: 100%;
   height: 80px;
-
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 4%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  padding: 0 50px;
+  gap: 32px;
 
   position: sticky;
   top: 0;
   z-index: 1000;
 
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
+  background: rgba(220, 238, 255, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 
+  color: #1e3a5f;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+
+  box-shadow: 0 6px 24px rgba(30, 58, 95, 0.1);
+
+  transition: all 0.3s ease;
+}
+
+/* ===========================
+   LOGO
+=========================== */
+
+.navbar-logo {
+  font-size: 26px;
+  font-weight: 800;
+  color: #1e3a5f;
+  cursor: pointer;
+  white-space: nowrap;
+  letter-spacing: -0.3px;
+  transition: 0.3s ease;
+}
+
+.navbar-logo:hover {
+  transform: scale(1.03);
+}
+
+/* ===========================
+   MENU
+=========================== */
+
+.navbar-menu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbar-menu button {
+  border: none;
+  background: transparent;
+  color: #1e3a5f;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.navbar-menu button:hover {
+  background: rgba(116, 185, 255, 0.28);
+}
+
+.navbar-menu button.active {
+  background: #74b9ff;
+  color: #1e3a5f;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(116, 185, 255, 0.45);
+}
+
+/* ===========================
+   RIGHT SIDE
+=========================== */
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ===========================
+   LOGIN
+=========================== */
+
+.navbar-login {
+  border: none;
+  background: #1e3a5f;
+  color: white;
+
+  padding: 10px 22px;
+  border-radius: 22px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
   transition: 0.3s;
 }
 
-/* Logo */
+.navbar-login:hover {
+  background: #152b47;
+  transform: translateY(-2px);
+}
 
-.navbar-logo {
-  font-size: 28px;
-  font-weight: 800;
-  color: var(--primary);
+/* ===========================
+   PROFILE
+=========================== */
+
+.navbar-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 14px;
+
+  border: 1px solid rgba(30, 58, 95, 0.15);
+  border-radius: 22px;
+
+  background: rgba(255, 255, 255, 0.65);
 
   cursor: pointer;
-
-  transition: .3s;
+  transition: 0.3s;
 }
 
-.navbar-logo:hover{
-    transform: scale(1.05);
+.navbar-profile:hover {
+  background: white;
+  border-color: #74b9ff;
 }
 
-/* Menu */
+.profile-icon {
+  width: 32px;
+  height: 32px;
 
-.navbar-menu{
-    display:flex;
-    align-items:center;
-    gap:18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #74b9ff;
+
+  font-size: 17px;
 }
 
-.navbar-menu button{
+.profile-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e3a5f;
 
-    background:none;
-    border:none;
-
-    color:var(--text);
-
-    font-size:15px;
-    font-weight:600;
-
-    padding:10px 16px;
-
-    border-radius:10px;
-
-    transition:.3s;
-
-    cursor:pointer;
-
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.navbar-menu button:hover{
+/* ===========================
+   LOGOUT
+=========================== */
 
-    background:var(--primary);
+.navbar-logout {
+  padding: 8px 18px;
 
-    color:white;
+  border: 1.5px solid #1e3a5f;
+  border-radius: 20px;
 
+  background: transparent;
+  color: #1e3a5f;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-.navbar-menu .active{
-
-    background:var(--primary);
-
-    color:white;
-
+.navbar-logout:hover {
+  background: #1e3a5f;
+  color: white;
 }
 
-/* Right Side */
+/* ===========================
+   THEME BUTTON
+=========================== */
 
-.navbar-right{
+.navbar-theme {
+  width: 40px;
+  height: 40px;
 
-    display:flex;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    align-items:center;
+  border: none;
+  border-radius: 50%;
 
-    gap:12px;
+  background: rgba(255, 255, 255, 0.5);
 
+  font-size: 18px;
+
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-/* Login */
-
-.navbar-login{
-
-    padding:10px 18px;
-
-    border:none;
-
-    border-radius:10px;
-
-    background:var(--primary);
-
-    color:white;
-
-    font-weight:600;
-
-    cursor:pointer;
-
-    transition:.3s;
-
+.navbar-theme:hover {
+  background: white;
+  transform: rotate(20deg);
 }
 
-.navbar-login:hover{
+/* ===========================
+   RESPONSIVE
+=========================== */
 
-    transform:translateY(-2px);
+@media (max-width: 1000px) {
+  .navbar {
+    padding: 0 20px;
+    gap: 16px;
+  }
 
+  .navbar-menu button {
+    padding: 8px 14px;
+    font-size: 14px;
+  }
 }
 
-/* Profile */
+@media (max-width: 820px) {
+  .navbar {
+    height: auto;
+    flex-wrap: wrap;
+    padding: 15px 20px;
+  }
 
-.navbar-profile{
+  .navbar-menu {
+    width: 100%;
+    order: 3;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
 
-    display:flex;
-
-    align-items:center;
-
-    gap:8px;
-
-    padding:10px 16px;
-
-    border:1px solid var(--border);
-
-    border-radius:12px;
-
-    background:var(--card);
-
-    color:var(--text);
-
-    cursor:pointer;
-
-    transition:.3s;
-
+  .navbar-right {
+    width: 100%;
+    justify-content: center;
+    margin-top: 10px;
+  }
 }
 
-.navbar-profile:hover{
+@media (max-width: 550px) {
+  .navbar-logo {
+    font-size: 22px;
+  }
 
-    background:var(--primary);
+  .profile-name {
+    display: none;
+  }
 
-    color:white;
+  .navbar-menu {
+    gap: 6px;
+  }
 
+  .navbar-menu button {
+    font-size: 13px;
+    padding: 7px 10px;
+  }
+
+  .navbar-login,
+  .navbar-logout {
+    padding: 7px 14px;
+  }
 }
-
-/* Logout */
-
-.navbar-logout{
-
-    padding:10px 16px;
-
-    border:none;
-
-    border-radius:10px;
-
-    background:#ef4444;
-
-    color:white;
-
-    font-weight:600;
-
-    cursor:pointer;
-
-    transition:.3s;
-
-}
-
-.navbar-logout:hover{
-
-    background:#dc2626;
-
-}
-
-/* Theme Button */
-
-.navbar-theme{
-
-    width:46px;
-
-    height:46px;
-
-    border-radius:50%;
-
-    border:1px solid var(--border);
-
-    background:var(--card);
-
-    color:var(--text);
-
-    font-size:20px;
-
-    cursor:pointer;
-
-    transition:.3s;
-
-}
-
-.navbar-theme:hover{
-
-    background:var(--primary);
-
-    color:white;
-
-    transform:rotate(180deg);
-
-}
-
-/* Mobile */
-
-@media(max-width:950px){
-
-.navbar{
-
-padding:15px 20px;
-
-flex-wrap:wrap;
-
-height:auto;
-
-}
-
-.navbar-menu{
-
-width:100%;
-
-justify-content:center;
-
-margin-top:15px;
-
-flex-wrap:wrap;
-
-}
-
-.navbar-right{
-
-margin-top:15px;
-
-width:100%;
-
-justify-content:center;
-
-}
-
-}
-
-@media(max-width:600px){
-
-.navbar-logo{
-
-font-size:24px;
-
-}
-
-.navbar-menu{
-
-gap:10px;
-
-}
-
-.navbar-menu button{
-
-font-size:14px;
-
-padding:8px 12px;
-
-}
-
-}   

@@ -1,39 +1,120 @@
-.map-card{
+/* =====================================================
+   VIBRANT TRAVEL LIVE MAP CARD STYLES
+===================================================== */
 
-    background:white;
-
-    border-radius:20px;
-
-    padding:30px;
-
-    box-shadow:0 10px 30px rgba(0,0,0,.08);
-
+.map-card-preview {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 12px 36px rgba(2, 132, 199, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
 }
 
-.map-card h2{
-
-    color:#2563eb;
-
-    margin-bottom:20px;
-
+.map-card-preview:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 44px rgba(2, 132, 199, 0.14);
 }
 
-.map-placeholder{
+.map-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-    height:450px;
+.map-eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #0284c7;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  padding: 5px 14px;
+  border-radius: 20px;
+  margin-bottom: 6px;
+}
 
-    border-radius:15px;
+.map-destination-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+}
 
-    background:#e8eefc;
+.map-spinner-badge {
+  font-size: 12.5px;
+  color: #0284c7;
+  background: #f0f9ff;
+  padding: 5px 12px;
+  border-radius: 14px;
+  font-weight: 600;
+  animation: pulseText 1.5s infinite alternate;
+}
 
-    display:flex;
+@keyframes pulseText {
+  0% { opacity: 0.65; }
+  100% { opacity: 1; }
+}
 
-    justify-content:center;
+/* Map Frame Container */
+.map-frame {
+  width: 100%;
+  height: 420px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 2px solid #cbd5e1;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
 
-    align-items:center;
+/* Map Footer */
+.map-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  color: #64748b;
+  padding-top: 4px;
+}
 
-    font-size:22px;
+.map-status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 10px #10b981;
+  display: inline-block;
+}
 
-    color:#555;
+.map-footer-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
+.map-coords-badge {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 11.5px;
+  color: #334155;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+@media (max-width: 900px) {
+  .map-frame {
+    height: 340px;
+  }
 }

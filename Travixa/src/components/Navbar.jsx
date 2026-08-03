@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { useTheme } from "../context/ThemeContext";
+import { useTheme } from "../Context/ThemeContext";
 import "../styles/Navbar.css";
 
 function Navbar() {
@@ -52,6 +52,19 @@ function Navbar() {
         >
           Home
         </button>
+
+
+
+        {loggedIn && (
+          <button
+            className={location.pathname === "/dashboard" ? "active" : ""}
+            onClick={() => navigate("/dashboard")}
+          >
+            Dashboard
+          </button>
+        )}
+
+
 
         <button
           className={location.pathname === "/plan-trip" ? "active" : ""}
