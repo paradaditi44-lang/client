@@ -583,3 +583,52 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+.twc-travel-section{
+  margin-top:24px;
+  padding-top:20px;
+  border-top:1px solid rgba(255,255,255,0.15);
+}
+
+.twc-travel-title{
+  font-size:1.2rem;
+  margin-bottom:10px;
+}
+
+.twc-travel-score{
+  font-size:1rem;
+  font-weight:600;
+  margin-bottom:10px;
+}
+
+.twc-travel-advice{
+  margin-bottom:18px;
+  line-height:1.6;
+}
+
+.twc-travel-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+}
+
+.twc-travel-card{
+  padding:15px;
+  border-radius:16px;
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(10px);
+}
+
+.twc-travel-card ul{
+  margin-top:10px;
+  padding-left:18px;
+}
+
+.twc-travel-card li{
+  margin-bottom:8px;
+}
+
+@media(max-width:768px){
+  .twc-travel-grid{
+    grid-template-columns:1fr;
+  }
+}
