@@ -147,6 +147,7 @@ function TravelChatbot() {
           id: Date.now() + 1,
           sender: "ai",
           text: data.reply || data.message || "I'm here to help with your travel questions!",
+          destination: updatedContext.destination || "",
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         };
         setMessages((prev) => [...prev, aiMessage]);
@@ -225,6 +226,20 @@ function TravelChatbot() {
 
                 <div className="msg-bubble">
                   <p className="msg-text">{msg.text}</p>
+                  {msg.destination && msg.sender === "ai" && (
+                    <div className="msg-video-cta">
+                      <a
+                        href={`https://www.youtube.com/results?search_query=${encodeURIComponent(
+                          msg.destination + " travel guide 2026"
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-chat-videos"
+                      >
+                        🎥 Watch {msg.destination} Travel Videos →
+                      </a>
+                    </div>
+                  )}
                   <span className="msg-timestamp">{msg.timestamp}</span>
                 </div>
               </div>

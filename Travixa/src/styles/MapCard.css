@@ -1,5 +1,5 @@
 /* =====================================================
-   VIBRANT TRAVEL LIVE MAP CARD STYLES
+   VIBRANT TRAVEL LIVE MAP CARD STYLES & SMART ROUTE PLANNER
 ===================================================== */
 
 .map-card-preview {
@@ -68,53 +68,181 @@
 /* Map Frame Container */
 .map-frame {
   width: 100%;
-  height: 420px;
+  height: 380px;
   border-radius: 18px;
   overflow: hidden;
   border: 2px solid #cbd5e1;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
-/* Map Footer */
-.map-card-footer {
+.custom-map-pin-wrapper {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* SMART ROUTE PLANNER SECTION */
+.smart-route-planner {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 13px;
-  color: #64748b;
+  flex-direction: column;
+  gap: 12px;
   padding-top: 4px;
 }
 
-.map-status-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #10b981;
-  box-shadow: 0 0 10px #10b981;
-  display: inline-block;
+.route-planner-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.map-footer-text {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.route-planner-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: #64748b;
+  text-transform: uppercase;
 }
 
-.map-coords-badge {
-  background: #f1f5f9;
+/* TRANSPORT MODE CHIPS */
+.transport-chips-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.transport-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: #f8fafc;
   border: 1px solid #e2e8f0;
-  padding: 4px 10px;
-  border-radius: 10px;
-  font-size: 11.5px;
-  color: #334155;
+  color: #475569;
+  font-size: 13px;
   font-weight: 600;
-  font-family: monospace;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
 }
 
+.transport-chip:hover {
+  background: #f0f9ff;
+  border-color: #7dd3fc;
+  color: #0284c7;
+  transform: translateY(-1px);
+}
+
+.transport-chip.active {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+}
+
+.chip-icon {
+  font-size: 14px;
+}
+
+.chip-label {
+  font-weight: 700;
+}
+
+/* ROUTE METRICS DISPLAY CARD */
+.route-metrics-card {
+  background: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 16px;
+  padding: 14px 18px;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.route-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+.metric-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.metric-icon {
+  font-size: 20px;
+}
+
+.metric-label {
+  display: block;
+  font-size: 9px;
+  font-weight: 800;
+  color: #64748b;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+
+.metric-value {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.route-loading-state,
+.route-error-state,
+.route-info-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.route-loading-state {
+  color: #0284c7;
+}
+
+.route-error-state {
+  color: #ef4444;
+}
+
+.route-info-state {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.route-spinner {
+  animation: pulseText 1s infinite alternate;
+}
+
+/* RESPONSIVE DESIGN */
 @media (max-width: 900px) {
   .map-frame {
-    height: 340px;
+    height: 320px;
+  }
+
+  .transport-chips-container {
+    gap: 6px;
+  }
+
+  .transport-chip {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .route-metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
 }
