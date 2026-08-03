@@ -76,6 +76,15 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+.hotel-search {
+  flex: 1;
+  max-width: 500px;
+}
+
+.hotel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 25px;
 }
 
 .search-input-group {
@@ -85,6 +94,7 @@
   border: 1.5px solid #cbd5e1;
   border-radius: 16px;
   padding: 8px 16px;
+  align-items: center;
   gap: 12px;
   transition: all 0.3s ease;
 }
@@ -122,6 +132,11 @@
   border-radius: 50%;
   font-size: 12px;
   cursor: pointer;
+
+  width: 65%;
+  max-width: 700px;
+
+  margin: 20px auto 30px;
 }
 
 .btn-search-primary {

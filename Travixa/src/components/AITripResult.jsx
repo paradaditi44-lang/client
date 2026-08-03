@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { generateItineraryPDF } from "../utils/generatePDF";
+import PackingChecklist from "./PackingChecklist";
+import DestinationVideos from "./DestinationVideos/DestinationVideos";
+import DestinationGallery from "./DestinationGallery/DestinationGallery";
 import "../styles/AITripResult.css";
 
 function AITripResult({ trip: propTrip }) {
@@ -320,6 +323,19 @@ function AITripResult({ trip: propTrip }) {
           ))}
 
         </div>
+
+        {/* DESTINATION TRAVEL VIDEOS */}
+        <DestinationVideos destination={trip.destination} />
+
+        {/* AI DESTINATION TRAVEL GALLERY */}
+        <DestinationGallery destination={trip.destination} />
+
+        {/* AI PACKING CHECKLIST */}
+        <PackingChecklist
+          destination={trip.destination}
+          travelStyle={displayStyle}
+          duration={displayDays}
+        />
 
         {/* BOTTOM */}
 

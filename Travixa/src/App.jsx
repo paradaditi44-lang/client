@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
+import TravelChatbot from "./components/TravelChatbot/TravelChatbot";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -37,6 +38,9 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/profile" element={<Profile />} />
       </Routes>
+
+      {/* Global AI Travel Chatbot Widget */}
+      <TravelChatbot />
     </>
   );
 }

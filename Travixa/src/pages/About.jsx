@@ -39,7 +39,35 @@ function About() {
             brings important travel tools together in one simple experience.
           </p>
         </section>
+{/* Statistics */}
 
+<section className="about-stats">
+
+  <div className="stat-card">
+    <div className="stat-icon">🌍</div>
+    <h3>190+</h3>
+    <p>Countries Supported</p>
+  </div>
+
+  <div className="stat-card">
+    <div className="stat-icon">🏨</div>
+    <h3>Hotels</h3>
+    <p>Worldwide Search</p>
+  </div>
+
+  <div className="stat-card">
+    <div className="stat-icon">☁️</div>
+    <h3>Live</h3>
+    <p>Weather Updates</p>
+  </div>
+
+  <div className="stat-card">
+    <div className="stat-icon">🗺️</div>
+    <h3>Maps</h3>
+    <p>Explore Places</p>
+  </div>
+
+</section>
         {/* Features */}
         <section className="about-features">
           <div className="about-card">
