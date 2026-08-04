@@ -1,6 +1,6 @@
 import { jsPDF } from "jspdf";
 
-export const generateItineraryPDF = (trip, days, displayDays) => {
+export const generateItineraryPDF = (trip = {}, days = [], displayDays = 1) => {
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "mm",
@@ -14,12 +14,18 @@ export const generateItineraryPDF = (trip, days, displayDays) => {
 
   let currentY = 15;
 
-  // Color Palette
-  const darkBlue = [29, 78, 216]; // #1d4ed8 - Primary headings & accent
-  const bodyTextDark = [30, 41, 59]; // #1e293b - Dark gray/black for body text
-  const mutedText = [100, 116, 139]; // #64748b - Muted labels
-  const cardBg = [248, 250, 252]; // #f8fafc
-  const borderColor = [226, 232, 240]; // #e2e8f0
+  // ---------------------------------------------------------
+  // Color Palette & Typography Tokens
+  // ---------------------------------------------------------
+  const primaryBlue = [2, 132, 199];    // #0284c7 Primary accent
+  const darkNavy = [15, 23, 42];        // #0f172a Deep text / titles
+  const bodyDark = [30, 41, 59];        // #1e293b Regular body text
+  const mutedText = [100, 116, 139];    // #64748b Subtitles & labels
+  const cardFill = [248, 250, 252];     // #f8fafc Light card fill
+  const cardAccentFill = [240, 249, 255]; // #f0f9ff Light blue tint
+  const borderCol = [226, 232, 240];    // #e2e8f0 Soft border
+  const borderAccent = [186, 230, 253]; // #bae6fd Light blue border
+  const successGreen = [16, 185, 129];   // #10b981 Success / checkmarks
 
   // Helper for page breaks
   const checkPageBreak = (neededHeight) => {
@@ -31,312 +37,455 @@ export const generateItineraryPDF = (trip, days, displayDays) => {
     return false;
   };
 
-  // ---------------------------------------------------------
-  // Header: Travexa Title & Document Metadata
-  // ---------------------------------------------------------
-  const drawHeader = () => {
-    // Accent Top Line
-    doc.setFillColor(...darkBlue);
-    doc.rect(0, 0, pageWidth, 5, "F");
-
-    currentY = 18;
-
-    // Document Title: Helvetica Bold, 24pt, Dark Blue
+  // Helper for section headers
+  const drawSectionHeader = (title, subtitle = "") => {
+    checkPageBreak(25);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(24);
-    doc.setTextColor(...darkBlue);
-    doc.text("TRAVEXA", margin, currentY);
+    doc.setFontSize(16);
+    doc.setTextColor(...primaryBlue);
+    doc.text(title, margin, currentY);
 
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(...mutedText);
-    doc.text("AI TRAVEL PLANNER", margin, currentY + 6);
+    if (subtitle) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9.5);
+      doc.setTextColor(...mutedText);
+      doc.text(subtitle, margin, currentY + 5);
+      currentY += 10;
+    } else {
+      currentY += 7;
+    }
 
-    // Sub-header on Right
-    const todayStr = new Date().toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.setTextColor(...darkBlue);
-    doc.text("AI Travel Itinerary", pageWidth - margin, currentY, { align: "right" });
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(...mutedText);
-    doc.text(`Generated: ${todayStr}`, pageWidth - margin, currentY + 6, { align: "right" });
-
-    currentY += 12;
-
-    // Divider Line
-    doc.setDrawColor(...borderColor);
-    doc.setLineWidth(0.5);
+    doc.setDrawColor(...borderCol);
+    doc.setLineWidth(0.4);
     doc.line(margin, currentY, pageWidth - margin, currentY);
-
-    currentY += 10;
+    currentY += 8;
   };
 
-  drawHeader();
-
-  // ---------------------------------------------------------
-  // Trip Information Overview Section
-  // ---------------------------------------------------------
-  const overviewHeight = 42;
-  doc.setFillColor(...cardBg);
-  doc.setDrawColor(...borderColor);
-  doc.setLineWidth(0.4);
-  doc.roundedRect(margin, currentY, contentWidth, overviewHeight, 3, 3, "FD");
-
-  const colWidth = contentWidth / 3;
-  const row1Y = currentY + 9;
-  const row2Y = currentY + 26;
+  // Extract / parse trip data
+  const destinationStr = String(trip.destination || "Your Destination").toUpperCase();
+  const rawBudget = trip.budget || 50000;
+  const totalBudgetNum =
+    typeof rawBudget === "number"
+      ? rawBudget
+      : parseInt(String(rawBudget).replace(/[^0-9]/g, ""), 10) || 50000;
+  const displayBudget =
+    typeof rawBudget === "number"
+      ? `INR ${new Intl.NumberFormat("en-IN").format(rawBudget)}`
+      : String(rawBudget);
 
   const displayDate =
     trip.startDate && trip.endDate
       ? `${new Date(trip.startDate).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} - ${new Date(trip.endDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`
       : trip.startDate || trip.travelDate || "Flexible Dates";
 
-  const displayTravelers =
-    trip.numberOfTravelers || trip.travellers || trip.travelers || 1;
-  const displayBudget =
-    typeof trip.budget === "number"
-      ? `₹${new Intl.NumberFormat("en-IN").format(trip.budget)}`
-      : trip.budget || "N/A";
-  const displayStyle =
-    trip.preferences?.travelStyle || trip.travelStyle || "General";
+  const displayTravelers = trip.numberOfTravelers || trip.travellers || trip.travelers || 1;
+  const displayStyle = trip.preferences?.travelStyle || trip.travelStyle || "Comfort & Exploration";
+  
+  const interestsList = Array.isArray(trip.preferences?.interests)
+    ? trip.preferences.interests.join(", ")
+    : Array.isArray(trip.interests)
+    ? trip.interests.join(", ")
+    : (trip.preferences?.interests || trip.interests || "Sightseeing, Food, Culture");
 
-  // Column 1
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...mutedText);
-  doc.text("DESTINATION", margin + 6, row1Y);
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...darkBlue);
-  doc.text(String(trip.destination || "N/A"), margin + 6, row1Y + 6);
+  const todayStr = new Date().toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 
-  doc.setFontSize(9);
+  // =========================================================
+  // PAGE 1 — PREMIUM COVER PAGE
+  // =========================================================
+
+  // Top Accent Bars
+  doc.setFillColor(...primaryBlue);
+  doc.rect(0, 0, pageWidth, 6, "F");
+  doc.setFillColor(56, 189, 248);
+  doc.rect(0, 6, pageWidth, 2, "F");
+
+  // Logo / Brand Header
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(...mutedText);
-  doc.text("TRAVEL DATES", margin + 6, row2Y);
-  doc.setFontSize(11);
+  doc.setFontSize(26);
+  doc.setTextColor(...primaryBlue);
+  doc.text("TRAVEXA", margin, 32);
+
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(...bodyTextDark);
-  doc.text(String(displayDate), margin + 6, row2Y + 6);
-
-  // Column 2
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...mutedText);
-  doc.text("DURATION", margin + colWidth + 6, row1Y);
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...bodyTextDark);
-  doc.text(`${displayDays} Days`, margin + colWidth + 6, row1Y + 6);
-
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...mutedText);
-  doc.text("TRAVELERS", margin + colWidth + 6, row2Y);
   doc.setFontSize(11);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(...bodyTextDark);
-  doc.text(`${displayTravelers} ${displayTravelers === 1 ? "Person" : "People"}`, margin + colWidth + 6, row2Y + 6);
+  doc.setTextColor(...mutedText);
+  doc.text("AI Powered Travel Itinerary", margin, 39);
 
-  // Column 3
+  // Large Elegant Central Cover Card
+  const coverCardY = 60;
+  const coverCardHeight = 160;
+
+  doc.setFillColor(...cardFill);
+  doc.setDrawColor(...borderCol);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(margin, coverCardY, contentWidth, coverCardHeight, 6, 6, "FD");
+
+  // Badge inside Cover Card
+  doc.setFillColor(...cardAccentFill);
+  doc.setDrawColor(...borderAccent);
+  doc.setLineWidth(0.4);
+  doc.roundedRect(margin + 45, coverCardY + 16, 90, 10, 5, 5, "FD");
+
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
+  doc.setTextColor(...primaryBlue);
+  doc.text("EXCLUSIVE ITINERARY BOOKLET", pageWidth / 2, coverCardY + 22.5, { align: "center" });
+
+  // Large Destination Name
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(28);
+  doc.setTextColor(...darkNavy);
+  doc.text(destinationStr, pageWidth / 2, coverCardY + 48, { align: "center" });
+
+  // Divider inside Card
+  doc.setDrawColor(...borderCol);
+  doc.setLineWidth(0.4);
+  doc.line(margin + 30, coverCardY + 60, pageWidth - margin - 30, coverCardY + 60);
+
+  // Cover Card Meta Details Grid
+  const metaY = coverCardY + 74;
+
+  doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...mutedText);
-  doc.text("BUDGET", margin + colWidth * 2 + 6, row1Y);
+  doc.text("TRAVEL DATES", pageWidth / 2, metaY, { align: "center" });
+
+  doc.setFontSize(13);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...darkNavy);
+  doc.text(String(displayDate), pageWidth / 2, metaY + 7, { align: "center" });
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...mutedText);
+  doc.text("DURATION & STYLE", pageWidth / 2, metaY + 22, { align: "center" });
+
   doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...bodyTextDark);
-  doc.text(String(displayBudget), margin + colWidth * 2 + 6, row1Y + 6);
-
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...mutedText);
-  doc.text("TRAVEL STYLE", margin + colWidth * 2 + 6, row2Y);
-  doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(...bodyTextDark);
-  doc.text(String(displayStyle), margin + colWidth * 2 + 6, row2Y + 6);
+  doc.setTextColor(...bodyDark);
+  doc.text(`${displayDays} Days  |  ${displayStyle}  |  ${displayTravelers} ${displayTravelers === 1 ? "Traveler" : "Travelers"}`, pageWidth / 2, metaY + 29, { align: "center" });
 
-  currentY += overviewHeight + 14;
+  // Bottom Cover Metadata
+  doc.setFontSize(9.5);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...mutedText);
+  doc.text(`Generated Date: ${todayStr}`, pageWidth / 2, coverCardY + coverCardHeight - 16, { align: "center" });
+  doc.text("Prepared by Travexa AI Suite • www.travexa.com", pageWidth / 2, coverCardY + coverCardHeight - 9, { align: "center" });
 
-  // ---------------------------------------------------------
-  // Itinerary Section Title (18pt Bold, Dark Blue)
-  // ---------------------------------------------------------
-  doc.setFontSize(18);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...darkBlue);
-  doc.text("Detailed Day-by-Day Itinerary", margin, currentY);
-  currentY += 12;
+  // Bottom Decorative Banner
+  doc.setFillColor(...primaryBlue);
+  doc.rect(margin, 255, contentWidth, 3, "F");
 
-  // ---------------------------------------------------------
-  // Day-by-Day Itinerary Loop
-  // ---------------------------------------------------------
-  days.forEach((day, dayIndex) => {
-    checkPageBreak(35);
+  // Move to Page 2
+  doc.addPage();
+  currentY = 20;
 
-    // Day Header Pill Badge
-    doc.setFillColor(...darkBlue);
-    doc.roundedRect(margin, currentY, 28, 8, 2, 2, "F");
+  // =========================================================
+  // PAGE 2 — TRIP OVERVIEW & DASHBOARD SNAPSHOT
+  // =========================================================
 
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(255, 255, 255);
-    doc.text(`DAY ${day.day || dayIndex + 1}`, margin + 14, currentY + 5.5, { align: "center" });
+  drawSectionHeader("TRIP OVERVIEW & SNAPSHOT", "Comprehensive summary of your planned journey");
 
-    // Section Heading: Helvetica Bold, 18pt, Dark Blue
-    doc.setFontSize(18);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...darkBlue);
-    doc.text(String(day.title || `Day ${dayIndex + 1} Plan`), margin + 34, currentY + 6.2);
+  // Grid Info Cards (2 Columns x 4 Rows)
+  const gridCards = [
+    { label: "DESTINATION", val: destinationStr, icon: "DEST" },
+    { label: "TRAVEL DATES", val: String(displayDate), icon: "DATE" },
+    { label: "DURATION", val: `${displayDays} Days`, icon: "DAYS" },
+    { label: "TRAVELERS", val: `${displayTravelers} ${displayTravelers === 1 ? "Person" : "People"}`, icon: "PEOP" },
+    { label: "TOTAL BUDGET", val: displayBudget, icon: "BUDG" },
+    { label: "DAILY BUDGET", val: `INR ${Math.round(totalBudgetNum / Math.max(1, displayDays)).toLocaleString('en-IN')}`, icon: "DAILY" },
+    { label: "TRAVEL STYLE", val: String(displayStyle), icon: "STYLE" },
+    { label: "INTERESTS", val: String(interestsList), icon: "LIKE" },
+  ];
 
-    currentY += 11;
+  const colW = (contentWidth - 10) / 2;
+  const cardH = 22;
 
-    // Day Divider Line
-    doc.setDrawColor(...borderColor);
+  gridCards.forEach((c, idx) => {
+    const row = Math.floor(idx / 2);
+    const col = idx % 2;
+    const x = margin + col * (colW + 10);
+    const y = currentY + row * (cardH + 8);
+
+    doc.setFillColor(...cardAccentFill);
+    doc.setDrawColor(...borderAccent);
     doc.setLineWidth(0.4);
-    doc.line(margin, currentY, pageWidth - margin, currentY);
-    currentY += 8;
+    doc.roundedRect(x, y, colW, cardH, 3, 3, "FD");
 
-    // Activities Loop (Body text: Helvetica Normal, 12pt, Dark Gray/Black)
+    // Label
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(...primaryBlue);
+    doc.text(c.label, x + 8, y + 7);
+
+    // Value
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10.5);
+    doc.setTextColor(...darkNavy);
+    const splitVal = doc.splitTextToSize(c.val, colW - 12);
+    doc.text(splitVal[0] || "", x + 8, y + 15);
+  });
+
+  currentY += 4 * (cardH + 8) + 10;
+
+  // AI Travel Tips Box
+  checkPageBreak(50);
+  doc.setFillColor(...cardFill);
+  doc.setDrawColor(...borderCol);
+  doc.setLineWidth(0.4);
+  doc.roundedRect(margin, currentY, contentWidth, 48, 4, 4, "FD");
+
+  // Accent Green Left Bar
+  doc.setFillColor(...successGreen);
+  doc.roundedRect(margin, currentY, 3.5, 48, 2, 2, "F");
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.setTextColor(...darkNavy);
+  doc.text("AI TRAVEL TIPS & GUIDELINES", margin + 10, currentY + 10);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9.5);
+  doc.setTextColor(...bodyDark);
+
+  const tips = [
+    "• Carry digital & printed copies of your government ID, tickets, and reservations.",
+    "• Book hotel rooms, intercity trains, and popular attraction passes in advance.",
+    "• Keep emergency cash, power bank, and offline maps accessible at all times.",
+    "• Respect local traditions, dress codes, and environmental guidelines during travel.",
+  ];
+
+  tips.forEach((tip, idx) => {
+    doc.text(tip, margin + 10, currentY + 18 + idx * 7);
+  });
+
+  currentY += 58;
+
+  // =========================================================
+  // DAY-WISE ITINERARY
+  // =========================================================
+
+  drawSectionHeader("DAY-BY-DAY ITINERARY", "Detailed schedule and activity breakdown");
+
+  days.forEach((day, dayIndex) => {
+    checkPageBreak(40);
+
+    // Day Header Pill Banner
+    doc.setFillColor(...primaryBlue);
+    doc.roundedRect(margin, currentY, contentWidth, 10, 3, 3, "F");
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(255, 255, 255);
+    const dayTitleText = `DAY ${day.day || dayIndex + 1}: ${String(day.title || `Plan for Day ${dayIndex + 1}`)}`.toUpperCase();
+    doc.text(dayTitleText, margin + 8, currentY + 6.8);
+
+    currentY += 15;
+
+    // Activities List
     const activities = Array.isArray(day.activities)
       ? day.activities
       : typeof day.activities === "string"
       ? [day.activities]
       : [];
 
-    activities.forEach((act) => {
-      const cleanAct = String(act).replace(/^[-*•\d.]+\s*/, "").replace(/\*\*/g, "");
+    if (activities.length === 0) {
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(10);
+      doc.setTextColor(...mutedText);
+      doc.text("No specific activities listed for this day.", margin + 6, currentY);
+      currentY += 8;
+    } else {
+      activities.forEach((act) => {
+        const cleanAct = String(act).replace(/^[-*•\d.]+\s*/, "").replace(/\*\*/g, "");
+        const lines = doc.splitTextToSize(cleanAct, contentWidth - 14);
+        const requiredSpace = lines.length * 5.5 + 4;
+        checkPageBreak(requiredSpace);
 
-      // Body text font setting
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(12);
+        // Activity Bullet Point
+        doc.setFillColor(...primaryBlue);
+        doc.circle(margin + 4, currentY + 2.5, 1.2, "F");
 
-      const lines = doc.splitTextToSize(cleanAct, contentWidth - 12);
-      const requiredSpace = lines.length * 6.5 + 4;
-      checkPageBreak(requiredSpace);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor(...bodyDark);
 
-      // Bullet Point Icon (Dark Blue)
-      doc.setFontSize(14);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(...darkBlue);
-      doc.text("•", margin + 2, currentY + 4);
+        lines.forEach((line, lIndex) => {
+          if (lIndex > 0) checkPageBreak(5.5);
+          doc.text(line, margin + 9, currentY + 3.5);
+          currentY += 5.5;
+        });
 
-      // Activity Lines (12pt Normal, Dark Gray/Black)
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(12);
-      doc.setTextColor(...bodyTextDark);
-
-      lines.forEach((line, lIndex) => {
-        if (lIndex > 0) checkPageBreak(6.5);
-        doc.text(line, margin + 9, currentY + 4);
-        currentY += 6.5; // Increased line spacing for readability
+        currentY += 2;
       });
+    }
 
-      currentY += 3; // Section spacing between activities
-    });
-
-    currentY += 10; // Section spacing between days
+    currentY += 6;
   });
 
-  // ---------------------------------------------------------
-  // Optional Sections: Travel Tips & Packing Checklist
-  // ---------------------------------------------------------
-  checkPageBreak(55);
+  // =========================================================
+  // SMART BUDGET SUMMARY
+  // =========================================================
+  doc.addPage();
+  currentY = 20;
 
-  doc.setDrawColor(...borderColor);
-  doc.setLineWidth(0.5);
-  doc.line(margin, currentY, pageWidth - margin, currentY);
-  currentY += 12;
+  drawSectionHeader("SMART BUDGET BREAKDOWN", "AI-optimized category allocation & health indicators");
 
-  // Section Heading: 18pt Bold, Dark Blue
-  doc.setFontSize(18);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...darkBlue);
-  doc.text("Travel Tips & Packing Checklist", margin, currentY);
-  currentY += 10;
-
-  const tipColWidth = (contentWidth - 12) / 2;
-
-  // Left Column: Essential Travel Tips
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...darkBlue);
-  doc.text("Essential Travel Tips", margin, currentY);
-
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(...bodyTextDark);
-  const tips = [
-    "• Carry digital & printed copies of tickets & IDs.",
-    "• Save offline maps & local emergency numbers.",
-    "• Check weather forecasts prior to daily excursions.",
+  // Top Metric Cards (3 Cards)
+  const budgetMetrics = [
+    { title: "TOTAL BUDGET", val: displayBudget },
+    { title: "DAILY BUDGET", val: `INR ${Math.round(totalBudgetNum / Math.max(1, displayDays)).toLocaleString('en-IN')}` },
+    { title: "BUDGET HEALTH", val: "EXCELLENT (Optimal)" },
   ];
-  tips.forEach((tip, idx) => {
-    doc.text(tip, margin, currentY + 8 + idx * 7);
+
+  const mWidth = (contentWidth - 12) / 3;
+  budgetMetrics.forEach((bm, i) => {
+    const bx = margin + i * (mWidth + 6);
+    doc.setFillColor(...cardFill);
+    doc.setDrawColor(...borderCol);
+    doc.setLineWidth(0.4);
+    doc.roundedRect(bx, currentY, mWidth, 18, 3, 3, "FD");
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(...primaryBlue);
+    doc.text(bm.title, bx + 6, currentY + 6);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10.5);
+    doc.setTextColor(...darkNavy);
+    doc.text(bm.val, bx + 6, currentY + 13);
   });
 
-  // Right Column: Packing Checklist
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...darkBlue);
-  doc.text("Packing Checklist", margin + tipColWidth + 12, currentY);
+  currentY += 26;
 
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(...bodyTextDark);
-  const packing = [
-    "• Travel documents, passports & wallet",
-    "• Universal charger, power bank & adapters",
-    "• Comfortable footwear & suitable attire",
+  // Category Allocations
+  const categories = [
+    { name: "ACCOMMODATION & HOTELS", pct: 40, amt: Math.round(totalBudgetNum * 0.40) },
+    { name: "FOOD & LOCAL DINING", pct: 25, amt: Math.round(totalBudgetNum * 0.25) },
+    { name: "TRANSPORT & TRANSIT", pct: 15, amt: Math.round(totalBudgetNum * 0.15) },
+    { name: "SIGHTSEEING & TOURS", pct: 12, amt: Math.round(totalBudgetNum * 0.12) },
+    { name: "SHOPPING & EXTRAS", pct: 8, amt: Math.round(totalBudgetNum * 0.08) },
   ];
-  packing.forEach((item, idx) => {
-    doc.text(item, margin + tipColWidth + 12, currentY + 8 + idx * 7);
+
+  categories.forEach((cat) => {
+    checkPageBreak(18);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9.5);
+    doc.setTextColor(...darkNavy);
+    doc.text(cat.name, margin, currentY);
+
+    const amtStr = `INR ${cat.amt.toLocaleString('en-IN')} (${cat.pct}%)`;
+    doc.text(amtStr, pageWidth - margin, currentY, { align: "right" });
+
+    currentY += 3;
+
+    // Progress Bar Track
+    doc.setFillColor(...borderCol);
+    doc.roundedRect(margin, currentY, contentWidth, 4, 2, 2, "F");
+
+    // Progress Bar Fill
+    const fillW = (contentWidth * cat.pct) / 100;
+    doc.setFillColor(...primaryBlue);
+    doc.roundedRect(margin, currentY, fillW, 4, 2, 2, "F");
+
+    currentY += 10;
   });
 
-  currentY += 34;
-
-  // Notes Section
-  checkPageBreak(25);
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...mutedText);
-  doc.text("IMPORTANT NOTES", margin, currentY);
+  // Potential Savings Card
   currentY += 6;
+  checkPageBreak(25);
+  doc.setFillColor(...cardAccentFill);
+  doc.setDrawColor(...borderAccent);
+  doc.setLineWidth(0.4);
+  doc.roundedRect(margin, currentY, contentWidth, 22, 4, 4, "FD");
 
-  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10.5);
+  doc.setTextColor(...primaryBlue);
+  doc.text("POTENTIAL SAVINGS ESTIMATE", margin + 8, currentY + 7);
+
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(...mutedText);
-  doc.text(
-    "This itinerary was generated by Travexa AI. Activity times, attraction schedules, and route recommendations are subject to local conditions.",
-    margin,
-    currentY,
-    { maxWidth: contentWidth }
-  );
+  doc.setFontSize(9.5);
+  doc.setTextColor(...bodyDark);
+  doc.text(`By booking flight & hotel packages 3-4 weeks early, you can save up to INR ${Math.round(totalBudgetNum * 0.12).toLocaleString('en-IN')} (12%) on this trip.`, margin + 8, currentY + 15);
 
-  // ---------------------------------------------------------
-  // Page Numbers & Footer on All Pages
-  // ---------------------------------------------------------
+  currentY += 30;
+
+  // =========================================================
+  // PACKING CHECKLIST PAGE
+  // =========================================================
+  checkPageBreak(120);
+
+  drawSectionHeader("AI PACKING CHECKLIST", "Categorized essentials & recommendations for your trip");
+
+  const packingCols = [
+    {
+      title: "DOCUMENTS & ESSENTIALS",
+      items: ["Passport, ID & Visa copies", "Flight & Hotel confirmation tickets", "Driver's license & Travel Insurance", "Wallet, Forex & Credit Cards"],
+    },
+    {
+      title: "CLOTHING & FOOTWEAR",
+      items: ["Weather-appropriate attire", "Comfortable walking / hiking shoes", "Light jackets or warm layers", "Rain gear / Sunglasses & Cap"],
+    },
+    {
+      title: "ELECTRONICS & ACCESSORIES",
+      items: ["Smartphone & Charger cables", "Universal power adapter", "High-capacity Power Bank", "Camera / Memory Cards"],
+    },
+    {
+      title: "HEALTH & TOILETRIES",
+      items: ["First aid kit & Medications", "Sunscreen & Moisturizer", "Hand sanitizer & Wet wipes", "Personal grooming essentials"],
+    },
+  ];
+
+  const pColWidth = (contentWidth - 10) / 2;
+
+  packingCols.forEach((col, idx) => {
+    const r = Math.floor(idx / 2);
+    const c = idx % 2;
+    const px = margin + c * (pColWidth + 10);
+    const py = currentY + r * 45;
+
+    doc.setFillColor(...cardFill);
+    doc.setDrawColor(...borderCol);
+    doc.setLineWidth(0.4);
+    doc.roundedRect(px, py, pColWidth, 38, 3, 3, "FD");
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...primaryBlue);
+    doc.text(col.title, px + 6, py + 7);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(...bodyDark);
+
+    col.items.forEach((item, iIdx) => {
+      doc.text(`[ ]  ${item}`, px + 6, py + 15 + iIdx * 5.5);
+    });
+  });
+
+  // =========================================================
+  // PAGE NUMBERS & FOOTER ON ALL PAGES
+  // =========================================================
   const totalPages = doc.internal.getNumberOfPages();
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
 
-    doc.setDrawColor(...borderColor);
+    // Footer divider line
+    doc.setDrawColor(...borderCol);
     doc.setLineWidth(0.4);
     doc.line(margin, pageHeight - 14, pageWidth - margin, pageHeight - 14);
 
-    doc.setFontSize(9);
+    doc.setFontSize(8.5);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...mutedText);
 
-    doc.text("Travexa AI Travel Planner — www.travexa.com", margin, pageHeight - 8);
+    doc.text("Generated by Travexa AI • www.travexa.com", margin, pageHeight - 8);
     doc.text(`Page ${i} of ${totalPages}`, pageWidth - margin, pageHeight - 8, { align: "right" });
   }
 

@@ -3,10 +3,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { generateItineraryPDF } from "../utils/generatePDF";
 import PackingChecklist from "./PackingChecklist";
 import DestinationVideos from "./DestinationVideos/DestinationVideos";
-import DestinationGallery from "./DestinationGallery/DestinationGallery";
+
 import "../styles/AITripResult.css";
 
-function AITripResult({ trip: propTrip }) {
+function AITripResult({ trip: propTrip, showExtras = true, showSummary = true }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -193,62 +193,59 @@ function AITripResult({ trip: propTrip }) {
 
   return (
     <div className="trip-result-page">
+      {showSummary && (
+        <>
+          {/* TRIP SUMMARY */}
+          <div className="starting-point">
+            <span>📍 STARTING POINT</span>
+            <strong>
+              {locationError
+                ? locationError
+                : currentLocation || "Detecting..."}
+            </strong>
+          </div>
 
-      {/* TRIP SUMMARY */}
-      <div className="starting-point">
-        <span>📍 STARTING POINT</span>
+          <div className="result-container" style={{ marginTop: 0 }}>
+            <div className="trip-summary">
+              <div>
+                <span>📍 DESTINATION</span>
+                <strong>{trip.destination}</strong>
+              </div>
 
-        <strong>
-          {locationError
-            ? locationError
-            : currentLocation || "Detecting..."}
-        </strong>
-      </div>
+              <div>
+                <span>📅 DATE</span>
+                <strong>{displayDate}</strong>
+              </div>
+
+              <div>
+                <span>🗓️ DURATION</span>
+                <strong>{displayDays} Days</strong>
+              </div>
+
+              <div>
+                <span>👥 TRAVELLERS</span>
+                <strong>{displayTravelers} People</strong>
+              </div>
+
+              <div>
+                <span>💰 BUDGET</span>
+                <strong>{displayBudget}</strong>
+              </div>
+
+              <div>
+                <span>🎒 STYLE</span>
+                <strong>{displayStyle}</strong>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       <main className="result-container">
-
-        <div className="trip-summary">
-
-          <div>
-            <span>📍 DESTINATION</span>
-            <strong>{trip.destination}</strong>
-          </div>
-
-          <div>
-            <span>📅 DATE</span>
-            <strong>{displayDate}</strong>
-          </div>
-
-          <div>
-            <span>🗓️ DURATION</span>
-            <strong>{displayDays} Days</strong>
-          </div>
-
-          <div>
-            <span>👥 TRAVELLERS</span>
-            <strong>{displayTravelers} People</strong>
-          </div>
-
-          <div>
-            <span>💰 BUDGET</span>
-            <strong>{displayBudget}</strong>
-          </div>
-
-          <div>
-            <span>🎒 STYLE</span>
-            <strong>{displayStyle}</strong>
-          </div>
-
-        </div>
-
-
         {/* ITINERARY */}
-
         <div className="itinerary-header">
-
           <div>
             <span>YOUR JOURNEY</span>
-
             <h2>
               {displayDays}-Day Itinerary
             </h2>
@@ -259,106 +256,82 @@ function AITripResult({ trip: propTrip }) {
           >
             ← Edit Trip
           </button>
-
         </div>
 
-
         <div className="timeline">
-
           {days.map((day) => (
-
             <div
               className="day-card"
               key={day.day}
             >
-
               <div className="day-number">
                 <span>DAY</span>
                 <strong>{day.day}</strong>
               </div>
 
               <div className="day-content">
-
                 <div className="day-title">
-
                   <span>
                     {day.icon || "📍"}
                   </span>
-
                   <h3>
                     {day.title}
                   </h3>
-
                 </div>
 
                 <div className="activities">
-
                   {day.activities.map(
                     (activity, index) => (
-
                       <div
                         className="activity"
                         key={index}
                       >
-
                         <span className="activity-dot">
                           ✓
                         </span>
-
                         <span>
                           {activity}
                         </span>
-
                       </div>
-
                     )
                   )}
-
                 </div>
-
               </div>
-
             </div>
-
           ))}
-
         </div>
 
-        {/* DESTINATION TRAVEL VIDEOS */}
-        <DestinationVideos destination={trip.destination} />
+        {showExtras && (
+          <>
+            {/* DESTINATION TRAVEL VIDEOS */}
+            <DestinationVideos destination={trip.destination} />
 
-        {/* AI DESTINATION TRAVEL GALLERY */}
-        <DestinationGallery destination={trip.destination} />
+            {/* AI PACKING CHECKLIST */}
+            <PackingChecklist
+              destination={trip.destination}
+              travelStyle={displayStyle}
+              duration={displayDays}
+            />
 
-        {/* AI PACKING CHECKLIST */}
-        <PackingChecklist
-          destination={trip.destination}
-          travelStyle={displayStyle}
-          duration={displayDays}
-        />
+            {/* BOTTOM */}
+            <div className="result-actions">
+              <button
+                className="secondary-btn"
+                onClick={() => navigate("/plan-trip")}
+              >
+                🔄 Plan Another Trip
+              </button>
 
-        {/* BOTTOM */}
-
-        <div className="result-actions">
-
-          <button
-            className="secondary-btn"
-            onClick={() => navigate("/plan-trip")}
-          >
-            🔄 Plan Another Trip
-          </button>
-
-          <button
-            className="primary-btn"
-            onClick={() => generateItineraryPDF(trip, days, displayDays)}
-          >
-            📄 Download Itinerary PDF
-          </button>
-
-        </div>
-
+              <button
+                className="primary-btn"
+                onClick={() => generateItineraryPDF(trip, days, displayDays)}
+              >
+                📄 Download Itinerary PDF
+              </button>
+            </div>
+          </>
+        )}
       </main>
-
     </div>
   );
 }

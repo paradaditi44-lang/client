@@ -4,14 +4,11 @@ import PlannerForm from "../components/PlannerForm";
 import MapCard from "../components/MapCard";
 import DestinationCard from "../components/DestinationCard";
 import AISuggestions from "../components/AISuggestions";
-import AITripResult from "../components/AITripResult";
 import Footer from "../components/Footer";
 import SuccessPopup from "../components/SuccessPopup";
 import "../styles/PlanTrip.css";
 
 function PlanTrip() {
-  const [generatedTrip, setGeneratedTrip] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [destinationPreview, setDestinationPreview] = useState("");
 
@@ -72,8 +69,7 @@ function PlanTrip() {
           <div className="planner-left-panel">
             <PlannerForm
               onDestinationChange={(dest) => setDestinationPreview(dest)}
-              setGeneratedTrip={(trip) => {
-                setGeneratedTrip(trip);
+              setGeneratedTrip={() => {
                 setShowPopup(true);
               }}
             />
@@ -84,32 +80,6 @@ function PlanTrip() {
             <MapCard destination={destinationPreview} />
           </div>
         </div>
-
-        {/* Loading / Empty State / AI Result */}
-        {loading ? (
-          <div className="loading-card">
-            <h2>✨ Generating your AI itinerary...</h2>
-            <p>⏳ Thinking...</p>
-            <p>📍 Analyzing destination...</p>
-            <p>🗺 Finding attractions...</p>
-            <p>✈ Planning your trip...</p>
-          </div>
-        ) : generatedTrip ? (
-          <AITripResult trip={generatedTrip} />
-        ) : (
-          <div className="empty-state-glass">
-            <div className="empty-icon-glow">🤖</div>
-            <h2>Your AI Travel Itinerary Will Appear Here</h2>
-            <p>
-              Fill out the trip details above and click
-              <br />
-              <strong style={{ color: "#38bdf8" }}>✨ Generate AI Trip</strong>
-              <br />
-              to create your complete travel plan.
-            </p>
-            <span className="empty-badge">🌍 Ready to explore the world?</span>
-          </div>
-        )}
 
         {/* Popular Destinations & AI Suggestions Grid */}
         <div className="dashboard-grid">

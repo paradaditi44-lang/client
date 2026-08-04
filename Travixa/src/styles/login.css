@@ -1,389 +1,225 @@
 /* =========================================================
-   LOGIN PAGE
+   LOGIN PAGE (Light & Dark Theme)
 ========================================================= */
 
 .login-page {
   min-height: calc(100vh - 88px);
-
   display: grid;
-
   grid-template-columns: 46% 54%;
-
-  background: #f5f8ff;
+  background: var(--bg);
+  transition: background-color 0.3s ease;
 }
 
-
-/* =========================================================
-   IMAGE SIDE
-========================================================= */
-
+/* IMAGE SIDE */
 .login-image-section {
   position: relative;
-
   min-height: calc(100vh - 88px);
-
-  background-image:
-    url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=90");
-
+  background-image: url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=90");
   background-size: cover;
-
   background-position: center;
-
   overflow: hidden;
 }
 
-
 .login-image-overlay {
   position: absolute;
-
   inset: 0;
-
-  background:
-    linear-gradient(
-      160deg,
-      rgba(15,39,80,0.58),
-      rgba(15,39,80,0.85)
-    );
+  background: linear-gradient(160deg, rgba(15,39,80,0.58), rgba(15,39,80,0.85));
 }
-
 
 .login-image-content {
   position: relative;
-
   z-index: 2;
-
   height: 100%;
-
   padding: 55px;
-
   color: white;
-
   display: flex;
-
   flex-direction: column;
-
   justify-content: center;
 }
-
 
 .login-logo {
   position: absolute;
-
   top: 40px;
-
   left: 55px;
-
   font-size: 30px;
-
   font-weight: 800;
 }
 
-
 .login-travel-icon {
   width: 68px;
-
   height: 68px;
-
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
   border-radius: 50%;
-
   background: rgba(255,255,255,0.18);
-
   backdrop-filter: blur(10px);
-
   font-size: 35px;
-
   margin-bottom: 30px;
 }
 
-
 .login-image-content h1 {
   margin: 0;
-
   font-size: clamp(55px, 6vw, 82px);
-
   line-height: 0.95;
-
   letter-spacing: -3px;
 }
-
 
 .login-image-content h1 span {
   color: #77b0ff;
 }
 
-
 .login-image-content p {
   max-width: 560px;
-
   margin: 35px 0;
-
   font-size: 18px;
-
   line-height: 1.8;
-
   color: rgba(255,255,255,0.88);
 }
 
-
 .login-tags {
   display: flex;
-
   gap: 12px;
-
   flex-wrap: wrap;
 }
 
-
 .login-tags span {
   padding: 12px 18px;
-
   border: 1px solid rgba(255,255,255,0.35);
-
   border-radius: 30px;
-
   background: rgba(255,255,255,0.10);
-
   backdrop-filter: blur(10px);
-
   font-size: 14px;
 }
 
-
-/* =========================================================
-   FORM SIDE
-========================================================= */
-
+/* FORM SIDE */
 .login-form-section {
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
   padding: 50px;
 }
-
 
 .login-card {
   width: 100%;
-
   max-width: 530px;
-
   padding: 50px;
-
-  background: white;
-
-  border: 1px solid #e4eaf5;
-
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 28px;
-
-  box-shadow:
-    0 30px 80px rgba(30,60,120,0.12);
-
+  box-shadow: var(--shadow);
   text-align: center;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
-
 
 .login-icon {
   width: 78px;
-
   height: 78px;
-
   margin: 0 auto 25px;
-
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
   border-radius: 50%;
-
   background: #2563eb;
-
   font-size: 35px;
-
-  box-shadow:
-    0 15px 30px rgba(37,99,235,0.25);
+  box-shadow: 0 15px 30px rgba(37,99,235,0.25);
 }
-
 
 .login-card h2 {
   margin: 0;
-
-  color: #2563eb;
-
+  color: var(--primary);
   font-size: 36px;
 }
 
-
 .login-subtitle {
   margin: 10px 0 30px;
-
-  color: #64748b;
-
+  color: var(--text-secondary);
   font-size: 16px;
 }
 
-
 /* Error */
-
 .login-error {
   padding: 12px 15px;
-
   margin-bottom: 20px;
-
   border-radius: 10px;
-
   background: #fff1f2;
-
   color: #dc2626;
-
   font-size: 14px;
 }
 
+body.dark-theme .login-error {
+  background: rgba(220, 38, 38, 0.2);
+  color: #fca5a5;
+}
 
 /* Form */
-
 .login-card form {
   display: flex;
-
   flex-direction: column;
-
   gap: 17px;
 }
 
-
 .login-card input {
   width: 100%;
-
   box-sizing: border-box;
-
   padding: 17px 18px;
-
-  border: 1px solid #d9e1ef;
-
+  border: 1px solid var(--border);
   border-radius: 13px;
-
   outline: none;
-
-  background: #f8faff;
-
+  background: var(--input-bg);
+  color: var(--text);
   font-size: 15px;
-
   transition: 0.25s ease;
 }
 
-
 .login-card input:focus {
-  border-color: #2563eb;
-
-  background: white;
-
-  box-shadow:
-    0 0 0 4px rgba(37,99,235,0.10);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(37,99,235,0.15);
 }
-
 
 .login-card form button {
   border: none;
-
   padding: 17px;
-
   border-radius: 13px;
-
   background: #2563eb;
-
   color: white;
-
   font-size: 16px;
-
   font-weight: 700;
-
   cursor: pointer;
-
   transition: 0.3s ease;
-
-  box-shadow:
-    0 12px 30px rgba(37,99,235,0.25);
+  box-shadow: 0 12px 30px rgba(37,99,235,0.25);
 }
-
 
 .login-card form button:hover {
   background: #1d4ed8;
-
   transform: translateY(-2px);
 }
 
-
 /* Register link */
-
 .login-register-text {
   margin-top: 25px;
-
-  color: #64748b;
+  color: var(--text-secondary);
 }
-
 
 .login-register-text button {
   border: none;
-
   background: transparent;
-
-  color: #2563eb;
-
+  color: var(--primary);
   font-weight: 700;
-
   cursor: pointer;
-
   margin-left: 5px;
 }
 
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
-
+/* RESPONSIVE */
 @media (max-width: 900px) {
-
-  .login-page {
-    grid-template-columns: 1fr;
-  }
-
-  .login-image-section {
-    min-height: 400px;
-  }
-
-  .login-image-content {
-    padding: 40px;
-  }
-
-  .login-logo {
-    top: 30px;
-    left: 40px;
-  }
-
-  .login-image-content h1 {
-    font-size: 55px;
-  }
-
+  .login-page { grid-template-columns: 1fr; }
+  .login-image-section { min-height: 400px; }
+  .login-image-content { padding: 40px; }
+  .login-logo { top: 30px; left: 40px; }
+  .login-image-content h1 { font-size: 55px; }
 }
 
-
 @media (max-width: 550px) {
-
-  .login-form-section {
-    padding: 25px 15px;
-  }
-
-  .login-card {
-    padding: 35px 22px;
-  }
-
+  .login-form-section { padding: 25px 15px; }
+  .login-card { padding: 35px 22px; }
 }

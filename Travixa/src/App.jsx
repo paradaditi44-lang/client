@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import PlanTrip from "./pages/PlanTrip";
+import TripDetails from "./pages/TripDetails";
 import AITripResult from "./components/AITripResult";
 import Hotels from "./pages/Hotels";
 import Weather from "./pages/Weather";
@@ -33,6 +34,7 @@ function App() {
 
         {/* Travel Features */}
         <Route path="/plan-trip" element={<PlanTrip />} />
+        <Route path="/trip-details" element={<TripDetails />} />
         <Route path="/trip-result" element={<AITripResult />} />
         <Route path="/hotels" element={<Hotels />} />
         <Route path="/weather" element={<Weather />} />

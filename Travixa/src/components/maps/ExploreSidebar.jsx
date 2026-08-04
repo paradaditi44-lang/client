@@ -8,6 +8,8 @@ function ExploreSidebar({
   locationLabel,
   selectedPlace,
   setSelectedPlace,
+  error,
+  onRetry,
 }) {
   return (
     <aside className="explore-sidebar">
@@ -61,17 +63,17 @@ function ExploreSidebar({
           </p>
 
           <p className="place-detail-address">
-  📍 {selectedPlace.address}
-</p>
+            📍 {selectedPlace.address}
+          </p>
 
-<a
-  href={`https://www.google.com/maps/search/?api=1&query=${selectedPlace.lat},${selectedPlace.lon}`}
-  target="_blank"
-  rel="noreferrer"
-  className="place-detail-btn"
->
-  Open in Google Maps
-</a>
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${selectedPlace.lat},${selectedPlace.lon}`}
+            target="_blank"
+            rel="noreferrer"
+            className="place-detail-btn"
+          >
+            Open in Google Maps
+          </a>
         </div>
       )}
 
@@ -84,15 +86,36 @@ function ExploreSidebar({
           </div>
         )}
 
-        {!loading && hasSearched && places.length === 0 && (
+        {!loading && error && (
           <div className="sidebar-status">
-            <span className="sidebar-status-icon">{selectedCategory.icon}</span>
-            <h4>No {selectedCategory.label.toLowerCase()} found</h4>
-            <p>Try another category or search a different location.</p>
+            <span className="sidebar-status-icon">⚠️</span>
+            <h4>Unable to fetch nearby places.</h4>
+            <p>
+              {error === "timeout"
+                ? "Request timed out. Please try again."
+                : "The map service is temporarily busy. Please try again in a few seconds."}
+            </p>
+            {onRetry && (
+              <button
+                type="button"
+                className="sidebar-retry-btn"
+                onClick={onRetry}
+              >
+                🔄 Retry
+              </button>
+            )}
           </div>
         )}
 
-        {!loading && !hasSearched && (
+        {!loading && !error && hasSearched && places.length === 0 && (
+          <div className="sidebar-status">
+            <span className="sidebar-status-icon">{selectedCategory.icon}</span>
+            <h4>No {selectedCategory.label} found near this location.</h4>
+            <p>Try another category or search a nearby city.</p>
+          </div>
+        )}
+
+        {!loading && !error && !hasSearched && (
           <div className="sidebar-status">
             <span className="sidebar-status-icon">🗺️</span>
             <h4>Nothing to show yet</h4>
@@ -101,6 +124,7 @@ function ExploreSidebar({
         )}
 
         {!loading &&
+          !error &&
           places.map((place) => {
             const isSelected = selectedPlace?.id === place.id;
 

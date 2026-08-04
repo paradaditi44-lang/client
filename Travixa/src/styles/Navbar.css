@@ -1,9 +1,5 @@
 /* =========================================================
-   TRAVEXA PASTEL BLUE NAVBAR STYLES
-   Color Palette:
-   - Background: #DCEEFF / #CFE8FF (Light pastel blue with glassmorphism)
-   - Text: #1E3A5F (Dark Navy)
-   - Active Pill: #74B9FF (Brighter Blue)
+   TRAVEXA NAVBAR STYLES (Light & Dark Theme Support)
 ========================================================= */
 
 .navbar {
@@ -14,28 +10,25 @@
   display: flex;
   align-items: center;
   gap: 32px;
-  background: rgba(220, 238, 255, 0.88);
+  background: var(--navbar-bg);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  color: #1e3a5f;
+  color: var(--text);
   position: sticky;
   top: 0;
   z-index: 1000;
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 6px 24px rgba(30, 58, 95, 0.1);
-  transition: all 0.3s ease;
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* =========================================================
-   LOGO
-========================================================= */
-
+/* LOGO */
 .navbar-logo {
   font-size: 26px;
   font-weight: 800;
-  color: #1e3a5f;
+  color: var(--text);
   cursor: pointer;
   white-space: nowrap;
   margin-right: auto;
@@ -48,10 +41,7 @@
   transform: scale(1.02);
 }
 
-/* =========================================================
-   MENU NAVIGATION
-========================================================= */
-
+/* MENU NAVIGATION */
 .navbar-menu {
   display: flex;
   align-items: center;
@@ -62,7 +52,7 @@
   position: relative;
   border: none;
   background: transparent;
-  color: #1e3a5f;
+  color: var(--text);
   font-size: 14.5px;
   font-weight: 600;
   cursor: pointer;
@@ -72,27 +62,20 @@
 }
 
 .navbar-menu button:hover {
-  background: rgba(116, 185, 255, 0.28);
-  color: #1e3a5f;
+  background: var(--surface);
+  color: var(--primary);
   transform: translateY(-1px);
 }
 
 /* Active Page Highlight Pill */
 .navbar-menu button.active {
-  background: #74b9ff;
-  color: #1e3a5f;
+  background: var(--primary);
+  color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 4px 14px rgba(116, 185, 255, 0.45);
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
 }
 
-.navbar-menu button::after {
-  display: none;
-}
-
-/* =========================================================
-   RIGHT SIDE ACTIONS
-========================================================= */
-
+/* RIGHT SIDE ACTIONS */
 .navbar-right {
   display: flex;
   align-items: center;
@@ -104,19 +87,19 @@
   border: none;
   padding: 10px 24px;
   border-radius: 22px;
-  background: #1e3a5f;
+  background: var(--secondary);
   color: #ffffff;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 14px rgba(30, 58, 95, 0.2);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
 }
 
 .navbar-login:hover {
-  background: #152b47;
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(30, 58, 95, 0.3);
+  filter: brightness(1.1);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
 }
 
 /* SMALL PROFILE */
@@ -125,18 +108,18 @@
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
-  border: 1px solid rgba(30, 58, 95, 0.15);
+  border: 1px solid var(--border);
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.65);
-  color: #1e3a5f;
+  background: var(--card-bg);
+  color: var(--text);
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .navbar-profile:hover {
-  background: #ffffff;
-  border-color: #74b9ff;
-  box-shadow: 0 4px 12px rgba(116, 185, 255, 0.3);
+  background: var(--surface);
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
   transform: translateY(-1px);
 }
 
@@ -147,15 +130,15 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #74b9ff;
-  color: #1e3a5f;
+  background: var(--surface);
+  color: var(--primary);
   font-size: 17px;
 }
 
 .profile-name {
   font-size: 14px;
   font-weight: 700;
-  color: #1e3a5f;
+  color: var(--text);
   max-width: 100px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -166,9 +149,9 @@
 .navbar-logout {
   padding: 8px 18px;
   border-radius: 20px;
-  border: 1.5px solid #1e3a5f;
+  border: 1.5px solid var(--border);
   background: transparent;
-  color: #1e3a5f;
+  color: var(--text);
   font-size: 13.5px;
   font-weight: 700;
   cursor: pointer;
@@ -176,10 +159,10 @@
 }
 
 .navbar-logout:hover {
-  background: #1e3a5f;
-  color: #ffffff;
+  background: var(--surface);
+  color: var(--primary);
+  border-color: var(--primary);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(30, 58, 95, 0.2);
 }
 
 /* THEME TOGGLE */
@@ -189,34 +172,27 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
+  border: 1px solid var(--border);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
-  color: #1e3a5f;
+  background: var(--surface);
+  color: var(--text);
   font-size: 18px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .navbar-theme:hover {
-  background: #ffffff;
+  background: var(--card-bg);
   transform: rotate(15deg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* =========================================================
-   RESPONSIVE MEDIA QUERIES
-========================================================= */
-
+/* RESPONSIVE MEDIA QUERIES */
 @media (max-width: 1000px) {
   .navbar {
     gap: 16px;
     padding: 0 20px;
   }
-
-  .navbar-menu {
-    gap: 6px;
-  }
-
   .navbar-menu button {
     font-size: 13.5px;
     padding: 7px 14px;
@@ -230,11 +206,9 @@
     flex-wrap: wrap;
     padding: 12px 20px;
   }
-
   .navbar-logo {
     margin-right: 0;
   }
-
   .navbar-menu {
     order: 3;
     width: 100%;
@@ -248,11 +222,9 @@
   .profile-name {
     display: none;
   }
-
   .navbar-logout {
     padding: 7px 14px;
   }
-
   .navbar-menu {
     gap: 8px;
   }

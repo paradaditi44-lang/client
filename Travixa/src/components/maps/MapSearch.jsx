@@ -1,6 +1,6 @@
 import "../../styles/MapSearch.css";
 
-function MapSearch({ searchInput, setSearchInput, onSearch, onUseLocation }) {
+function MapSearch({ searchInput, setSearchInput, onSearch, onUseLocation, disabled }) {
   return (
     <div className="map-search-container">
       <div className="map-hero">
@@ -21,19 +21,20 @@ function MapSearch({ searchInput, setSearchInput, onSearch, onUseLocation }) {
           type="text"
           placeholder="Search places, cities, districts, states or countries..."
           value={searchInput}
+          disabled={disabled}
           onChange={(e) => setSearchInput(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
+            if (e.key === "Enter" && !disabled) {
               onSearch();
             }
           }}
         />
 
-        <button type="button" onClick={onSearch}>
+        <button type="button" onClick={onSearch} disabled={disabled}>
           Search
         </button>
 
-        <button type="button" className="location-btn" onClick={onUseLocation}>
+        <button type="button" className="location-btn" onClick={onUseLocation} disabled={disabled}>
           📍 Use My Location
         </button>
       </div>

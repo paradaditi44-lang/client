@@ -1,10 +1,12 @@
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
 import "../styles/Navbar.css";
 
 function Navbar() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
 
   const loggedIn =
     localStorage.getItem("travexaLoggedIn") === "true";
@@ -150,9 +152,12 @@ function Navbar() {
 
 
         {/* DARK MODE */}
-
-        <button className="navbar-theme">
-          🌙
+        <button
+          className="navbar-theme"
+          onClick={toggleTheme}
+          title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+        >
+          {theme === "dark" ? "☀️" : "🌙"}
         </button>
 
       </div>

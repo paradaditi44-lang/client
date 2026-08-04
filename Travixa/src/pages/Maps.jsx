@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 import MapSearch from "../components/maps/MapSearch";
 import CategoryFilter from "../components/maps/CategoryFilter";
@@ -18,18 +18,46 @@ function Maps() {
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(DEFAULT_CATEGORY);
+  const [error, setError] = useState(null);
+
+  const activeRequestRef = useRef(null);
+  const requestIdRef = useRef(0);
+
+  // Cleanup in-flight requests on unmount
+  useEffect(() => {
+    return () => {
+      if (activeRequestRef.current) {
+        activeRequestRef.current.abort();
+      }
+    };
+  }, []);
 
   // Fetch nearby places for a given coordinate + category using Overpass API
   const fetchNearbyPlaces = async (lat, lon, category) => {
+    // Cancel any previous pending request
+    if (activeRequestRef.current) {
+      activeRequestRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    activeRequestRef.current = controller;
+    const currentRequestId = ++requestIdRef.current;
+
     setLoading(true);
+    setError(null);
     setSelectedPlace(null);
+
+    // Set 15 second fetch timeout
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 15000);
 
     const query = `
 [out:json][timeout:25];
 (
-  node["${category.key}"="${category.value}"](around:6000,${lat},${lon});
-  way["${category.key}"="${category.value}"](around:6000,${lat},${lon});
-  relation["${category.key}"="${category.value}"](around:6000,${lat},${lon});
+  node["${category.key}"="${category.value}"](around:12000,${lat},${lon});
+  way["${category.key}"="${category.value}"](around:12000,${lat},${lon});
+  relation["${category.key}"="${category.value}"](around:12000,${lat},${lon});
 );
 out center 60;
 `;
@@ -38,9 +66,22 @@ out center 60;
       const response = await fetch("https://overpass-api.de/api/interpreter", {
         method: "POST",
         body: query,
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
+
+      // Check HTTP status code before parsing JSON
+      if (!response.ok) {
+        throw new Error(`Overpass API unavailable: ${response.status}`);
+      }
+
       const data = await response.json();
+
+      // Discard stale API responses
+      if (currentRequestId !== requestIdRef.current) {
+        return;
+      }
 
       const parsed = (data.elements || [])
         .map((el) => {
@@ -69,11 +110,27 @@ out center 60;
         .slice(0, 60);
 
       setPlaces(parsed);
-    } catch (error) {
-      console.error("Explore Nearby: failed to fetch places", error);
+      setError(null);
+    } catch (err) {
+      clearTimeout(timeoutId);
+
+      // If aborted because of a newer request, ignore error
+      if (currentRequestId !== requestIdRef.current) {
+        return;
+      }
+
+      console.error("Explore Nearby: failed to fetch places", err);
       setPlaces([]);
+      if (err.name === "AbortError") {
+        setError("timeout");
+      } else {
+        setError("unavailable");
+      }
     } finally {
-      setLoading(false);
+      if (currentRequestId === requestIdRef.current) {
+        setLoading(false);
+        activeRequestRef.current = null;
+      }
     }
   };
 
@@ -82,17 +139,38 @@ out center 60;
     const query = searchInput.trim();
     if (!query) return;
 
+    if (loading) return; // Prevent duplicate requests while loading
+
     setLoading(true);
     setHasSearched(true);
     setPlaces([]);
     setSelectedPlace(null);
+    setError(null);
+
+    const controller = new AbortController();
+    if (activeRequestRef.current) {
+      activeRequestRef.current.abort();
+    }
+    activeRequestRef.current = controller;
+
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 15000);
 
     try {
       const geoResponse = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
           query
-        )}&limit=1`
+        )}&limit=1`,
+        { signal: controller.signal }
       );
+
+      clearTimeout(timeoutId);
+
+      if (!geoResponse.ok) {
+        throw new Error(`Nominatim unavailable: ${geoResponse.status}`);
+      }
+
       const geoData = await geoResponse.json();
 
       if (!geoData || geoData.length === 0) {
@@ -110,19 +188,25 @@ out center 60;
       setLocationLabel(geoData[0].display_name || query);
 
       await fetchNearbyPlaces(lat, lon, selectedCategory);
-    } catch (error) {
-      console.error("Explore Nearby: geocoding failed", error);
+    } catch (err) {
+      clearTimeout(timeoutId);
+      console.error("Explore Nearby: geocoding failed", err);
       setPlaces([]);
       setLoading(false);
+      setError(err.name === "AbortError" ? "timeout" : "unavailable");
     }
   };
 
   // Use browser geolocation
   const handleUseMyLocation = () => {
+    if (loading) return; // Prevent duplicate requests
+
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser.");
       return;
     }
+
+    setLoading(true);
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -137,6 +221,7 @@ out center 60;
         await fetchNearbyPlaces(lat, lon, selectedCategory);
       },
       () => {
+        setLoading(false);
         alert("Unable to access your location. Please allow location access and try again.");
       }
     );
@@ -144,9 +229,19 @@ out center 60;
 
   // Switching category re-queries places at the same coordinates
   const handleCategorySelect = (category) => {
+    if (loading) return; // Prevent duplicate requests
     setSelectedCategory(category);
     if (position) {
       fetchNearbyPlaces(position[0], position[1], category);
+    }
+  };
+
+  // Retry previous request
+  const handleRetry = () => {
+    if (position) {
+      fetchNearbyPlaces(position[0], position[1], selectedCategory);
+    } else if (searchInput.trim()) {
+      handleSearch();
     }
   };
 
@@ -158,12 +253,14 @@ out center 60;
           setSearchInput={setSearchInput}
           onSearch={handleSearch}
           onUseLocation={handleUseMyLocation}
+          disabled={loading}
         />
 
         <CategoryFilter
           categories={EXPLORE_CATEGORIES}
           selectedCategory={selectedCategory}
           onSelect={handleCategorySelect}
+          disabled={loading}
         />
 
         <div className="explore-body">
@@ -175,6 +272,8 @@ out center 60;
             locationLabel={locationLabel}
             selectedPlace={selectedPlace}
             setSelectedPlace={setSelectedPlace}
+            error={error}
+            onRetry={handleRetry}
           />
 
           <ExploreMap

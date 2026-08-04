@@ -1,318 +1,204 @@
-.profile-page {
-  min-height: calc(100vh - 82px);
-
-  padding: 70px 30px 100px;
-
-  background:
-    radial-gradient(
-      circle at 10% 10%,
-      #dbeafe 0,
-      transparent 25%
-    ),
-    #f8fafc;
-
-  color: #172554;
-}
-
-
 /* =========================
-   HEADER
+   PROFILE PAGE (Light & Dark Theme)
 ========================= */
 
+.profile-page {
+  min-height: calc(100vh - 82px);
+  padding: 70px 30px 100px;
+  background: var(--bg);
+  color: var(--text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* HEADER */
 .profile-header {
   max-width: 1150px;
-
   margin: 0 auto 40px;
-
   display: flex;
-
   align-items: flex-end;
-
   justify-content: space-between;
-
   gap: 30px;
 }
 
 .profile-label {
-  color: #2563eb;
-
+  color: var(--primary);
   font-size: 12px;
-
   font-weight: 800;
-
   letter-spacing: 2px;
 }
 
 .profile-header h1 {
   margin-top: 10px;
-
   font-size: 52px;
-
   letter-spacing: -2px;
+  color: var(--text);
 }
 
 .profile-header p {
   margin-top: 10px;
-
-  color: #64748b;
-
+  color: var(--text-secondary);
   font-size: 16px;
 }
 
 .edit-profile-btn {
   padding: 13px 21px;
-
   border: none;
-
   border-radius: 12px;
-
   background: #2563eb;
-
   color: white;
-
   font-weight: 700;
-
   cursor: pointer;
-
   transition: 0.3s;
 }
 
 .edit-profile-btn:hover {
   background: #1d4ed8;
-
   transform: translateY(-2px);
 }
 
-
-/* =========================
-   CONTAINER
-========================= */
-
+/* CONTAINER */
 .profile-container {
   max-width: 1150px;
-
   margin: auto;
-
   display: grid;
-
   grid-template-columns: 1fr 320px;
-
   gap: 25px;
 }
 
-
-/* =========================
-   PROFILE CARD
-========================= */
-
+/* PROFILE CARD */
 .profile-card {
   padding: 40px;
-
-  background: rgba(255, 255, 255, 0.95);
-
-  border: 1px solid #e2e8f0;
-
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 25px;
-
-  box-shadow:
-    0 20px 50px rgba(15, 23, 42, 0.07);
+  box-shadow: var(--shadow);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
-
-
-/* Profile top */
 
 .profile-top {
   display: flex;
-
   align-items: center;
-
   gap: 20px;
-
   padding-bottom: 30px;
-
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border);
 }
 
 .profile-avatar {
   width: 80px;
   height: 80px;
-
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   border-radius: 50%;
-
-  background:
-    linear-gradient(
-      135deg,
-      #2563eb,
-      #60a5fa
-    );
-
+  background: linear-gradient(135deg, #2563eb, #60a5fa);
   color: white;
-
   font-size: 32px;
-
   font-weight: 800;
-
-  box-shadow:
-    0 10px 25px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
 }
 
 .profile-top h2 {
   font-size: 24px;
+  color: var(--text);
 }
 
 .profile-top p {
   margin-top: 5px;
-
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .traveller-badge {
   display: inline-block;
-
   margin-top: 10px;
-
   padding: 5px 10px;
-
   border-radius: 20px;
-
-  background: #eff6ff;
-
-  color: #2563eb;
-
+  background: var(--surface);
+  color: var(--primary);
   font-size: 11px;
-
   font-weight: 700;
 }
 
-
-/* Saved */
-
 .saved-message {
   margin-top: 20px;
-
   padding: 13px 15px;
-
   border-radius: 12px;
-
   background: #ecfdf5;
-
   color: #047857;
-
   font-size: 14px;
-
   font-weight: 600;
 }
 
+body.dark-theme .saved-message {
+  background: rgba(4, 120, 87, 0.2);
+  color: #6ee7b7;
+}
 
-/* =========================
-   FORM
-========================= */
-
+/* FORM */
 .profile-grid {
   display: grid;
-
   grid-template-columns: 1fr 1fr;
-
   gap: 25px;
-
   padding: 35px 0;
 }
 
 .profile-field {
   display: flex;
-
   flex-direction: column;
-
   gap: 9px;
 }
 
 .profile-field label,
 .travel-preference label {
-  color: #64748b;
-
+  color: var(--text-secondary);
   font-size: 11px;
-
   font-weight: 800;
-
   letter-spacing: 1px;
 }
 
 .profile-field input,
 .travel-preference select {
   width: 100%;
-
   padding: 14px 15px;
-
-  border: 1px solid #cbd5e1;
-
+  border: 1px solid var(--border);
   border-radius: 12px;
-
   outline: none;
-
-  background: white;
-
-  color: #172554;
-
+  background: var(--input-bg);
+  color: var(--text);
   font-size: 15px;
-
   transition: 0.3s;
 }
 
 .profile-field input:focus,
 .travel-preference select:focus {
-  border-color: #2563eb;
-
-  box-shadow:
-    0 0 0 4px rgba(37, 99, 235, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
 
 .profile-value {
   min-height: 48px;
-
   display: flex;
-
   align-items: center;
-
   padding: 12px 15px;
-
   border-radius: 12px;
-
-  background: #f8fafc;
-
-  color: #334155;
-
+  background: var(--surface);
+  color: var(--text);
   font-size: 15px;
 }
 
-
 /* Travel preference */
-
 .travel-preference {
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
-
   gap: 25px;
-
   padding: 25px 0;
-
-  border-top: 1px solid #e2e8f0;
-
-  border-bottom: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 .travel-preference p {
   margin-top: 5px;
-
-  color: #64748b;
-
+  color: var(--text-secondary);
   font-size: 13px;
 }
 
@@ -322,235 +208,126 @@
 
 .travel-style-display {
   padding: 11px 18px;
-
   border-radius: 30px;
-
-  background: #eff6ff;
-
-  color: #1d4ed8;
-
+  background: var(--surface);
+  color: var(--primary);
   font-weight: 700;
 }
 
-
 /* Buttons */
-
 .profile-actions {
   display: flex;
-
   justify-content: flex-end;
-
   gap: 12px;
-
   margin-top: 25px;
 }
 
 .cancel-btn,
 .save-btn {
   padding: 12px 20px;
-
   border-radius: 11px;
-
   font-weight: 700;
-
   cursor: pointer;
-
   transition: 0.3s;
 }
 
 .cancel-btn {
-  border: 1px solid #cbd5e1;
-
-  background: white;
-
-  color: #475569;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
 }
 
 .cancel-btn:hover {
-  background: #f1f5f9;
+  background: var(--card-bg);
 }
 
 .save-btn {
   border: none;
-
   background: #2563eb;
-
   color: white;
 }
 
 .save-btn:hover {
   background: #1d4ed8;
-
   transform: translateY(-2px);
 }
 
-
-/* =========================
-   SIDE CARD
-========================= */
-
+/* SIDE CARD */
 .profile-side-card {
   align-self: start;
-
   padding: 30px;
-
   border-radius: 25px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #172554,
-      #1d4ed8
-    );
-
+  background: linear-gradient(145deg, #172554, #1d4ed8);
   color: white;
+  box-shadow: 0 20px 40px rgba(30, 64, 175, 0.2);
+}
 
-  box-shadow:
-    0 20px 40px rgba(30, 64, 175, 0.2);
+body.dark-theme .profile-side-card {
+  background: linear-gradient(145deg, #1e293b, #0f172a);
+  border: 1px solid var(--border);
 }
 
 .side-icon {
   width: 55px;
   height: 55px;
-
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   margin-bottom: 25px;
-
   border-radius: 16px;
-
   background: rgba(255, 255, 255, 0.12);
-
   font-size: 25px;
 }
 
 .profile-side-card h3 {
   font-size: 22px;
-
   line-height: 1.3;
 }
 
 .profile-side-card > p {
   margin-top: 12px;
-
   color: #dbeafe;
-
   line-height: 1.6;
-
   font-size: 14px;
 }
 
 .profile-benefits {
   display: flex;
-
   flex-direction: column;
-
   gap: 15px;
-
   margin-top: 30px;
 }
 
 .profile-benefits div {
   display: flex;
-
   align-items: center;
-
   gap: 10px;
-
   font-size: 13px;
-
   color: #eff6ff;
 }
 
 .profile-benefits span {
   width: 22px;
   height: 22px;
-
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   border-radius: 50%;
-
   background: rgba(255,255,255,0.15);
-
   color: #bfdbfe;
 }
 
-
-/* =========================
-   RESPONSIVE
-========================= */
-
-@media (max-width: 850px) {
-
-  .profile-container {
-    grid-template-columns: 1fr;
-  }
-
-  .profile-side-card {
-    max-width: none;
-  }
-
-}
-
-@media (max-width: 600px) {
-
-  .profile-page {
-    padding: 45px 15px 70px;
-  }
-
-  .profile-header {
-    align-items: flex-start;
-
-    flex-direction: column;
-  }
-
-  .profile-header h1 {
-    font-size: 40px;
-  }
-
-  .profile-card {
-    padding: 25px 20px;
-  }
-
-  .profile-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .travel-preference {
-    align-items: flex-start;
-
-    flex-direction: column;
-  }
-
-  .travel-preference select {
-    max-width: none;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* =========================
-   TRAVEL STATS & ACCOUNT
-========================= */
-
+/* TRAVEL STATS & ACCOUNT */
 .stats-section {
   margin-top: 30px;
   padding-top: 25px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border);
 }
 
 .section-subtitle {
   font-size: 12px;
   font-weight: 800;
-  color: #64748b;
+  color: var(--text-secondary);
   letter-spacing: 1.5px;
   text-transform: uppercase;
   margin-bottom: 16px;
@@ -563,8 +340,8 @@
 }
 
 .profile-stat-card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 18px;
   padding: 20px;
   display: flex;
@@ -575,15 +352,15 @@
 
 .profile-stat-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow);
 }
 
 .stat-icon {
   width: 52px;
   height: 52px;
   border-radius: 14px;
-  background: #eff6ff;
-  color: #2563eb;
+  background: var(--card-bg);
+  color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -593,7 +370,7 @@
 .stat-info h3 {
   font-size: 28px;
   font-weight: 800;
-  color: #172554;
+  color: var(--text);
   margin: 0;
   line-height: 1;
 }
@@ -601,7 +378,7 @@
 .stat-info p {
   font-size: 13px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-secondary);
   margin-top: 5px;
 }
 
@@ -609,7 +386,7 @@
 .account-section {
   margin-top: 30px;
   padding-top: 25px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border);
 }
 
 .account-actions {
@@ -622,9 +399,9 @@
 .btn-edit-disabled {
   padding: 13px 24px;
   border-radius: 12px;
-  border: 1px solid #cbd5e1;
-  background: #f1f5f9;
-  color: #94a3b8;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
   font-weight: 700;
   font-size: 14px;
   cursor: not-allowed;
@@ -636,8 +413,8 @@
 .btn-logout {
   padding: 13px 24px;
   border-radius: 12px;
-  border: 1px solid #fecdd3;
-  background: #fef2f2;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  background: rgba(220, 38, 38, 0.1);
   color: #dc2626;
   font-weight: 700;
   font-size: 14px;
@@ -654,4 +431,21 @@
   border-color: #dc2626;
   box-shadow: 0 4px 14px rgba(220, 38, 38, 0.25);
   transform: translateY(-2px);
+}
+
+/* RESPONSIVE */
+@media (max-width: 850px) {
+  .profile-container { grid-template-columns: 1fr; }
+  .profile-side-card { max-width: none; }
+}
+
+@media (max-width: 600px) {
+  .profile-page { padding: 45px 15px 70px; }
+  .profile-header { align-items: flex-start; flex-direction: column; }
+  .profile-header h1 { font-size: 40px; }
+  .profile-card { padding: 25px 20px; }
+  .profile-grid { grid-template-columns: 1fr; }
+  .travel-preference { align-items: flex-start; flex-direction: column; }
+  .travel-preference select { max-width: none; }
+  .stats-grid { grid-template-columns: 1fr; }
 }

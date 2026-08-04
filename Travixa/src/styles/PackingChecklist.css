@@ -1,11 +1,5 @@
 /* =====================================================
-   GLASSMORPHISM AI PACKING CHECKLIST STYLES
-   Color Palette:
-   - Ocean Blue: #0284C7
-   - Turquoise: #06B6D4
-   - Emerald Green: #10B981
-   - Background: #F8FAFC
-   - Cards: Glassmorphism Crisp White
+   GLASSMORPHISM AI PACKING CHECKLIST STYLES (Light & Dark Theme)
 ===================================================== */
 
 .packing-checklist-section {
@@ -28,9 +22,9 @@
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 1.5px;
-  color: #0284c7;
-  background: #f0f9ff;
-  border: 1px solid #bae6fd;
+  color: var(--primary);
+  background: var(--surface);
+  border: 1px solid var(--border);
   padding: 5px 14px;
   border-radius: 20px;
   margin-bottom: 6px;
@@ -39,21 +33,21 @@
 .checklist-header h2 {
   font-size: 28px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text);
   margin: 0 0 4px 0;
   letter-spacing: -0.5px;
 }
 
 .checklist-header p {
   font-size: 15px;
-  color: #64748b;
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .btn-reset-checklist {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid #cbd5e1;
-  color: #475569;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
   padding: 9px 16px;
   border-radius: 12px;
   font-size: 13px;
@@ -65,22 +59,23 @@
 }
 
 .btn-reset-checklist:hover {
-  background: #f0f9ff;
-  border-color: #0284c7;
-  color: #0284c7;
+  background: var(--surface);
+  border-color: var(--primary);
+  color: var(--primary);
   transform: translateY(-1px);
 }
 
 /* Glassmorphism Packing Progress Card */
 .packing-progress-card {
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--card-bg);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--border);
   border-radius: 20px;
   padding: 20px 26px;
   margin-bottom: 24px;
-  box-shadow: 0 10px 30px rgba(2, 132, 199, 0.08);
+  box-shadow: var(--shadow);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .progress-text-row {
@@ -88,7 +83,7 @@
   justify-content: space-between;
   align-items: center;
   font-size: 14.5px;
-  color: #334155;
+  color: var(--text);
   margin-bottom: 10px;
 }
 
@@ -101,7 +96,7 @@
 .progress-bar-bg {
   width: 100%;
   height: 9px;
-  background: #f1f5f9;
+  background: var(--surface);
   border-radius: 10px;
   overflow: hidden;
 }
@@ -121,21 +116,21 @@
 }
 
 .category-checklist-card {
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--card-bg);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--border);
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(2, 132, 199, 0.08);
+  box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
 }
 
 .category-checklist-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 36px rgba(2, 132, 199, 0.14);
+  box-shadow: var(--shadow);
 }
 
 /* Category Card Header */
@@ -144,7 +139,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border);
 }
 
 .category-card-header .category-icon {
@@ -156,6 +151,7 @@
   font-weight: 800;
   margin: 0;
   flex: 1;
+  color: var(--text);
 }
 
 .category-count {
@@ -163,37 +159,38 @@
   font-weight: 700;
   padding: 3px 10px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--surface);
+  color: var(--text-secondary);
 }
 
 /* Badge Color Themes */
 .badge-blue {
-  background: #f0f9ff;
-  border-color: #bae6fd;
-  color: #0284c7;
+  background: rgba(2, 132, 199, 0.1);
+  border-color: rgba(2, 132, 199, 0.2);
+  color: var(--primary);
 }
 
 .badge-orange {
-  background: #fff7ed;
-  border-color: #ffedd5;
+  background: rgba(234, 88, 12, 0.1);
+  border-color: rgba(234, 88, 12, 0.2);
   color: #ea580c;
 }
 
 .badge-teal {
-  background: #f0fdfa;
-  border-color: #99f6e4;
+  background: rgba(13, 148, 136, 0.1);
+  border-color: rgba(13, 148, 136, 0.2);
   color: #0d9488;
 }
 
 .badge-red {
-  background: #fef2f2;
-  border-color: #fecdd3;
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.2);
   color: #dc2626;
 }
 
 .badge-cyan {
-  background: #ecfeff;
-  border-color: #a5f3fc;
+  background: rgba(8, 145, 178, 0.1);
+  border-color: rgba(8, 145, 178, 0.2);
   color: #0891b2;
 }
 
@@ -217,24 +214,24 @@
 }
 
 .checklist-item-row:hover {
-  background: #f8fafc;
+  background: var(--surface);
 }
 
 .checklist-item-row.checked {
-  background: #f1f5f9;
+  background: var(--surface);
   opacity: 0.72;
 }
 
 .checklist-item-row.checked .item-label-text {
   text-decoration: line-through;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 .custom-checkbox-box {
   width: 20px;
   height: 20px;
   border-radius: 6px;
-  border: 2px solid #cbd5e1;
+  border: 2px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -242,12 +239,12 @@
   font-weight: 800;
   color: #ffffff;
   transition: all 0.2s ease;
-  background: #ffffff;
+  background: var(--input-bg);
   flex-shrink: 0;
 }
 
 .checklist-item-row:hover .custom-checkbox-box {
-  border-color: #0284c7;
+  border-color: var(--primary);
 }
 
 .checklist-item-row.checked .custom-checkbox-box {
@@ -258,7 +255,7 @@
 .item-label-text {
   font-size: 13.5px;
   font-weight: 500;
-  color: #334155;
+  color: var(--text);
   line-height: 1.4;
   transition: color 0.2s ease, text-decoration 0.2s ease;
 }

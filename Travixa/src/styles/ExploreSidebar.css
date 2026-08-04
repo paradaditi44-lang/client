@@ -2,14 +2,15 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: rgba(255, 255, 255, 0.75);
+  background: var(--card-bg);
   backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--border);
   border-radius: 22px;
   padding: 20px;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow);
   min-height: 500px;
   max-height: 720px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 /* ---------- Stats header ---------- */
@@ -21,7 +22,8 @@
 }
 
 .stat-block {
-  background: linear-gradient(135deg, #eef4ff 0%, #f5f3ff 100%);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 12px 10px;
   text-align: center;
@@ -35,7 +37,7 @@
   display: block;
   font-size: 1.4rem;
   font-weight: 800;
-  color: #2563eb;
+  color: var(--primary);
   margin-bottom: 2px;
 }
 
@@ -48,6 +50,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--text);
 }
 
 .stat-caption {
@@ -56,37 +59,37 @@
   font-weight: 600;
   letter-spacing: 0.3px;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--text-secondary);
 }
 
 /* ---------- Selected place detail card ---------- */
 
 .place-detail-card {
   position: relative;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 18px 16px 16px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow);
 }
 
 .place-detail-close {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #f1f5f9;
+  background: var(--surface);
   border: none;
   border-radius: 50%;
   width: 24px;
   height: 24px;
   line-height: 1;
   font-size: 16px;
-  color: #64748b;
+  color: var(--text-secondary);
   cursor: pointer;
 }
 
 .place-detail-close:hover {
-  background: #e2e8f0;
+  background: var(--border);
 }
 
 .place-detail-icon {
@@ -103,20 +106,20 @@
 .place-detail-card h3 {
   margin: 0 0 6px;
   font-size: 1.05rem;
-  color: #1e293b;
+  color: var(--text);
 }
 
 .place-detail-category {
   margin: 0 0 8px;
   font-size: 0.8rem;
   font-weight: 600;
-  color: #2563eb;
+  color: var(--primary);
 }
 
 .place-detail-address {
   margin: 0 0 14px;
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--text-secondary);
   line-height: 1.4;
 }
 
@@ -154,7 +157,7 @@
 }
 
 .sidebar-list::-webkit-scrollbar-thumb {
-  background: #dbeafe;
+  background: var(--border);
   border-radius: 10px;
 }
 
@@ -162,8 +165,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: white;
-  border: 1px solid #f1f5f9;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 10px;
   cursor: pointer;
@@ -172,13 +175,14 @@
 }
 
 .place-list-item:hover {
-  border-color: #dbeafe;
+  border-color: var(--primary);
+  background: var(--surface);
   transform: translateX(2px);
 }
 
 .place-list-item.active {
-  border-color: #2563eb;
-  background: #eef4ff;
+  border-color: var(--primary);
+  background: var(--surface);
 }
 
 .place-list-icon {
@@ -201,7 +205,7 @@
 .place-list-name {
   font-size: 0.85rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -209,7 +213,7 @@
 
 .place-list-address {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -220,11 +224,11 @@
 .sidebar-status {
   text-align: center;
   padding: 40px 12px;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .sidebar-status h4 {
-  color: #1e293b;
+  color: var(--text);
   margin: 8px 0 4px;
   font-size: 0.95rem;
 }
@@ -245,8 +249,8 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 3px solid #dbeafe;
-  border-top-color: #2563eb;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
   animation: spin 0.8s linear infinite;
 }
 
@@ -254,4 +258,24 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.sidebar-retry-btn {
+  margin-top: 14px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  background: var(--primary);
+  color: #ffffff;
+  border: none;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
+}
+
+.sidebar-retry-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.35);
 }

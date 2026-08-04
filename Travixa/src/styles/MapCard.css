@@ -1,23 +1,23 @@
 /* =====================================================
-   VIBRANT TRAVEL LIVE MAP CARD STYLES & SMART ROUTE PLANNER
+   VIBRANT TRAVEL LIVE MAP CARD STYLES (Light & Dark)
 ===================================================== */
 
 .map-card-preview {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 24px;
   padding: 24px;
-  box-shadow: 0 12px 36px rgba(2, 132, 199, 0.08);
+  box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   gap: 16px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
   height: 100%;
 }
 
 .map-card-preview:hover {
   transform: translateY(-4px);
-  box-shadow: 0 18px 44px rgba(2, 132, 199, 0.14);
+  box-shadow: var(--shadow);
 }
 
 .map-card-header {
@@ -31,9 +31,9 @@
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 1.5px;
-  color: #0284c7;
-  background: #f0f9ff;
-  border: 1px solid #bae6fd;
+  color: var(--primary);
+  background: var(--surface);
+  border: 1px solid var(--border);
   padding: 5px 14px;
   border-radius: 20px;
   margin-bottom: 6px;
@@ -42,7 +42,7 @@
 .map-destination-title {
   font-size: 22px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -52,8 +52,8 @@
 
 .map-spinner-badge {
   font-size: 12.5px;
-  color: #0284c7;
-  background: #f0f9ff;
+  color: var(--primary);
+  background: var(--surface);
   padding: 5px 12px;
   border-radius: 14px;
   font-weight: 600;
@@ -71,8 +71,8 @@
   height: 380px;
   border-radius: 18px;
   overflow: hidden;
-  border: 2px solid #cbd5e1;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow);
 }
 
 .custom-map-pin-wrapper {
@@ -98,7 +98,7 @@
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 1.2px;
-  color: #64748b;
+  color: var(--text-secondary);
   text-transform: uppercase;
 }
 
@@ -116,9 +116,9 @@
   gap: 6px;
   padding: 8px 16px;
   border-radius: 20px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  color: #475569;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -127,9 +127,9 @@
 }
 
 .transport-chip:hover {
-  background: #f0f9ff;
-  border-color: #7dd3fc;
-  color: #0284c7;
+  background: var(--card-bg);
+  border-color: var(--primary);
+  color: var(--primary);
   transform: translateY(-1px);
 }
 
@@ -150,8 +150,8 @@
 
 /* ROUTE METRICS DISPLAY CARD */
 .route-metrics-card {
-  background: #f8fafc;
-  border: 1px solid #edf2f7;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 14px 18px;
   min-height: 64px;
@@ -171,10 +171,10 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #ffffff;
+  background: var(--card-bg);
   padding: 10px 14px;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
 }
 
 .metric-icon {
@@ -185,7 +185,7 @@
   display: block;
   font-size: 9px;
   font-weight: 800;
-  color: #64748b;
+  color: var(--text-secondary);
   letter-spacing: 1px;
   margin-bottom: 2px;
 }
@@ -194,7 +194,7 @@
   display: block;
   font-size: 15px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .route-loading-state,
@@ -208,7 +208,7 @@
 }
 
 .route-loading-state {
-  color: #0284c7;
+  color: var(--primary);
 }
 
 .route-error-state {
@@ -216,7 +216,7 @@
 }
 
 .route-info-state {
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 12px;
 }
 
@@ -229,11 +229,9 @@
   .map-frame {
     height: 320px;
   }
-
   .transport-chips-container {
     gap: 6px;
   }
-
   .transport-chip {
     padding: 7px 12px;
     font-size: 12px;

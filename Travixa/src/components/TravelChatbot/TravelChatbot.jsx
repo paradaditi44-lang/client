@@ -1,19 +1,41 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./TravelChatbot.css";
 
-const QUICK_PROMPTS = [
-  "📍 Best places to visit",
-  "🏨 Budget hotels",
-  "🧳 Packing tips",
-  "🍽️ Local food",
-  "🌤️ Weather",
+const LANGUAGES = [
+  { code: "en", name: "English", bcp47: "en-US", flag: "🇬🇧" },
+  { code: "hi", name: "हिंदी (Hindi)", bcp47: "hi-IN", flag: "🇮🇳" },
+  { code: "mr", name: "मराठी (Marathi)", bcp47: "mr-IN", flag: "🇮🇳" },
 ];
+
+const QUICK_PROMPTS = {
+  en: [
+    "📍 Best places to visit",
+    "🏨 Budget hotels",
+    "🧳 Packing tips",
+    "🍽️ Local food",
+    "🌤️ Weather",
+  ],
+  hi: [
+    "📍 घूमने की बेहतरीन जगहें",
+    "🏨 बजट होटल",
+    "🧳 पैकिंग टिप्स",
+    "🍽️ स्थानीय भोजन",
+    "🌤️ मौसम का हाल",
+  ],
+  mr: [
+    "📍 भेट देण्यासाठी सर्वोत्तम ठिकाणे",
+    "🏨 बजेट हॉटेल्स",
+    "🧳 पॅकिंग टिप्स",
+    "🍽️ स्थानिक खाद्यपदार्थ",
+    "🌤️ हवामानाचा अंदाज",
+  ],
+};
 
 const INITIAL_MESSAGES = [
   {
     id: 1,
     sender: "ai",
-    text: "Hello! I'm Travexa AI, your personal travel assistant ✈️. Where are you planning to go, or what travel questions do you have?",
+    text: "Hello! I'm Travexa AI, your multi-language travel assistant ✈️. Where are you planning to go?",
     timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
   },
 ];
@@ -30,11 +52,33 @@ function TravelChatbot() {
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [inputText, setInputText] = useState("");
   const [isThinking, setIsThinking] = useState(false);
+  const [selectedLang, setSelectedLang] = useState("en");
 
-  // 1. React State for Conversation Context
+  // Conversation Context
   const [context, setContext] = useState(INITIAL_CONTEXT);
 
+  // Voice Assistant States
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [autoSpeak, setAutoSpeak] = useState(true);
+  const [speechSupported, setSpeechSupported] = useState(true);
+
   const messagesEndRef = useRef(null);
+  const recognitionRef = useRef(null);
+
+  // Check Web Speech API support and preload voices
+  useEffect(() => {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition || !window.speechSynthesis) {
+      setSpeechSupported(false);
+    } else {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+  }, []);
 
   // Auto scroll to latest message
   const scrollToBottom = () => {
@@ -47,12 +91,156 @@ function TravelChatbot() {
     }
   }, [messages, isThinking, isOpen]);
 
-  // 2. Helper to analyze user message and update context state
+  // Clean text for Text-to-Speech
+  const cleanTextForSpeech = (text) => {
+    return text
+      .replace(/https?:\/\/\S+/g, "")
+      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "")
+      .replace(/\*/g, "")
+      .replace(/#/g, "")
+      .trim();
+  };
+
+  // Speak text with SpeechSynthesis & graceful Marathi voice fallback
+  const speakText = (text, langCode = selectedLang) => {
+    if (!window.speechSynthesis) return;
+
+    window.speechSynthesis.cancel();
+
+    const cleaned = cleanTextForSpeech(text);
+    if (!cleaned) return;
+
+    const langObj = LANGUAGES.find((l) => l.code === langCode) || LANGUAGES[0];
+    const voices = window.speechSynthesis.getVoices();
+
+    const utterance = new SpeechSynthesisUtterance(cleaned);
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+
+    let targetVoice = null;
+
+    if (langObj.code === "mr") {
+      // 1. Try finding Marathi voice
+      targetVoice = voices.find(
+        (v) =>
+          v.lang.toLowerCase().includes("mr") ||
+          v.lang.toLowerCase().includes("marathi")
+      );
+
+      if (targetVoice) {
+        utterance.lang = "mr-IN";
+        utterance.voice = targetVoice;
+      } else {
+        // 2. Fallback to Hindi (hi-IN) voice for Devanagari script compatibility
+        const hindiVoice = voices.find(
+          (v) =>
+            v.lang.toLowerCase().includes("hi") ||
+            v.lang.toLowerCase().includes("hindi")
+        );
+        if (hindiVoice) {
+          utterance.lang = "hi-IN";
+          utterance.voice = hindiVoice;
+        } else {
+          // 3. Fallback to Indian English or default voice
+          const indianEngVoice = voices.find((v) =>
+            v.lang.toLowerCase().includes("en-in")
+          );
+          if (indianEngVoice) {
+            utterance.lang = "en-IN";
+            utterance.voice = indianEngVoice;
+          } else {
+            utterance.lang = "hi-IN"; // Request hi-IN Devanagari synthesis
+          }
+        }
+      }
+    } else {
+      // Standard English & Hindi voice matching
+      utterance.lang = langObj.bcp47;
+      targetVoice = voices.find(
+        (v) =>
+          v.lang.toLowerCase().startsWith(langObj.code) ||
+          v.lang.toLowerCase().startsWith(langObj.bcp47.toLowerCase())
+      );
+      if (targetVoice) {
+        utterance.voice = targetVoice;
+      }
+    }
+
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    try {
+      window.speechSynthesis.speak(utterance);
+    } catch (e) {
+      setIsSpeaking(false);
+    }
+  };
+
+  // Stop Speech Synthesis
+  const stopSpeech = () => {
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  };
+
+  // Toggle Voice Recognition (Speech-to-Text) with dynamic language
+  const toggleListening = () => {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in your browser.");
+      return;
+    }
+
+    if (isListening) {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      setIsListening(false);
+      return;
+    }
+
+    stopSpeech();
+
+    const langObj = LANGUAGES.find((l) => l.code === selectedLang) || LANGUAGES[0];
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = langObj.bcp47;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map((result) => result[0].transcript)
+        .join("");
+      setInputText(transcript);
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech Recognition Error:", event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+    recognitionRef.current = recognition;
+  };
+
+  // Context Extraction Helper
   const extractContextFromMessage = (text, prevContext) => {
     const updated = { ...prevContext };
     const lower = text.toLowerCase();
 
-    // Destination Extraction (e.g. "I am visiting Goa", "Going to Paris")
+    // Destination Extraction
     const destMatch = text.match(/(?:visiting|going to|trip to|travel to|in|to)\s+([A-Za-z\s]+)/i);
     if (destMatch && destMatch[1]) {
       const candidate = destMatch[1].trim().split(/\s+/)[0];
@@ -70,16 +258,10 @@ function TravelChatbot() {
       }
     }
 
-    // Budget Extraction (e.g. "My budget is 10000", "Under 50000")
+    // Budget Extraction
     const budgetMatch = text.match(/(?:budget\s*(?:is|=|:)?\s*|under\s*|around\s*|₹|\$)\s*(\d+[\d,]*)/i);
     if (budgetMatch && budgetMatch[1]) {
       updated.budget = budgetMatch[1].replace(/,/g, "");
-    }
-
-    // Travel Dates / Month / Duration Extraction (e.g. "Going in December", "Next week")
-    const dateMatch = text.match(/(?:in|for|during|around|starting)\s+(january|february|march|april|may|june|july|august|september|october|november|december|summer|winter|spring|autumn|next week|tomorrow|\d+\s*days?)/i);
-    if (dateMatch && dateMatch[1]) {
-      updated.travelDates = dateMatch[1];
     }
 
     // Preferences Extraction
@@ -88,9 +270,6 @@ function TravelChatbot() {
     if (lower.includes("beach")) prefList.push("Beach");
     if (lower.includes("mountain") || lower.includes("hiking")) prefList.push("Mountain");
     if (lower.includes("luxury")) prefList.push("Luxury");
-    if (lower.includes("budget") && !updated.budget) prefList.push("Budget-friendly");
-    if (lower.includes("family")) prefList.push("Family");
-    if (lower.includes("food") || lower.includes("cuisine")) prefList.push("Food & Dining");
 
     if (prefList.length > 0) {
       updated.preferences = prefList.join(", ");
@@ -99,12 +278,18 @@ function TravelChatbot() {
     return updated;
   };
 
-  // Handle sending a message to backend Groq AI API (/api/chat)
+  // Send message handler
   const handleSend = async (textToSend) => {
     const text = textToSend || inputText;
     if (!text.trim()) return;
 
-    // Analyze message and update context
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
+
+    stopSpeech();
+
     const updatedContext = extractContextFromMessage(text, context);
     setContext(updatedContext);
 
@@ -120,10 +305,10 @@ function TravelChatbot() {
     setIsThinking(true);
 
     try {
-      // 3. Send message AND context in payload
       const payload = {
         message: text,
-        context: updatedContext,
+        language: selectedLang,
+        context: { ...updatedContext, language: selectedLang },
       };
 
       let response = await fetch("/api/chat", {
@@ -132,7 +317,6 @@ function TravelChatbot() {
         body: JSON.stringify(payload),
       });
 
-      // Direct port fallback if proxy is bypassed
       if (!response.ok && response.status === 404) {
         response = await fetch("http://localhost:5000/api/chat", {
           method: "POST",
@@ -143,48 +327,61 @@ function TravelChatbot() {
 
       if (response.ok) {
         const data = await response.json();
+        const replyText = data.reply || data.message || "I'm here to help with your travel questions!";
         const aiMessage = {
           id: Date.now() + 1,
           sender: "ai",
-          text: data.reply || data.message || "I'm here to help with your travel questions!",
+          text: replyText,
+          lang: selectedLang,
           destination: updatedContext.destination || "",
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         };
+
         setMessages((prev) => [...prev, aiMessage]);
+
+        if (autoSpeak) {
+          speakText(replyText, selectedLang);
+        }
       } else {
         const errorData = await response.json().catch(() => ({}));
+        const errText = errorData.reply || "Sorry, I'm having trouble connecting right now. Please try again in a moment.";
         const aiErrorMessage = {
           id: Date.now() + 1,
           sender: "ai",
-          text: errorData.reply || "Sorry, I'm having trouble connecting to the AI service right now. Please try again in a moment.",
+          text: errText,
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         };
         setMessages((prev) => [...prev, aiErrorMessage]);
+        if (autoSpeak) speakText(errText, selectedLang);
       }
     } catch (err) {
       console.error("Chatbot API Error:", err);
+      const networkErrText = "Sorry, I'm having trouble connecting to the travel AI right now. Please make sure the backend server is running.";
       const networkErrorMessage = {
         id: Date.now() + 1,
         sender: "ai",
-        text: "Sorry, I'm having trouble connecting to the travel AI right now. Please make sure the backend server is running.",
+        text: networkErrText,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages((prev) => [...prev, networkErrorMessage]);
+      if (autoSpeak) speakText(networkErrText, selectedLang);
     } finally {
       setIsThinking(false);
     }
   };
 
+  const activeQuickPrompts = QUICK_PROMPTS[selectedLang] || QUICK_PROMPTS.en;
+
   return (
     <div className="travel-chatbot-wrapper">
-      {/* Floating Toggle Trigger Button */}
+      {/* Floating Trigger Button */}
       {!isOpen && (
         <button
           className="chatbot-toggle-btn"
           onClick={() => setIsOpen(true)}
           title="Chat with Travexa AI"
         >
-          <span className="chatbot-toggle-icon">🧳</span>
+          <span className="chatbot-toggle-icon">🎙️</span>
           <span className="chatbot-toggle-pulse" />
         </button>
       )}
@@ -199,18 +396,59 @@ function TravelChatbot() {
               <div>
                 <h3>🧳 Travexa AI</h3>
                 <span className="chatbot-online-status">
-                  <span className="status-dot" /> Online • Travel Assistant
+                  <span className="status-dot" /> Online • Multi-lingual
                 </span>
               </div>
             </div>
 
-            <button
-              className="chatbot-close-btn"
-              onClick={() => setIsOpen(false)}
-              title="Close Chat"
+            <div className="chatbot-header-actions">
+              {/* Voice Output Auto-Speak Toggle */}
+              {window.speechSynthesis && (
+                <button
+                  type="button"
+                  className={`chatbot-tts-btn ${autoSpeak ? "active" : ""}`}
+                  onClick={() => {
+                    if (isSpeaking) {
+                      stopSpeech();
+                    }
+                    setAutoSpeak(!autoSpeak);
+                  }}
+                  title={autoSpeak ? "Voice output enabled (click to mute)" : "Voice output muted (click to enable)"}
+                >
+                  {isSpeaking ? "🔊 Speaking..." : autoSpeak ? "🔊 Voice On" : "🔇 Muted"}
+                </button>
+              )}
+
+              <button
+                className="chatbot-close-btn"
+                onClick={() => {
+                  stopSpeech();
+                  if (isListening && recognitionRef.current) {
+                    recognitionRef.current.stop();
+                  }
+                  setIsOpen(false);
+                }}
+                title="Close Chat"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          {/* Sub-Header Language Selector */}
+          <div className="chatbot-language-bar">
+            <span className="lang-label">🌐 Language / भाषा:</span>
+            <select
+              className="chatbot-lang-select"
+              value={selectedLang}
+              onChange={(e) => setSelectedLang(e.target.value)}
             >
-              ✕
-            </button>
+              {LANGUAGES.map((l) => (
+                <option key={l.code} value={l.code}>
+                  {l.flag} {l.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Messages Container */}
@@ -225,7 +463,19 @@ function TravelChatbot() {
                 {msg.sender === "ai" && <div className="msg-avatar">🤖</div>}
 
                 <div className="msg-bubble">
-                  <p className="msg-text">{msg.text}</p>
+                  <p className="msg-text">
+                    {msg.text}
+                    {msg.sender === "ai" && window.speechSynthesis && (
+                      <button
+                        type="button"
+                        className="msg-tts-btn"
+                        onClick={() => speakText(msg.text, msg.lang || selectedLang)}
+                        title="Read message aloud"
+                      >
+                        🔊
+                      </button>
+                    )}
+                  </p>
                   {msg.destination && msg.sender === "ai" && (
                     <div className="msg-video-cta">
                       <a
@@ -255,7 +505,7 @@ function TravelChatbot() {
                     <span />
                     <span />
                   </span>
-                  <span className="thinking-text">Travexa AI is typing...</span>
+                  <span className="thinking-text">Travexa AI is thinking...</span>
                 </div>
               </div>
             )}
@@ -263,9 +513,9 @@ function TravelChatbot() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick Suggestion Buttons above Input */}
+          {/* Quick Suggestion Buttons */}
           <div className="chatbot-quick-prompts">
-            {QUICK_PROMPTS.map((prompt, idx) => (
+            {activeQuickPrompts.map((prompt, idx) => (
               <button
                 key={idx}
                 className="quick-prompt-chip"
@@ -276,7 +526,7 @@ function TravelChatbot() {
             ))}
           </div>
 
-          {/* Input Box */}
+          {/* Input Form with Mic Button */}
           <form
             className="chatbot-input-form"
             onSubmit={(e) => {
@@ -284,13 +534,34 @@ function TravelChatbot() {
               handleSend();
             }}
           >
+            {/* Microphone Button (Speech-to-Text) */}
+            <button
+              type="button"
+              className={`chatbot-mic-btn ${isListening ? "listening" : ""}`}
+              onClick={toggleListening}
+              title={
+                isListening
+                  ? "Listening... Click to stop"
+                  : speechSupported
+                  ? `Voice Input (${LANGUAGES.find((l) => l.code === selectedLang)?.name})`
+                  : "Speech recognition not supported"
+              }
+            >
+              {isListening ? "🎙️" : "🎤"}
+            </button>
+
             <input
               type="text"
-              placeholder="Ask Travexa AI about your trip..."
+              placeholder={
+                isListening
+                  ? `Listening in ${LANGUAGES.find((l) => l.code === selectedLang)?.name}...`
+                  : "Ask Travexa AI about your trip..."
+              }
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               className="chatbot-input"
             />
+
             <button type="submit" className="chatbot-send-btn" title="Send Message">
               ✈️
             </button>

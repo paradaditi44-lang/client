@@ -1,18 +1,14 @@
 /* =====================================================
-   VIBRANT TRAVEL WEATHER PAGE STYLES
-   Color Palette:
-   - Ocean Blue: #0284C7
-   - Sky Blue: #38BDF8
-   - Turquoise: #06B6D4
-   - Background: #F8FAFC
+   VIBRANT TRAVEL WEATHER PAGE STYLES (Light & Dark Theme)
 ===================================================== */
 
 .weather-page-root {
   min-height: 100vh;
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: var(--bg);
+  color: var(--text);
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   padding-bottom: 60px;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .weather-page-wrapper {
@@ -21,10 +17,7 @@
   padding: 40px 24px;
 }
 
-/* =====================================================
-   COMPACT HERO HEADER
-===================================================== */
-
+/* COMPACT HERO HEADER */
 .weather-hero-compact {
   background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
   color: #ffffff;

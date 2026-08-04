@@ -1,24 +1,24 @@
 /* =====================================================
-   PORTRAIT AIRBNB-STYLE HOTEL CARD STYLES (3 PER ROW)
+   PORTRAIT AIRBNB-STYLE HOTEL CARD STYLES (Light & Dark)
 ===================================================== */
 
 .hotel-card-redesign {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.06);
+  box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
   min-height: 460px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
 }
 
 .hotel-card-redesign:hover {
   transform: translateY(-6px);
-  box-shadow: 0 16px 36px rgba(2, 132, 199, 0.14);
+  box-shadow: var(--shadow);
 }
 
 /* Slightly Larger Cover Image Portion (~52% of card) */
@@ -88,13 +88,13 @@
   gap: 10px;
   flex: 1;
   justify-content: space-between;
-  background: #ffffff;
+  background: var(--card-bg);
 }
 
 .hotel-title {
   font-size: 17.5px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text);
   margin: 0;
   line-height: 1.3;
   display: -webkit-box;
@@ -109,13 +109,13 @@
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: #64748b;
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .loc-pin {
   font-size: 14px;
-  color: #0284c7;
+  color: var(--primary);
 }
 
 .addr-text {
@@ -133,9 +133,9 @@
 }
 
 .amenity-chip {
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  color: #475569;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
   font-size: 11.5px;
   font-weight: 600;
   padding: 4px 10px;
@@ -148,7 +148,7 @@
   gap: 10px;
   margin-top: 8px;
   padding-top: 12px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--border);
 }
 
 .btn-book-now {
@@ -173,9 +173,9 @@
 }
 
 .btn-view-map {
-  background: #f8fafc;
-  border: 1px solid #cbd5e1;
-  color: #334155;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
   text-decoration: none;
   padding: 11px 14px;
   border-radius: 12px;
@@ -187,8 +187,8 @@
 }
 
 .btn-view-map:hover {
-  background: #f0f9ff;
-  border-color: #0284c7;
-  color: #0284c7;
+  background: var(--card-bg);
+  border-color: var(--primary);
+  color: var(--primary);
   transform: translateY(-2px);
 }

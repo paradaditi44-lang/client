@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 import Footer from "../components/Footer";
+import TripMemoryModal from "../components/TripMemoryModal";
 import "../styles/Dashboard.css";
 
 function Dashboard() {
@@ -14,6 +15,10 @@ function Dashboard() {
   const [tripToDelete, setTripToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+
+  // Trip Memory state
+  const [memoriesMap, setMemoriesMap] = useState({});
+  const [activeMemoryTrip, setActiveMemoryTrip] = useState(null);
 
   const showToast = (message, type = "success") => {
     setToast({ show: true, message, type });
@@ -100,6 +105,37 @@ function Dashboard() {
     }
   };
 
+  const loadMemories = async () => {
+    try {
+      const token =
+        localStorage.getItem("travexaToken") || localStorage.getItem("token");
+      let map = {};
+      if (token) {
+        const res = await API.get("/memories", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        (res.data?.memories || []).forEach((m) => {
+          if (m.tripId) map[m.tripId] = m;
+        });
+      }
+      const localStr = localStorage.getItem("travexaMemories");
+      if (localStr) {
+        const localObj = JSON.parse(localStr);
+        map = { ...localObj, ...map };
+      }
+      setMemoriesMap(map);
+    } catch (e) {
+      const localStr = localStorage.getItem("travexaMemories");
+      if (localStr) {
+        try {
+          setMemoriesMap(JSON.parse(localStr));
+        } catch (err) {
+          console.error("Failed to parse local memories:", err);
+        }
+      }
+    }
+  };
+
   useEffect(() => {
     const storedName = localStorage.getItem("travexaUserName");
     if (storedName) {
@@ -133,6 +169,7 @@ function Dashboard() {
     };
 
     fetchTrips();
+    loadMemories();
   }, []);
 
   // Compute statistics
@@ -251,14 +288,16 @@ function Dashboard() {
         ) : (
           <div className="vibrant-trips-grid">
             {trips.map((trip) => {
+              const tripId = trip.id || trip._id;
               const formattedBudget = !isNaN(Number(trip.budget))
                 ? `₹${new Intl.NumberFormat("en-IN").format(Number(trip.budget))}`
                 : trip.budget;
               const daysCount = calculateDays(trip);
               const travelStyle = trip.preferences?.travelStyle || trip.travelStyle || "General";
+              const existingMemory = memoriesMap[tripId];
 
               return (
-                <div key={trip.id || trip._id} className="vibrant-trip-card">
+                <div key={tripId} className="vibrant-trip-card">
                   {/* Destination Image Cover */}
                   <div className="trip-card-image-wrap">
                     <img
@@ -300,16 +339,39 @@ function Dashboard() {
                       </div>
                     </div>
 
+                    {/* Actions Row */}
                     <div className="trip-card-actions-row">
                       <button
                         className="btn-view-details"
                         onClick={() => {
                           localStorage.setItem("travexaTrip", JSON.stringify(trip));
-                          navigate("/trip-result", { state: { trip } });
+                          navigate("/trip-details", { state: { trip } });
                         }}
                       >
                         View Details →
                       </button>
+
+                      <button
+                        className="btn-memory-trigger"
+                        onClick={() => setActiveMemoryTrip(trip)}
+                        title={existingMemory ? "Edit Memory Journal" : "Create Trip Memory"}
+                        style={{
+                          padding: "8px 12px",
+                          borderRadius: "12px",
+                          border: "1.5px solid var(--border)",
+                          background: existingMemory ? "var(--surface)" : "var(--card-bg)",
+                          color: "var(--primary)",
+                          fontWeight: "700",
+                          fontSize: "12px",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}
+                      >
+                        {existingMemory ? "📖 Memory Journal" : "✨ Create Memory"}
+                      </button>
+
                       <button
                         className="btn-delete-icon"
                         onClick={() => setTripToDelete(trip)}
@@ -325,6 +387,23 @@ function Dashboard() {
           </div>
         )}
       </main>
+
+      {/* Trip Memory Modal */}
+      {activeMemoryTrip && (
+        <TripMemoryModal
+          trip={activeMemoryTrip}
+          existingMemory={memoriesMap[activeMemoryTrip.id || activeMemoryTrip._id]}
+          onClose={() => setActiveMemoryTrip(null)}
+          onSave={(savedMemory) => {
+            const tripId = activeMemoryTrip.id || activeMemoryTrip._id;
+            setMemoriesMap((prev) => ({
+              ...prev,
+              [tripId]: savedMemory,
+            }));
+            showToast("Trip Memory saved successfully! 📖✨", "success");
+          }}
+        />
+      )}
 
       {/* Confirmation Modal */}
       {tripToDelete && (

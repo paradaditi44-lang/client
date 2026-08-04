@@ -1,18 +1,19 @@
 /* =====================================================
-   VIBRANT TRAVEL DESTINATION CARD STYLES
+   VIBRANT TRAVEL DESTINATION CARD STYLES (Light & Dark)
 ===================================================== */
 
 .destination-section {
   padding: 40px 30px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 24px;
-  box-shadow: 0 12px 36px rgba(2, 132, 199, 0.08);
+  box-shadow: var(--shadow);
   margin-top: 30px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .destination-section h2 {
-  color: #0f172a;
+  color: var(--text);
   font-size: 26px;
   margin-bottom: 25px;
   font-weight: 800;
@@ -25,17 +26,17 @@
 }
 
 .destination-card {
-  background: #ffffff;
+  background: var(--card-bg);
   border-radius: 20px;
   overflow: hidden;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
   transition: all 0.3s ease;
 }
 
 .destination-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 14px 32px rgba(2, 132, 199, 0.16);
+  box-shadow: var(--shadow);
 }
 
 .destination-image {
@@ -52,12 +53,12 @@
 .destination-content h3 {
   font-size: 22px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text);
   margin-bottom: 8px;
 }
 
 .destination-content p {
-  color: #64748b;
+  color: var(--text-secondary);
   margin: 6px 0;
   font-size: 14.5px;
 }

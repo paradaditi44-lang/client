@@ -1,5 +1,5 @@
 /* =====================================================
-   EXPLORE CATEGORIES FILTER STYLES
+   EXPLORE CATEGORIES FILTER STYLES (Light & Dark Theme)
 ===================================================== */
 
 .category-section {
@@ -8,7 +8,7 @@
 
 .category-section h2 {
   margin-bottom: 16px;
-  color: #0f172a;
+  color: var(--text);
   font-size: 22px;
   font-weight: 800;
   letter-spacing: -0.3px;
@@ -21,8 +21,8 @@
 }
 
 .category-card {
-  background: #ffffff;
-  border: 1.5px solid #e2e8f0;
+  background: var(--card-bg);
+  border: 1.5px solid var(--border);
   border-radius: 18px;
   padding: 16px 14px;
   cursor: pointer;
@@ -30,24 +30,24 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.06);
+  box-shadow: var(--shadow);
   transition: all 0.3s ease;
   font-weight: 700;
   font-size: 13.5px;
-  color: #334155;
+  color: var(--text);
   outline: none;
 }
 
 .category-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(2, 132, 199, 0.14);
-  border-color: #38bdf8;
+  box-shadow: var(--shadow);
+  border-color: var(--primary);
 }
 
 .category-card.active {
-  border-color: var(--cat-color, #0284c7);
-  background: #f0f9ff;
-  color: var(--cat-color, #0284c7);
+  border-color: var(--primary);
+  background: var(--surface);
+  color: var(--primary);
   box-shadow: 0 8px 24px rgba(2, 132, 199, 0.2);
 }
 
