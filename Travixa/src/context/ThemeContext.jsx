@@ -1,35 +1,25 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("travexaTheme") || "light";
-  });
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem("travexaTheme", theme);
-    document.body.classList.remove("light-theme", "dark-theme");
-    document.body.classList.add(`${theme}-theme`);
-  }, [theme]);
+    document.body.className = darkMode ? "dark" : "";
+  }, [darkMode]);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+    setDarkMode((prev) => !prev);
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ darkMode, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );
 }
 
 export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    return { theme: "light", toggleTheme: () => {} };
-  }
-  return context;
+  return useContext(ThemeContext);
 }
-
-export default ThemeContext;
