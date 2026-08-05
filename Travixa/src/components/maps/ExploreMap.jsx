@@ -95,18 +95,22 @@ function ExploreMap({
                 <div className="map-popup">
                   <h3>{place.name}</h3>
                   <p className="map-popup-category">
-                    {selectedCategory.icon} {selectedCategory.label}
+                    {selectedCategory.icon} {selectedCategory.label} {place.distanceStr ? `• ${place.distanceStr}` : ""}
                   </p>
                   <p className="map-popup-address">{place.address}</p>
-
-<a
-  href={`https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lon}`}
-  target="_blank"
-  rel="noreferrer"
-  className="map-popup-link"
->
-  Open in Google Maps
-</a>
+                  {place.description && (
+                    <p className="map-popup-desc" style={{ fontSize: "12px", color: "var(--text-secondary)", margin: "4px 0 8px" }}>
+                      {place.description}
+                    </p>
+                  )}
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lon}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="map-popup-link"
+                  >
+                    Open in Google Maps
+                  </a>
                 </div>
               </Popup>
             </Marker>

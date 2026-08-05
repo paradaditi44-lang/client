@@ -131,6 +131,8 @@
   font-size: 14px;
 }
 
+.dark .register-error,
+body.dark .register-error,
 body.dark-theme .register-error {
   background: rgba(220, 38, 38, 0.2);
   color: #fca5a5;

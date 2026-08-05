@@ -12,6 +12,7 @@ import {
 import L from "leaflet";
 
 import "leaflet/dist/leaflet.css";
+import { geocodeLocation, isValidCoordinate } from "../services/geocoding";
 
 // =====================================================
 // FIX LEAFLET MARKERS
@@ -176,86 +177,37 @@ function MapView({
         // SEARCH STARTING LOCATION AND DESTINATION
         // =================================================
 
-        const [
-          fromResponse,
-          toResponse,
-        ] = await Promise.all([
-          fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(
-              from
-            )}`
-          ),
-
-          fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(
-              to
-            )}`
-          ),
+        const [fromGeo, toGeo] = await Promise.all([
+          geocodeLocation(from),
+          geocodeLocation(to),
         ]);
-
-        const [
-          dataFrom,
-          dataTo,
-        ] = await Promise.all([
-          fromResponse.json(),
-          toResponse.json(),
-        ]);
-
-        // =================================================
-        // CHECK INVALID LOCATIONS
-        // =================================================
 
         if (
-          dataFrom.length === 0 ||
-          dataTo.length === 0
+          !fromGeo ||
+          !toGeo ||
+          !isValidCoordinate(fromGeo.lat, fromGeo.lon) ||
+          !isValidCoordinate(toGeo.lat, toGeo.lon)
         ) {
           setError(
-            "Location not found. Please enter a valid location."
+            "Location not found. Please check spelling or enter a valid city or attraction."
           );
 
           setFromCoords(null);
-
           setToCoords(null);
-
           setDistance("Not available");
-
           setDuration("Not available");
-
           return;
         }
 
-        // =================================================
-        // GET COORDINATES
-        // =================================================
+        const lat1 = fromGeo.lat;
+        const lon1 = fromGeo.lon;
+        const lat2 = toGeo.lat;
+        const lon2 = toGeo.lon;
 
-        const lat1 = parseFloat(
-          dataFrom[0].lat
-        );
-
-        const lon1 = parseFloat(
-          dataFrom[0].lon
-        );
-
-        const lat2 = parseFloat(
-          dataTo[0].lat
-        );
-
-        const lon2 = parseFloat(
-          dataTo[0].lon
-        );
-
-        const start = [
-          lat1,
-          lon1,
-        ];
-
-        const end = [
-          lat2,
-          lon2,
-        ];
+        const start = [lat1, lon1];
+        const end = [lat2, lon2];
 
         setFromCoords(start);
-
         setToCoords(end);
 
         // =================================================

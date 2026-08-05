@@ -89,13 +89,19 @@ function ExploreSidebar({
         {!loading && error && (
           <div className="sidebar-status">
             <span className="sidebar-status-icon">⚠️</span>
-            <h4>Unable to fetch nearby places.</h4>
+            <h4>
+              {error === "not_found"
+                ? "Location not found"
+                : "Unable to fetch nearby places"}
+            </h4>
             <p>
-              {error === "timeout"
+              {error === "not_found"
+                ? "Please check your spelling or try searching for a city, tourist attraction, or state name."
+                : error === "timeout"
                 ? "Request timed out. Please try again."
                 : "The map service is temporarily busy. Please try again in a few seconds."}
             </p>
-            {onRetry && (
+            {onRetry && error !== "not_found" && (
               <button
                 type="button"
                 className="sidebar-retry-btn"
@@ -119,7 +125,7 @@ function ExploreSidebar({
           <div className="sidebar-status">
             <span className="sidebar-status-icon">🗺️</span>
             <h4>Nothing to show yet</h4>
-            <p>Search a city, district, state, or country above.</p>
+            <p>Search a city, district, state, landmark, or country above.</p>
           </div>
         )}
 
@@ -144,7 +150,10 @@ function ExploreSidebar({
 
                 <span className="place-list-text">
                   <span className="place-list-name">{place.name}</span>
-                  <span className="place-list-address">{place.address}</span>
+                  <span className="place-list-address">
+                    {place.distanceStr ? `${place.distanceStr} • ` : ""}
+                    {place.address}
+                  </span>
                 </span>
               </button>
             );

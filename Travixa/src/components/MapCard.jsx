@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "../styles/MapCard.css";
+import { geocodeLocation, isValidCoordinate } from "../services/geocoding";
 
 // Fix Leaflet Default Icon path issues
 delete L.Icon.Default.prototype._getIconUrl;
@@ -227,30 +228,27 @@ function MapCard({ destination }) {
     const timer = setTimeout(async () => {
       try {
         setLoadingMap(true);
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(
-            destination.trim()
-          )}`
-        );
-        const data = await res.json();
-        if (data && data.length > 0) {
-          const lat = parseFloat(data[0].lat);
-          const lon = parseFloat(data[0].lon);
-          if (!isNaN(lat) && !isNaN(lon)) {
-            setCoords([lat, lon]);
-            const parts = data[0].display_name.split(",");
-            setLocationName(parts.slice(0, 2).join(",").trim());
-          }
+        setRouteError(false);
+        setRoutePolyline([]);
+
+        const result = await geocodeLocation(destination.trim());
+
+        if (result && isValidCoordinate(result.lat, result.lon)) {
+          setCoords([result.lat, result.lon]);
+          const parts = (result.displayName || destination).split(",");
+          setLocationName(parts.slice(0, 2).join(",").trim());
         } else {
           setRouteError(true);
           setRoutePolyline([]);
         }
       } catch (err) {
         console.error("Map geocoding error:", err);
+        setRouteError(true);
+        setRoutePolyline([]);
       } finally {
         setLoadingMap(false);
       }
-    }, 450);
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [destination, isDestinationSet]);

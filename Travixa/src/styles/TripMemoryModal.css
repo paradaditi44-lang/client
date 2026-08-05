@@ -211,9 +211,9 @@
 
 .btn-add-url {
   padding: 10px 16px;
-  background: var(--surface, #f0f9ff);
-  color: var(--primary, #0284c7);
-  border: 1px solid var(--border, #bae6fd);
+  background: var(--surface);
+  color: var(--primary);
+  border: 1px solid var(--border);
   border-radius: 12px;
   font-weight: 700;
   font-size: 13px;
@@ -226,9 +226,9 @@
   align-items: center;
   gap: 6px;
   padding: 10px 16px;
-  background: var(--surface, #f1f5f9);
-  color: var(--text, #334155);
-  border: 1px dashed var(--border, #cbd5e1);
+  background: var(--surface);
+  color: var(--text);
+  border: 1px dashed var(--border);
   border-radius: 12px;
   font-weight: 700;
   font-size: 13px;

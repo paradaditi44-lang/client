@@ -6,8 +6,6 @@ import "../styles/Navbar.css";
 function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme, toggleTheme } = useTheme();
-
   const { darkMode, toggleTheme } = useTheme();
 
   const loggedIn =
@@ -146,17 +144,10 @@ function Navbar() {
 
         {/* DARK / LIGHT */}
 
-        {/* DARK MODE */}
         <button
           className="navbar-theme"
           onClick={toggleTheme}
-          title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
-        >
-          {theme === "dark" ? "☀️" : "🌙"}
-        <button
-          className="navbar-theme"
-          onClick={toggleTheme}
-          title="Change Theme"
+          title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
         >
           {darkMode ? "☀️" : "🌙"}
         </button>

@@ -13,6 +13,7 @@ function PlannerForm({ setGeneratedTrip, onDestinationChange }) {
     travelers: 2,
     budget: "",
     travelStyle: "",
+    transport: "Driving",
     interests: [],
   });
 
@@ -89,6 +90,7 @@ function PlannerForm({ setGeneratedTrip, onDestinationChange }) {
         numberOfTravelers: Number(trip.travelers) || 1,
         preferences: {
           travelStyle: trip.travelStyle,
+          transport: trip.transport || "Driving",
           interests: trip.interests,
         },
       };
@@ -226,9 +228,9 @@ function PlannerForm({ setGeneratedTrip, onDestinationChange }) {
           </div>
         </div>
 
-        {/* Travel Style */}
-        <div className="form-group full-width">
-          <label htmlFor="travelStyle">🎒 TRAVEL STYLE</label>
+        {/* Travel Style / Traveler Type */}
+        <div className="form-group">
+          <label htmlFor="travelStyle">🎒 TRAVELER CATEGORY</label>
           <div className="input-group">
             <span className="input-icon">🎒</span>
             <select
@@ -237,12 +239,32 @@ function PlannerForm({ setGeneratedTrip, onDestinationChange }) {
               value={trip.travelStyle}
               onChange={handleInput}
             >
-              <option value="">Select your travel style</option>
-              <option value="Adventure">🏔️ Adventure & Outdoors</option>
-              <option value="Luxury">👑 Luxury & Comfort</option>
+              <option value="">Select category</option>
               <option value="Family">👨‍👩‍👧‍👦 Family Friendly</option>
               <option value="Solo">🎒 Solo Traveler</option>
+              <option value="Luxury">👑 Luxury & Comfort</option>
+              <option value="Adventure">🏔️ Adventure & Outdoors</option>
               <option value="Relax">🌅 Relax & Unwind</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Mode of Transport */}
+        <div className="form-group">
+          <label htmlFor="transport">🚗 MODE OF TRANSPORT</label>
+          <div className="input-group">
+            <span className="input-icon">🚗</span>
+            <select
+              id="transport"
+              name="transport"
+              value={trip.transport}
+              onChange={handleInput}
+            >
+              <option value="Driving">🚗 Driving</option>
+              <option value="Walking">🚶 Walking</option>
+              <option value="Ride/Bike">🏍️ Ride / Bike</option>
+              <option value="Flight">✈️ Flight</option>
+              <option value="Train">🚆 Train</option>
             </select>
           </div>
         </div>

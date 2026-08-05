@@ -270,7 +270,10 @@ export const generateItineraryPDF = (trip = {}, days = [], displayDays = 1) => {
 
   drawSectionHeader("DAY-BY-DAY ITINERARY", "Detailed schedule and activity breakdown");
 
-  days.forEach((day, dayIndex) => {
+  const displayDaysNum = Number(displayDays) || 1;
+  const targetDaysList = days.slice(0, displayDaysNum);
+
+  targetDaysList.forEach((day, dayIndex) => {
     checkPageBreak(40);
 
     // Day Header Pill Banner
@@ -300,7 +303,10 @@ export const generateItineraryPDF = (trip = {}, days = [], displayDays = 1) => {
       currentY += 8;
     } else {
       activities.forEach((act) => {
-        const cleanAct = String(act).replace(/^[-*•\d.]+\s*/, "").replace(/\*\*/g, "");
+        let cleanAct = String(act).replace(/^#+\s*/, "").replace(/\*\*/g, "").replace(/^[-*•]\s*/, "").replace(/^\d+\.\s+/, "").trim();
+        if (/^:\d{2}\s*(?:AM|PM)/i.test(cleanAct)) {
+          cleanAct = "8" + cleanAct;
+        }
         const lines = doc.splitTextToSize(cleanAct, contentWidth - 14);
         const requiredSpace = lines.length * 5.5 + 4;
         checkPageBreak(requiredSpace);
