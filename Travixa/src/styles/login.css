@@ -147,6 +147,8 @@
   font-size: 14px;
 }
 
+.dark .login-error,
+body.dark .login-error,
 body.dark-theme .login-error {
   background: rgba(220, 38, 38, 0.2);
   color: #fca5a5;

@@ -8,6 +8,8 @@ function Navbar() {
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
 
+  const { darkMode, toggleTheme } = useTheme();
+
   const loggedIn =
     localStorage.getItem("travexaLoggedIn") === "true";
 
@@ -122,17 +124,14 @@ function Navbar() {
           </button>
         )}
 
-        {/* DARK MODE */}
+        {/* DARK / LIGHT */}
+
         <button
           className="navbar-theme"
           onClick={toggleTheme}
-          title={
-            theme === "dark"
-              ? "Switch to Light Mode"
-              : "Switch to Dark Mode"
-          }
+          title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
         >
-          {theme === "dark" ? "☀️" : "🌙"}
+          {darkMode ? "☀️" : "🌙"}
         </button>
       </div>
     </nav>

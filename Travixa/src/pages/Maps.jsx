@@ -6,6 +6,8 @@ import ExploreMap from "../components/maps/ExploreMap";
 import ExploreSidebar from "../components/maps/ExploreSidebar";
 import Footer from "../components/Footer";
 import { EXPLORE_CATEGORIES, DEFAULT_CATEGORY } from "../utils/explorecategories";
+import { geocodeLocation, isValidCoordinate } from "../services/geocoding";
+import { fetchPlacesForCategory } from "../services/recommendations";
 
 import "../styles/Maps.css";
 const geoapifyCategories = {
@@ -42,8 +44,14 @@ function Maps() {
     };
   }, []);
 
-  // Fetch nearby places for a given coordinate + category using Overpass API
+  // Fetch nearby places for a given coordinate + category using recommendations service
   const fetchNearbyPlaces = async (lat, lon, category) => {
+    if (!isValidCoordinate(lat, lon)) {
+      setPlaces([]);
+      setLoading(false);
+      return;
+    }
+
     // Cancel any previous pending request
     if (activeRequestRef.current) {
       activeRequestRef.current.abort();
@@ -57,81 +65,18 @@ function Maps() {
     setError(null);
     setSelectedPlace(null);
 
-    // Set 15 second fetch timeout
-    const timeoutId = setTimeout(() => {
-      controller.abort();
-    }, 15000);
-
-    const query = `
-[out:json][timeout:15];
-(
-  node["${category.key}"="${category.value}"](around:10000,${lat},${lon});
-  way["${category.key}"="${category.value}"](around:10000,${lat},${lon});
-  relation["${category.key}"="${category.value}"](around:10000,${lat},${lon});
-);
-out center 60;
-`;
-
     try {
-     const response = await fetch(
-  "https://lz4.overpass-api.de/api/interpreter",{
-        method: "POST",
-        body: query,
-        signal: controller.signal,
-      });
+      const results = await fetchPlacesForCategory(lat, lon, category, controller.signal);
 
-      clearTimeout(timeoutId);
-
-      // Check HTTP status code before parsing JSON
-      if (!response.ok) {
-        throw new Error(`Overpass API unavailable: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("Overpass Response:", data);
-console.log("Elements Count:", data.elements?.length);
       // Discard stale API responses
       if (currentRequestId !== requestIdRef.current) {
         return;
       }
 
-      const parsed = (data.elements || [])
-        .map((el) => {
-          const placeLat = el.lat || el.center?.lat;
-          const placeLon = el.lon || el.center?.lon;
-          if (!placeLat || !placeLon) return null;
-
-          const tags = el.tags || {};
-          const addressParts = [
-            tags["addr:housenumber"],
-            tags["addr:street"],
-            tags["addr:suburb"] || tags["addr:city"],
-          ].filter(Boolean);
-
-          return {
-            id: `${el.type}-${el.id}`,
-            name: tags.name || `Unnamed ${category.label.replace(/s$/, "")}`,
-            lat: placeLat,
-            lon: placeLon,
-           address:
-  addressParts.join(", ") ||
-  tags["addr:full"] ||
-  tags["contact:street"] ||
-  tags["is_in"] ||
-  "Location available on map",
-          };
-        })
-        .filter(Boolean)
-       .slice(0, 50);
-
-      setPlaces(parsed);
+      setPlaces(results);
       setError(null);
-  } catch (err) {
-  clearTimeout(timeoutId);
-
-  if (currentRequestId !== requestIdRef.current) {
-    return;
-  }
+    } catch (err) {
+      if (currentRequestId !== requestIdRef.current) return;
 
   // Ignore cancelled requests
   if (err.name === "AbortError") {
@@ -150,7 +95,7 @@ console.log("Elements Count:", data.elements?.length);
     }
   };
 
-  // Search a city / district / state / country via Nominatim geocoding
+  // Search a city / tourist attraction / state / country via multi-stage geocoding
   const handleSearch = async () => {
     const query = searchInput.trim();
     if (!query) return;
@@ -163,53 +108,28 @@ console.log("Elements Count:", data.elements?.length);
     setSelectedPlace(null);
     setError(null);
 
-    const controller = new AbortController();
-    if (activeRequestRef.current) {
-      activeRequestRef.current.abort();
-    }
-    activeRequestRef.current = controller;
-
-    const timeoutId = setTimeout(() => {
-      controller.abort();
-    }, 15000);
-
     try {
-      const geoResponse = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          query
-        )}&limit=1`,
-        { signal: controller.signal }
-      );
+      const geoResult = await geocodeLocation(query);
 
-      clearTimeout(timeoutId);
-
-      if (!geoResponse.ok) {
-        throw new Error(`Nominatim unavailable: ${geoResponse.status}`);
-      }
-
-      const geoData = await geoResponse.json();
-
-      if (!geoData || geoData.length === 0) {
+      if (!geoResult || !isValidCoordinate(geoResult.lat, geoResult.lon)) {
         setPosition(null);
         setLocationLabel(query);
         setPlaces([]);
         setLoading(false);
+        setError("not_found");
         return;
       }
 
-      const lat = parseFloat(geoData[0].lat);
-      const lon = parseFloat(geoData[0].lon);
-
+      const { lat, lon, displayName } = geoResult;
       setPosition([lat, lon]);
-      setLocationLabel(geoData[0].display_name || query);
+      setLocationLabel(displayName || query);
 
       await fetchNearbyPlaces(lat, lon, selectedCategory);
     } catch (err) {
-      clearTimeout(timeoutId);
       console.error("Explore Nearby: geocoding failed", err);
       setPlaces([]);
       setLoading(false);
-      setError(err.name === "AbortError" ? "timeout" : "unavailable");
+      setError("unavailable");
     }
   };
 
@@ -223,11 +143,18 @@ console.log("Elements Count:", data.elements?.length);
     }
 
     setLoading(true);
+    setError(null);
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
+
+        if (!isValidCoordinate(lat, lon)) {
+          setLoading(false);
+          alert("Invalid GPS coordinates received.");
+          return;
+        }
 
         setSearchInput("");
         setHasSearched(true);
@@ -236,8 +163,9 @@ console.log("Elements Count:", data.elements?.length);
 
         await fetchNearbyPlaces(lat, lon, selectedCategory);
       },
-      () => {
+      (err) => {
         setLoading(false);
+        console.warn("Geolocation permission error:", err);
         alert("Unable to access your location. Please allow location access and try again.");
       }
     );
@@ -247,14 +175,14 @@ console.log("Elements Count:", data.elements?.length);
   const handleCategorySelect = (category) => {
     if (loading) return; // Prevent duplicate requests
     setSelectedCategory(category);
-    if (position) {
+    if (position && isValidCoordinate(position[0], position[1])) {
       fetchNearbyPlaces(position[0], position[1], category);
     }
   };
 
   // Retry previous request
   const handleRetry = () => {
-    if (position) {
+    if (position && isValidCoordinate(position[0], position[1])) {
       fetchNearbyPlaces(position[0], position[1], selectedCategory);
     } else if (searchInput.trim()) {
       handleSearch();

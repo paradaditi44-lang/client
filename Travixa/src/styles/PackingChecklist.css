@@ -219,7 +219,7 @@
 
 .checklist-item-row.checked {
   background: var(--surface);
-  opacity: 0.72;
+  opacity: 0.88;
 }
 
 .checklist-item-row.checked .item-label-text {

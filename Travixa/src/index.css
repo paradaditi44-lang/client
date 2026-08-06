@@ -17,114 +17,45 @@ html {
 body.light-theme {
   --bg: #f8fafc;
   --card-bg: #ffffff;
+  --card: #ffffff;
   --surface: #f1f5f9;
+  --surface-hover: #e2e8f0;
   --text: #0f172a;
-  --text-secondary: #64748b;
+  --text-secondary: #475569;
+  --textLight: #475569;
   --border: #e2e8f0;
   --shadow: 0 10px 30px rgba(2, 132, 199, 0.08);
   --primary: #0284c7;
+  --primaryHover: #0369a1;
   --secondary: #2563eb;
   --input-bg: #ffffff;
-  --navbar-bg: rgba(255, 255, 255, 0.9);
+  --navbar-bg: rgba(255, 255, 255, 0.95);
+  --navbar: rgba(255, 255, 255, 0.95);
   --hero-gradient: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
   --blob-opacity: 0.18;
-body {
-  font-family: "Poppins", Arial, sans-serif;
-  transition: all 0.35s ease;
 }
 
-#root {
-  min-height: 100vh;
-}
-
+.dark,
+body.dark,
 body.dark-theme {
   --bg: #0f172a;
   --card-bg: #1e293b;
+  --card: #1e293b;
   --surface: #334155;
+  --surface-hover: #475569;
   --text: #f8fafc;
   --text-secondary: #cbd5e1;
-  --border: #475569;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --textLight: #cbd5e1;
+  --border: #334155;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
   --primary: #38bdf8;
+  --primaryHover: #0284c7;
   --secondary: #60a5fa;
-  --input-bg: #273449;
-  --navbar-bg: rgba(15, 23, 42, 0.9);
+  --input-bg: #1e293b;
+  --navbar-bg: rgba(15, 23, 42, 0.95);
+  --navbar: #0f172a;
   --hero-gradient: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   --blob-opacity: 0.12;
-}
-
-body {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: var(--bg);
-  color: var(--text);
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-body, button, input, textarea, select {
-  font-family: inherit;
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-button {
-  cursor: pointer;
-}
-
-a {
-  text-decoration: none;
-}
-
-
-/* =========================
-      LIGHT THEME
-========================= */
-
-:root {
-
-  --bg: #f5f7fb;
-
-  --card: #ffffff;
-
-  --navbar: rgba(255,255,255,.92);
-
-  --primary: #2563eb;
-
-  --primaryHover:#1d4ed8;
-
-  --text: #1e293b;
-
-  --textLight:#64748b;
-
-  --border:#dbe4ee;
-
-  --shadow:0 12px 35px rgba(0,0,0,.08);
-
-}
-
-
-/* =========================
-      DARK THEME
-========================= */
-
-.dark {
-
-  --bg:#0f172a;
-
-  --card:#1e293b;
-
-  --navbar:#111827;
-
-  --primary:#3b82f6;
-
-  --primaryHover:#60a5fa;
-
-  --text:#f8fafc;
-
-  --textLight:#cbd5e1;
-
-  --border:#334155;
-
-  --shadow:0 12px 35px rgba(0,0,0,.45);
-
 }
 
 
@@ -200,30 +131,23 @@ body{
 
 input,
 textarea,
-select{
-
-  background:var(--card);
-
-  color:var(--text);
-
-  border:1px solid var(--border);
-
-  outline:none;
-
-  transition:.3s;
-
+select {
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  outline: none;
+  transition: .3s;
 }
 
-input::placeholder{
-
-  color:var(--textLight);
-
+select option {
+  background-color: var(--card-bg);
+  color: var(--text);
 }
 
-textarea::placeholder{
-
-  color:var(--textLight);
-
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.9;
 }
 
 

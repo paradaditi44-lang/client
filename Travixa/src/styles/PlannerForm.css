@@ -58,7 +58,9 @@
   font-weight: 600;
 }
 
-body.dark-theme .planner-error-alert {
+body.dark-theme .planner-error-alert,
+body.dark .planner-error-alert,
+.dark .planner-error-alert {
   background: rgba(225, 29, 72, 0.2);
   border-color: rgba(225, 29, 72, 0.4);
   color: #fda4af;

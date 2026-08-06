@@ -125,16 +125,22 @@
   border-color: #fca5a5;
 }
 
+.dark .budget-health-card.health-excellent,
+body.dark .budget-health-card.health-excellent,
 body.dark-theme .budget-health-card.health-excellent {
   background: linear-gradient(135deg, rgba(20, 83, 45, 0.35) 0%, rgba(22, 101, 52, 0.35) 100%);
   border-color: rgba(74, 222, 128, 0.4);
 }
 
+.dark .budget-health-card.health-moderate,
+body.dark .budget-health-card.health-moderate,
 body.dark-theme .budget-health-card.health-moderate {
   background: linear-gradient(135deg, rgba(120, 53, 15, 0.35) 0%, rgba(146, 64, 14, 0.35) 100%);
   border-color: rgba(251, 191, 36, 0.4);
 }
 
+.dark .budget-health-card.health-tight,
+body.dark .budget-health-card.health-tight,
 body.dark-theme .budget-health-card.health-tight {
   background: linear-gradient(135deg, rgba(127, 29, 29, 0.35) 0%, rgba(153, 27, 27, 0.35) 100%);
   border-color: rgba(248, 113, 113, 0.4);
@@ -307,6 +313,8 @@ body.dark-theme .budget-health-card.health-tight {
   overflow: hidden;
 }
 
+.dark .savings-highlight-card,
+body.dark .savings-highlight-card,
 body.dark-theme .savings-highlight-card {
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #334155 100%);
   border: 1px solid var(--border);

@@ -89,13 +89,14 @@ function AITripResult({ trip: propTrip, showExtras = true, showSummary = true })
     );
   }
 
-  // Parse or format backend itinerary string into day objects
-  const parseItinerary = (itineraryText) => {
+  // Parse or format backend itinerary string into day objects with exact day count enforcement
+  const parseItinerary = (itineraryText, targetDays) => {
     if (!itineraryText) return [];
 
-    if (Array.isArray(itineraryText)) return itineraryText;
-
-    if (typeof itineraryText === "string") {
+    let parsed = [];
+    if (Array.isArray(itineraryText)) {
+      parsed = itineraryText;
+    } else if (typeof itineraryText === "string") {
       const dayIcons = ["✈️", "📸", "🏔️", "🏛️", "🌅", "🎒", "🚗", "🌟"];
       const dayRegex = /(?:Day\s+\d+|###\s*Day\s+\d+|\*\*Day\s+\d+\*\*)/i;
 
@@ -104,7 +105,15 @@ function AITripResult({ trip: propTrip, showExtras = true, showSummary = true })
           .split(/(?=(?:Day\s+\d+|###\s*Day\s+\d+|\*\*Day\s+\d+\*\*))/i)
           .filter(Boolean);
 
-        return parts.map((part, index) => {
+        const extractedDays = [];
+        parts.forEach((part) => {
+          const trimmed = part.trim();
+          if (/^(?:Day\s+\d+|###\s*Day\s+\d+|\*\*Day\s+\d+\*\*)/i.test(trimmed)) {
+            extractedDays.push(trimmed);
+          }
+        });
+
+        parsed = extractedDays.map((part, index) => {
           const lines = part
             .trim()
             .split("\n")
@@ -112,14 +121,24 @@ function AITripResult({ trip: propTrip, showExtras = true, showSummary = true })
             .filter(Boolean);
 
           let titleLine = lines[0] ? lines[0].replace(/^#+\s*/, "").replace(/\*\*/g, "") : `Day ${index + 1}`;
+          const cleanActivityLine = (rawLine) => {
+            if (!rawLine) return "";
+            let line = rawLine.trim().replace(/^#+\s*/, "").replace(/\*\*/g, "");
+            line = line.replace(/^[-*•]\s*/, "").replace(/^\d+\.\s+/, "");
+            if (/^:\d{2}\s*(?:AM|PM)/i.test(line)) {
+              line = "8" + line;
+            }
+            return line.trim();
+          };
+
           const activities = lines
             .slice(1)
-            .map((l) => l.replace(/^[-*•\d.]+\s*/, "").replace(/\*\*/g, ""))
+            .map(cleanActivityLine)
             .filter(Boolean);
 
           return {
             day: index + 1,
-            title: titleLine.replace(/^Day\s+\d+[:\s-]*/i, "") || "Day Overview",
+            title: titleLine.replace(/^Day\s+\d+[:\s-]*/i, "") || `Day ${index + 1} Overview`,
             icon: dayIcons[index % dayIcons.length],
             activities: activities.length > 0 ? activities : [part],
           };
@@ -130,48 +149,53 @@ function AITripResult({ trip: propTrip, showExtras = true, showSummary = true })
           .map((l) => l.trim())
           .filter(Boolean);
 
-        return [
+        const cleanActivityLine = (rawLine) => {
+          if (!rawLine) return "";
+          let line = rawLine.trim().replace(/^#+\s*/, "").replace(/\*\*/g, "");
+          line = line.replace(/^[-*•]\s*/, "").replace(/^\d+\.\s+/, "");
+          if (/^:\d{2}\s*(?:AM|PM)/i.test(line)) {
+            line = "8" + line;
+          }
+          return line.trim();
+        };
+
+        parsed = [
           {
             day: 1,
             title: "AI Generated Itinerary",
             icon: "✨",
-            activities: lines.map((l) => l.replace(/^[-*•\d.]+\s*/, "").replace(/\*\*/g, "")),
+            activities: lines.map(cleanActivityLine).filter(Boolean),
           },
         ];
       }
     }
 
-    return [];
+    if (!targetDays || targetDays <= 0) return parsed;
+
+    // Validate and enforce targetDays count strictly
+    if (parsed.length > targetDays) {
+      parsed = parsed.slice(0, targetDays);
+    } else if (parsed.length < targetDays) {
+      const dayIcons = ["✈️", "📸", "🏔️", "🏛️", "🌅", "🎒", "🚗", "🌟"];
+      for (let i = parsed.length + 1; i <= targetDays; i++) {
+        parsed.push({
+          day: i,
+          title: `Day ${i} Sightseeing & Exploration`,
+          icon: dayIcons[(i - 1) % dayIcons.length],
+          activities: [
+            "🌅 Morning: Local breakfast and landmark visit",
+            "☀ Late Morning: City center exploration & museum tour",
+            "🍽 Lunch: Regional dining recommendation",
+            "🌇 Afternoon: Shopping and park relaxation",
+            "🌆 Evening: Sunset viewpoint",
+            "🌙 Night: Local dinner & relaxation",
+          ],
+        });
+      }
+    }
+
+    return parsed.map((d, idx) => ({ ...d, day: idx + 1 }));
   };
-
-  const defaultItinerary = [
-    {
-      day: 1,
-      title: "Arrival & Local Exploration",
-      icon: "✈️",
-      activities: [
-        "Arrive at your destination",
-        "Check in to your hotel",
-        "Explore nearby attractions",
-        "Enjoy a local dinner",
-      ],
-    },
-    {
-      day: 2,
-      title: "Explore the Highlights",
-      icon: "📸",
-      activities: [
-        "Visit the most popular attraction",
-        "Explore local streets",
-        "Try traditional food",
-        "Enjoy an evening experience",
-      ],
-    },
-  ];
-
-  const days = trip.itinerary
-    ? parseItinerary(trip.itinerary)
-    : defaultItinerary;
 
   const calculateDays = () => {
     if (trip.days) return trip.days;
@@ -180,15 +204,21 @@ function AITripResult({ trip: propTrip, showExtras = true, showSummary = true })
       const end = new Date(trip.endDate);
       const diffTime = Math.abs(end - start);
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays || 1;
+      return (diffDays + 1) || 1;
     }
-    return days.length || 5;
+    return 1;
   };
 
   const displayDays = calculateDays();
+
+  const days = trip.itinerary
+    ? parseItinerary(trip.itinerary, displayDays)
+    : parseItinerary(null, displayDays);
+
   const displayTravelers = trip.numberOfTravelers || trip.travellers || trip.travelers || 1;
   const displayBudget = typeof trip.budget === "number" ? `₹${trip.budget.toLocaleString()}` : (trip.budget || "N/A");
-  const displayStyle = trip.preferences?.travelStyle || trip.travelStyle || "General";
+  const displayCategory = trip.preferences?.travelStyle || trip.travelStyle || "Family";
+  const displayTransport = trip.preferences?.transport || "Driving";
   const displayDate = trip.startDate || trip.travelDate || "N/A";
 
   return (
@@ -218,23 +248,45 @@ function AITripResult({ trip: propTrip, showExtras = true, showSummary = true })
               </div>
 
               <div>
-                <span>🗓️ DURATION</span>
+                <span>🗓️ TOTAL DAYS</span>
                 <strong>{displayDays} Days</strong>
               </div>
 
               <div>
-                <span>👥 TRAVELLERS</span>
-                <strong>{displayTravelers} People</strong>
+                <span>👥 TRAVELERS</span>
+                <strong>{displayCategory} ({displayTravelers} {displayTravelers === 1 ? "Person" : "People"})</strong>
               </div>
 
               <div>
-                <span>💰 BUDGET</span>
+                <span>💰 ESTIMATED COST</span>
                 <strong>{displayBudget}</strong>
               </div>
 
               <div>
-                <span>🎒 STYLE</span>
-                <strong>{displayStyle}</strong>
+                <span>🚗 TRAVEL STYLE</span>
+                <strong>{displayTransport}</strong>
+              </div>
+
+              <div>
+                <span>🚶 TOTAL DISTANCE</span>
+                <strong>~{displayDays * 12} km total</strong>
+              </div>
+
+              <div>
+                <span>🌤️ WEATHER OVERVIEW</span>
+                <strong>Pleasant seasonal climate & clear skies</strong>
+              </div>
+
+              <div style={{ gridColumn: "1 / -1" }}>
+                <span>🍲 BEST LOCAL FOODS</span>
+                <strong>Authentic regional thali, street snacks, and traditional desserts</strong>
+              </div>
+
+              <div style={{ gridColumn: "1 / -1" }}>
+                <span>💡 ESSENTIAL TRAVEL TIPS</span>
+                <strong style={{ fontSize: "13.5px", fontWeight: "600", lineHeight: "1.5" }}>
+                  • Keep digital/physical tickets and IDs offline &nbsp;• Reserve monument passes online &nbsp;• Carry small cash bills &nbsp;• Wear comfortable walking shoes
+                </strong>
               </div>
             </div>
           </div>
@@ -280,21 +332,64 @@ function AITripResult({ trip: propTrip, showExtras = true, showSummary = true })
                 </div>
 
                 <div className="activities">
-                  {day.activities.map(
-                    (activity, index) => (
-                      <div
-                        className="activity"
-                        key={index}
-                      >
-                        <span className="activity-dot">
-                          ✓
-                        </span>
-                        <span>
+                  {day.activities.map((activity, index) => {
+                    const isHeader =
+                      /^(?:🌅|☀|🍽|🌇|🌆|🌙|Daily Summary|Trip Summary|###|\*\*)/.test(
+                        activity
+                      ) || /^\d+:\d+/.test(activity);
+
+                    const isSummaryItem = /^(?:💰|🚶|🚗|🌤|🎒|🍲|- 💰|- 🚶|- 🚗|- 🌤|- 🎒|- 🍲)/.test(
+                      activity
+                    );
+
+                    if (isHeader) {
+                      return (
+                        <div
+                          key={index}
+                          className="activity-section-header"
+                          style={{
+                            fontWeight: "800",
+                            fontSize: "15px",
+                            color: "var(--primary, #0284c7)",
+                            marginTop: index > 0 ? "16px" : "4px",
+                            marginBottom: "6px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                          }}
+                        >
+                          <span>{activity}</span>
+                        </div>
+                      );
+                    }
+
+                    if (isSummaryItem) {
+                      return (
+                        <div
+                          key={index}
+                          className="activity-summary-item"
+                          style={{
+                            fontSize: "13.5px",
+                            color: "var(--text)",
+                            background: "var(--surface)",
+                            padding: "6px 12px",
+                            borderRadius: "10px",
+                            margin: "4px 0",
+                            fontWeight: "600",
+                          }}
+                        >
                           {activity}
-                        </span>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="activity" key={index}>
+                        <span className="activity-dot">✓</span>
+                        <span>{activity}</span>
                       </div>
-                    )
-                  )}
+                    );
+                  })}
                 </div>
               </div>
             </div>

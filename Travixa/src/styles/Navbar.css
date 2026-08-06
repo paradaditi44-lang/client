@@ -19,19 +19,11 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-
-  background: rgba(220, 238, 255, 0.88);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-
-  color: #1e3a5f;
-
-  border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+  border-bottom: 1px solid var(--border);
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
-  border-bottom: 1px solid var(--border);
   box-shadow: var(--shadow);
-  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
 }
 
 /* LOGO */
@@ -50,10 +42,6 @@
 }
 
 /* MENU NAVIGATION */
-/* ===========================
-   MENU
-=========================== */
-
 .navbar-menu {
   display: flex;
   align-items: center;
@@ -64,8 +52,6 @@
   border: none;
   background: transparent;
   color: var(--text);
-  font-size: 14.5px;
-  color: #1e3a5f;
   font-size: 15px;
   font-weight: 600;
   padding: 9px 18px;
@@ -78,7 +64,6 @@
   background: var(--surface);
   color: var(--primary);
   transform: translateY(-1px);
-  background: rgba(116, 185, 255, 0.28);
 }
 
 .navbar-menu button.active {
@@ -89,39 +74,24 @@
 }
 
 /* RIGHT SIDE ACTIONS */
-/* ===========================
-   RIGHT SIDE
-=========================== */
-
 .navbar-right {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-/* ===========================
-   LOGIN
-=========================== */
-
+/* LOGIN */
 .navbar-login {
   border: none;
-  padding: 10px 24px;
+  padding: 10px 22px;
   border-radius: 22px;
   background: var(--secondary);
   color: #ffffff;
-  background: #1e3a5f;
-  color: white;
-
-  padding: 10px 22px;
-  border-radius: 22px;
-
   font-size: 14px;
   font-weight: 700;
-
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
-  transition: 0.3s;
 }
 
 .navbar-login:hover {
@@ -130,29 +100,18 @@
   box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
 }
 
-/* ===========================
-   PROFILE
-=========================== */
-
+/* PROFILE */
 .navbar-profile {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 14px;
+  padding: 8px 14px;
   border: 1px solid var(--border);
   border-radius: 22px;
   background: var(--card-bg);
   color: var(--text);
-
-  padding: 8px 14px;
-
-  border: 1px solid rgba(30, 58, 95, 0.15);
-  border-radius: 22px;
-
-  background: rgba(255, 255, 255, 0.65);
-
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.3s ease;
 }
 
 .navbar-profile:hover {
@@ -160,24 +119,18 @@
   border-color: var(--primary);
   box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
   transform: translateY(-1px);
-  background: white;
-  border-color: #74b9ff;
 }
 
 .profile-icon {
   width: 32px;
   height: 32px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   border-radius: 50%;
   background: var(--surface);
   color: var(--primary);
-
-  background: #74b9ff;
-
+  border: 1px solid var(--border);
   font-size: 17px;
 }
 
@@ -185,38 +138,23 @@
   font-size: 14px;
   font-weight: 700;
   color: var(--text);
-  max-width: 100px;
-  color: #1e3a5f;
-
   max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* ===========================
-   LOGOUT
-=========================== */
-
+/* LOGOUT */
 .navbar-logout {
   padding: 8px 18px;
   border-radius: 20px;
   border: 1.5px solid var(--border);
   background: transparent;
   color: var(--text);
-  font-size: 13.5px;
-
-  border: 1.5px solid #1e3a5f;
-  border-radius: 20px;
-
-  background: transparent;
-  color: #1e3a5f;
-
   font-size: 14px;
   font-weight: 700;
-
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.3s ease;
 }
 
 .navbar-logout:hover {
@@ -224,18 +162,12 @@
   color: var(--primary);
   border-color: var(--primary);
   transform: translateY(-1px);
-  background: #1e3a5f;
-  color: white;
 }
 
-/* ===========================
-   THEME BUTTON
-=========================== */
-
+/* THEME BUTTON */
 .navbar-theme {
   width: 40px;
   height: 40px;
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -243,27 +175,16 @@
   border-radius: 50%;
   background: var(--surface);
   color: var(--text);
-
-  border: none;
-  border-radius: 50%;
-
-  background: rgba(255, 255, 255, 0.5);
-
   font-size: 18px;
-
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.3s ease;
 }
 
 .navbar-theme:hover {
   background: var(--card-bg);
+  border-color: var(--primary);
   transform: rotate(15deg);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* RESPONSIVE MEDIA QUERIES */
-  background: white;
-  transform: rotate(20deg);
 }
 
 /* ===========================

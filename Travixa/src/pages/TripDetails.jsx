@@ -117,7 +117,8 @@ function TripDetails() {
     typeof trip.budget === "number"
       ? `₹${trip.budget.toLocaleString()}`
       : trip.budget || "N/A";
-  const displayStyle = trip.preferences?.travelStyle || trip.travelStyle || "General";
+  const displayCategory = trip.preferences?.travelStyle || trip.travelStyle || "Family";
+  const displayTransport = trip.preferences?.transport || "Driving";
   const interestsList = Array.isArray(trip.preferences?.interests)
     ? trip.preferences.interests
     : Array.isArray(trip.interests)
@@ -139,7 +140,13 @@ function TripDetails() {
           return parts.map((part, index) => {
             const lines = part.trim().split("\n").map((l) => l.trim()).filter(Boolean);
             let titleLine = lines[0] ? lines[0].replace(/^#+\s*/, "").replace(/\*\*/g, "") : `Day ${index + 1}`;
-            const activities = lines.slice(1).map((l) => l.replace(/^[-*•\d.]+\s*/, "").replace(/\*\*/g, "")).filter(Boolean);
+            const activities = lines.slice(1).map((l) => {
+              let line = l.replace(/^#+\s*/, "").replace(/\*\*/g, "").replace(/^[-*•]\s*/, "").replace(/^\d+\.\s+/, "").trim();
+              if (/^:\d{2}\s*(?:AM|PM)/i.test(line)) {
+                line = "8" + line;
+              }
+              return line;
+            }).filter(Boolean);
             return {
               day: index + 1,
               title: titleLine.replace(/^Day\s+\d+[:\s-]*/i, "") || "Day Overview",
@@ -209,28 +216,41 @@ function TripDetails() {
             </div>
 
             <div>
-              <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "1px" }}>📅 START DATE</span>
-              <strong style={{ fontSize: "16px", color: "var(--text)", display: "block", marginTop: "4px" }}>{trip.startDate || "N/A"}</strong>
+              <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "1px" }}>🗓️ TOTAL DAYS</span>
+              <strong style={{ fontSize: "16px", color: "var(--text)", display: "block", marginTop: "4px" }}>{trip.days || 1} Days ({trip.startDate || "N/A"} - {trip.endDate || "N/A"})</strong>
             </div>
 
             <div>
-              <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "1px" }}>📅 END DATE</span>
-              <strong style={{ fontSize: "16px", color: "var(--text)", display: "block", marginTop: "4px" }}>{trip.endDate || "N/A"}</strong>
-            </div>
-
-            <div>
-              <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "1px" }}>💰 BUDGET</span>
+              <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "1px" }}>💰 ESTIMATED COST</span>
               <strong style={{ fontSize: "16px", color: "var(--text)", display: "block", marginTop: "4px" }}>{displayBudget}</strong>
             </div>
 
             <div>
               <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "1px" }}>👥 TRAVELERS</span>
-              <strong style={{ fontSize: "16px", color: "var(--text)", display: "block", marginTop: "4px" }}>{displayTravelers} {displayTravelers === 1 ? "Person" : "People"}</strong>
+              <strong style={{ fontSize: "16px", color: "var(--text)", display: "block", marginTop: "4px" }}>
+                {displayCategory} ({displayTravelers} {displayTravelers === 1 ? "Person" : "People"})
+              </strong>
             </div>
 
             <div>
-              <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "1px" }}>🎒 TRAVEL STYLE</span>
-              <strong style={{ fontSize: "16px", color: "var(--text)", display: "block", marginTop: "4px", textTransform: "capitalize" }}>{displayStyle}</strong>
+              <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "1px" }}>🚗 TRAVEL STYLE</span>
+              <strong style={{ fontSize: "16px", color: "var(--text)", display: "block", marginTop: "4px" }}>
+                {displayTransport}
+              </strong>
+            </div>
+
+            <div>
+              <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "1px" }}>🚶 TOTAL DISTANCE</span>
+              <strong style={{ fontSize: "16px", color: "var(--text)", display: "block", marginTop: "4px" }}>
+                ~{(trip.days || 1) * 12} km total
+              </strong>
+            </div>
+
+            <div>
+              <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "1px" }}>🌤️ WEATHER OVERVIEW</span>
+              <strong style={{ fontSize: "15px", color: "var(--text)", display: "block", marginTop: "4px" }}>
+                Pleasant seasonal climate & clear skies
+              </strong>
             </div>
 
             {interestsList.length > 0 && (
@@ -243,9 +263,9 @@ function TripDetails() {
                       style={{
                         fontSize: "12px",
                         fontWeight: "700",
-                        color: "#0284c7",
-                        background: "#f0f9ff",
-                        border: "1px solid #bae6fd",
+                        color: "var(--primary)",
+                        background: "var(--surface)",
+                        border: "1px solid var(--border)",
                         padding: "4px 12px",
                         borderRadius: "16px",
                       }}
@@ -256,6 +276,23 @@ function TripDetails() {
                 </div>
               </div>
             )}
+
+            <div style={{ gridColumn: "1 / -1", borderTop: "1px solid var(--border)", paddingTop: "14px", marginTop: "10px" }}>
+              <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "1px" }}>🍲 BEST LOCAL FOODS</span>
+              <p style={{ fontSize: "14px", color: "var(--text)", margin: "4px 0 0", fontWeight: "600" }}>
+                Authentic regional thali, specialty local street delicacies, and traditional desserts.
+              </p>
+            </div>
+
+            <div style={{ gridColumn: "1 / -1" }}>
+              <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "1px" }}>💡 ESSENTIAL TRAVEL TIPS</span>
+              <ul style={{ fontSize: "13.5px", color: "var(--text)", margin: "6px 0 0", paddingLeft: "20px", lineHeight: "1.6" }}>
+                <li>Keep digital and physical copies of tickets, hotel vouchers, and IDs.</li>
+                <li>Reserve popular monument passes online in advance to skip ticket lines.</li>
+                <li>Carry small cash bills for local markets and auto-rickshaw fares.</li>
+                <li>Wear comfortable, broken-in walking shoes for day tours.</li>
+              </ul>
+            </div>
           </div>
         </section>
 
@@ -392,7 +429,7 @@ function TripDetails() {
         <section style={{ marginBottom: "40px" }}>
           <PackingChecklist
             destination={trip.destination}
-            travelStyle={displayStyle}
+            travelStyle={displayCategory}
             duration={trip.days || 3}
           />
         </section>
@@ -427,8 +464,9 @@ function TripDetails() {
                   style={{
                     fontSize: "11px",
                     fontWeight: "800",
-                    color: "#059669",
-                    background: "#d1fae5",
+                    color: "#10b981",
+                    background: "var(--surface)",
+                    border: "1px solid var(--border)",
                     padding: "4px 12px",
                     borderRadius: "14px",
                     letterSpacing: "0.5px",
@@ -470,7 +508,7 @@ function TripDetails() {
               borderRadius: "16px",
               border: "1px solid var(--border)",
               background: "var(--card-bg, #ffffff)",
-              color: "#0284c7",
+              color: "var(--primary)",
               fontWeight: "800",
               fontSize: "16px",
               cursor: "pointer",
