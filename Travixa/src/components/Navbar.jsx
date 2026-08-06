@@ -8,8 +8,6 @@ function Navbar() {
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
 
-  const { darkMode, toggleTheme } = useTheme();
-
   const loggedIn =
     localStorage.getItem("travexaLoggedIn") === "true";
 
@@ -34,9 +32,7 @@ function Navbar() {
 
   return (
     <nav className="navbar">
-
       {/* LOGO */}
-
       <div
         className="navbar-logo"
         onClick={() => navigate("/")}
@@ -45,17 +41,13 @@ function Navbar() {
       </div>
 
       {/* MENU */}
-
       <div className="navbar-menu">
-
         <button
           className={location.pathname === "/" ? "active" : ""}
           onClick={() => navigate("/")}
         >
           Home
         </button>
-
-
 
         {loggedIn && (
           <button
@@ -65,8 +57,6 @@ function Navbar() {
             Dashboard
           </button>
         )}
-
-
 
         <button
           className={location.pathname === "/plan-trip" ? "active" : ""}
@@ -102,31 +92,19 @@ function Navbar() {
         >
           About
         </button>
-
       </div>
 
       {/* RIGHT SIDE */}
-
       <div className="navbar-right">
-
         {loggedIn ? (
           <>
-            {/* PROFILE */}
-
             <button
               className="navbar-profile"
               onClick={() => navigate("/profile")}
             >
-              <span className="profile-icon">
-                👤
-              </span>
-
-              <span className="profile-name">
-                {userName}
-              </span>
+              <span className="profile-icon">👤</span>
+              <span className="profile-name">{userName}</span>
             </button>
-
-            {/* LOGOUT */}
 
             <button
               className="navbar-logout"
@@ -144,23 +122,18 @@ function Navbar() {
           </button>
         )}
 
-        {/* DARK / LIGHT */}
-
         {/* DARK MODE */}
         <button
           className="navbar-theme"
           onClick={toggleTheme}
-          title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          title={
+            theme === "dark"
+              ? "Switch to Light Mode"
+              : "Switch to Dark Mode"
+          }
         >
           {theme === "dark" ? "☀️" : "🌙"}
-        <button
-          className="navbar-theme"
-          onClick={toggleTheme}
-          title="Change Theme"
-        >
-          {darkMode ? "☀️" : "🌙"}
         </button>
-
       </div>
     </nav>
   );

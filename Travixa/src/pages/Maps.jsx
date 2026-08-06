@@ -8,8 +8,18 @@ import Footer from "../components/Footer";
 import { EXPLORE_CATEGORIES, DEFAULT_CATEGORY } from "../utils/explorecategories";
 
 import "../styles/Maps.css";
-
+const geoapifyCategories = {
+  hotels: "accommodation.hotel",
+  restaurants: "catering.restaurant",
+  cafes: "catering.cafe",
+  hospitals: "healthcare.hospital",
+  airports: "airport",
+  railway: "public_transport",
+  shopping: "commercial.shopping_mall",
+  attractions: "tourism.attraction",
+};
 function Maps() {
+  
   const [searchInput, setSearchInput] = useState("");
   const [locationLabel, setLocationLabel] = useState("");
   const [position, setPosition] = useState(null); // [lat, lon] once a location is resolved
@@ -53,17 +63,18 @@ function Maps() {
     }, 15000);
 
     const query = `
-[out:json][timeout:25];
+[out:json][timeout:15];
 (
-  node["${category.key}"="${category.value}"](around:12000,${lat},${lon});
-  way["${category.key}"="${category.value}"](around:12000,${lat},${lon});
-  relation["${category.key}"="${category.value}"](around:12000,${lat},${lon});
+  node["${category.key}"="${category.value}"](around:10000,${lat},${lon});
+  way["${category.key}"="${category.value}"](around:10000,${lat},${lon});
+  relation["${category.key}"="${category.value}"](around:10000,${lat},${lon});
 );
 out center 60;
 `;
 
     try {
-      const response = await fetch("https://overpass-api.de/api/interpreter", {
+     const response = await fetch(
+  "https://lz4.overpass-api.de/api/interpreter",{
         method: "POST",
         body: query,
         signal: controller.signal,
@@ -77,7 +88,8 @@ out center 60;
       }
 
       const data = await response.json();
-
+      console.log("Overpass Response:", data);
+console.log("Elements Count:", data.elements?.length);
       // Discard stale API responses
       if (currentRequestId !== requestIdRef.current) {
         return;
@@ -101,32 +113,36 @@ out center 60;
             name: tags.name || `Unnamed ${category.label.replace(/s$/, "")}`,
             lat: placeLat,
             lon: placeLon,
-            address: addressParts.length
-              ? addressParts.join(", ")
-              : "Address not available",
+           address:
+  addressParts.join(", ") ||
+  tags["addr:full"] ||
+  tags["contact:street"] ||
+  tags["is_in"] ||
+  "Location available on map",
           };
         })
         .filter(Boolean)
-        .slice(0, 60);
+       .slice(0, 50);
 
       setPlaces(parsed);
       setError(null);
-    } catch (err) {
-      clearTimeout(timeoutId);
+  } catch (err) {
+  clearTimeout(timeoutId);
 
-      // If aborted because of a newer request, ignore error
-      if (currentRequestId !== requestIdRef.current) {
-        return;
-      }
+  if (currentRequestId !== requestIdRef.current) {
+    return;
+  }
 
-      console.error("Explore Nearby: failed to fetch places", err);
-      setPlaces([]);
-      if (err.name === "AbortError") {
-        setError("timeout");
-      } else {
-        setError("unavailable");
-      }
-    } finally {
+  // Ignore cancelled requests
+  if (err.name === "AbortError") {
+    return;
+  }
+
+  console.error("Explore Nearby: failed to fetch places", err);
+
+  setPlaces([]);
+  setError("unavailable");
+}finally {
       if (currentRequestId === requestIdRef.current) {
         setLoading(false);
         activeRequestRef.current = null;
