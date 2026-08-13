@@ -34,20 +34,10 @@ function DestinationVideos({ destination = "" }) {
     const fetchVideos = async () => {
       setLoading(true);
       setError(null);
-
       try {
-        let response = await fetch(
-          `/api/videos?destination=${encodeURIComponent(dest)}`
-        );
-
-        // Fallback port in case proxy is bypassed during local development
-        if (!response.ok && response.status === 404) {
-          response = await fetch(
-            `http://localhost:5000/api/videos?destination=${encodeURIComponent(
-              dest
-            )}`
-          );
-        }
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+        const endpoint = `${API_BASE_URL}/api/videos?destination=${encodeURIComponent(dest)}`;
+        let response = await fetch(endpoint);
 
         if (response.ok) {
           const data = await response.json();

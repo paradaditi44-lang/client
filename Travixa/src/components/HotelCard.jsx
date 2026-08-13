@@ -1,41 +1,24 @@
 import React from "react";
 import "../styles/HotelCard.css";
 
-const HOTEL_IMAGES = [
-  "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
-  "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800",
-  "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800",
-  "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800",
-  "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800",
-  "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800",
-  "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800",
-  "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800",
-];
+const FALLBACK_HOTEL_IMAGE =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='500' viewBox='0 0 800 500'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%230f172a'/%3E%3Cstop offset='50%25' stop-color='%231e293b'/%3E%3Cstop offset='100%25' stop-color='%230f172a'/%3E%3C/linearGradient%3E%3ClinearGradient id='accent' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%230284c7'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='800' height='500' fill='url(%23bg)'/%3E%3Ccircle cx='400' cy='210' r='60' fill='rgba(2,132,199,0.15)' stroke='url(%23accent)' stroke-width='2'/%3E%3Cg transform='translate(400,225)' text-anchor='middle'%3E%3Ctext y='0' font-size='56' fill='%2338bdf8'%3E%F0%9F%8F%A8%3C/text%3E%3Ctext y='55' font-size='20' font-family='system-ui, -apple-system, sans-serif' font-weight='600' fill='%23f8fafc' letter-spacing='1'%3EHotel image unavailable%3C/text%3E%3C/g%3E%3C/svg%3E";
 
-function getHotelImage(name = "") {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const idx = Math.abs(hash) % HOTEL_IMAGES.length;
-  return HOTEL_IMAGES[idx];
-}
-
-function getPriceEstimate(name = "") {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const priceVal = 2500 + (Math.abs(hash) % 75) * 100;
-  return `₹${new Intl.NumberFormat("en-IN").format(priceVal)}`;
-}
+const AMENITY_MAP = {
+  WiFi: "📶 Free WiFi",
+  Pool: "🏊 Pool",
+  Breakfast: "🍽️ Breakfast",
+  Parking: "🚗 Parking",
+};
 
 function HotelCard({
   name,
   location,
   rating = "4.5",
   userRatingsTotal,
-  price = "Check Price",
+  price,
+  amenities = [],
+  photoUrl,
   website,
   mapsUrl,
 }) {
@@ -51,14 +34,25 @@ function HotelCard({
       name + " " + location + " official website"
     )}`;
 
-  const hotelImage = getHotelImage(name);
-  const displayPrice = price === "Check Price" ? getPriceEstimate(name) : price;
+  const hotelImage = photoUrl || FALLBACK_HOTEL_IMAGE;
+  const displayPrice =
+    typeof price === "number"
+      ? `₹${new Intl.NumberFormat("en-IN").format(price)}`
+      : price || "Check Price";
 
   return (
     <div className="hotel-card-redesign">
       {/* Large Hotel Image Cover */}
       <div className="hotel-image-wrap">
-        <img src={hotelImage} alt={name} className="hotel-cover-image" />
+        <img
+          src={hotelImage}
+          alt={name}
+          className="hotel-cover-image"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = FALLBACK_HOTEL_IMAGE;
+          }}
+        />
         <div className="hotel-badges-overlay">
           <span className="hotel-rating-badge">
             ⭐ {rating} {userRatingsTotal ? `(${userRatingsTotal})` : ""}
@@ -82,10 +76,11 @@ function HotelCard({
 
         {/* Amenities Chips */}
         <div className="amenities-chips">
-          <span className="amenity-chip">📶 Free WiFi</span>
-          <span className="amenity-chip">🏊 Pool</span>
-          <span className="amenity-chip">🍽️ Breakfast</span>
-          <span className="amenity-chip">🚗 Parking</span>
+          {amenities?.map((amenity) => (
+            <span className="amenity-chip" key={amenity}>
+              {AMENITY_MAP[amenity] || amenity}
+            </span>
+          ))}
         </div>
 
         {/* Action Buttons */}

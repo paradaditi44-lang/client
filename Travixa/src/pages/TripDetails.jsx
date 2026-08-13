@@ -7,6 +7,7 @@ import SmartBudgetOptimizer from "../components/SmartBudgetOptimizer";
 import TripMemoryModal from "../components/TripMemoryModal";
 import Footer from "../components/Footer";
 import { generateItineraryPDF } from "../utils/generatePDF";
+import { formatTotalDistanceText } from "../services/geocoding";
 import API from "../services/api";
 import "../styles/PlanTrip.css";
 import "../styles/AITripResult.css";
@@ -125,6 +126,23 @@ function TripDetails() {
     ? trip.interests
     : [];
 
+  const calculateDays = (t) => {
+    const currentTrip = t || trip;
+    if (currentTrip?.startDate && currentTrip?.endDate) {
+      const [sYear, sMonth, sDay] = String(currentTrip.startDate).split('-').map(Number);
+      const [eYear, eMonth, eDay] = String(currentTrip.endDate).split('-').map(Number);
+      if (sYear && sMonth && sDay && eYear && eMonth && eDay) {
+        const startUtc = Date.UTC(sYear, sMonth - 1, sDay);
+        const endUtc = Date.UTC(eYear, eMonth - 1, eDay);
+        const diffMs = endUtc - startUtc;
+        const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+        return Math.max(1, diffDays + 1);
+      }
+    }
+    if (currentTrip?.days) return currentTrip.days;
+    return 1;
+  };
+
   const handleDownloadPDF = () => {
     // Generate PDF using parsed days or defaults
     const parseItinerary = (itineraryText) => {
@@ -167,19 +185,7 @@ function TripDetails() {
     };
 
     const days = trip.itinerary ? parseItinerary(trip.itinerary) : [];
-    const calculateDays = () => {
-      if (trip.days) return trip.days;
-      if (trip.startDate && trip.endDate) {
-        const start = new Date(trip.startDate);
-        const end = new Date(trip.endDate);
-        const diffTime = Math.abs(end - start);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays || 1;
-      }
-      return days.length || 3;
-    };
-
-    generateItineraryPDF(trip, days, calculateDays());
+    generateItineraryPDF(trip, days, calculateDays(trip));
   };
 
   return (
@@ -217,7 +223,7 @@ function TripDetails() {
 
             <div>
               <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "1px" }}>🗓️ TOTAL DAYS</span>
-              <strong style={{ fontSize: "16px", color: "var(--text)", display: "block", marginTop: "4px" }}>{trip.days || 1} Days ({trip.startDate || "N/A"} - {trip.endDate || "N/A"})</strong>
+              <strong style={{ fontSize: "16px", color: "var(--text)", display: "block", marginTop: "4px" }}>{calculateDays(trip)} Days ({trip.startDate || "N/A"} - {trip.endDate || "N/A"})</strong>
             </div>
 
             <div>
@@ -242,7 +248,7 @@ function TripDetails() {
             <div>
               <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "1px" }}>🚶 TOTAL DISTANCE</span>
               <strong style={{ fontSize: "16px", color: "var(--text)", display: "block", marginTop: "4px" }}>
-                ~{(trip.days || 1) * 12} km total
+                {formatTotalDistanceText(trip.totalDistanceKm)}
               </strong>
             </div>
 
@@ -430,7 +436,7 @@ function TripDetails() {
           <PackingChecklist
             destination={trip.destination}
             travelStyle={displayCategory}
-            duration={trip.days || 3}
+            duration={calculateDays(trip)}
           />
         </section>
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { generateItineraryPDF } from "../utils/generatePDF";
+import { formatTotalDistanceText } from "../services/geocoding";
 import PackingChecklist from "./PackingChecklist";
 import DestinationVideos from "./DestinationVideos/DestinationVideos";
 
@@ -198,14 +199,25 @@ function AITripResult({ trip: propTrip, showExtras = true, showSummary = true })
   };
 
   const calculateDays = () => {
-    if (trip.days) return trip.days;
     if (trip.startDate && trip.endDate) {
+      const [sYear, sMonth, sDay] = String(trip.startDate).split('-').map(Number);
+      const [eYear, eMonth, eDay] = String(trip.endDate).split('-').map(Number);
+      if (sYear && sMonth && sDay && eYear && eMonth && eDay) {
+        const startUtc = Date.UTC(sYear, sMonth - 1, sDay);
+        const endUtc = Date.UTC(eYear, eMonth - 1, eDay);
+        const diffMs = endUtc - startUtc;
+        const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+        return Math.max(1, diffDays + 1);
+      }
       const start = new Date(trip.startDate);
       const end = new Date(trip.endDate);
-      const diffTime = Math.abs(end - start);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return (diffDays + 1) || 1;
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+        const diffMs = Math.abs(end.getTime() - start.getTime());
+        const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+        return Math.max(1, diffDays + 1);
+      }
     }
+    if (trip.days) return trip.days;
     return 1;
   };
 
@@ -269,7 +281,7 @@ function AITripResult({ trip: propTrip, showExtras = true, showSummary = true })
 
               <div>
                 <span>🚶 TOTAL DISTANCE</span>
-                <strong>~{displayDays * 12} km total</strong>
+                <strong>{formatTotalDistanceText(trip.totalDistanceKm)}</strong>
               </div>
 
               <div>

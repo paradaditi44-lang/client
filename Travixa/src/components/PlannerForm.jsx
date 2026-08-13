@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api/api";
+import { calculateItineraryDistance } from "../services/geocoding";
 import "../styles/PlannerForm.css";
 
 function PlannerForm({ setGeneratedTrip, onDestinationChange }) {
@@ -61,13 +62,6 @@ function PlannerForm({ setGeneratedTrip, onDestinationChange }) {
 
     setError("");
 
-    const token =
-      localStorage.getItem("travexaToken") || localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
     if (
       !trip.destination ||
       !trip.startDate ||
@@ -81,20 +75,80 @@ function PlannerForm({ setGeneratedTrip, onDestinationChange }) {
 
     setLoading(true);
 
-    try {
-      const payload = {
-        destination: trip.destination.trim(),
-        startDate: trip.startDate,
-        endDate: trip.endDate,
-        budget: Number(trip.budget) || 0,
-        numberOfTravelers: Number(trip.travelers) || 1,
-        preferences: {
-          travelStyle: trip.travelStyle,
-          transport: trip.transport || "Driving",
-          interests: trip.interests,
-        },
-      };
+    const calcDays = () => {
+      if (trip.startDate && trip.endDate) {
+        const [sYear, sMonth, sDay] = String(trip.startDate).split('-').map(Number);
+        const [eYear, eMonth, eDay] = String(trip.endDate).split('-').map(Number);
+        if (sYear && sMonth && sDay && eYear && eMonth && eDay) {
+          const startUtc = Date.UTC(sYear, sMonth - 1, sDay);
+          const endUtc = Date.UTC(eYear, eMonth - 1, eDay);
+          const diffMs = endUtc - startUtc;
+          return Math.max(1, Math.round(diffMs / (1000 * 60 * 60 * 24)) + 1);
+        }
+      }
+      return 1;
+    };
+    const totalDays = calcDays();
 
+    let totalDistanceKm = null;
+    try {
+      let userCoords = null;
+      if ("geolocation" in navigator) {
+        await new Promise((resolve) => {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              if (pos?.coords) {
+                userCoords = [pos.coords.latitude, pos.coords.longitude];
+              }
+              resolve();
+            },
+            () => resolve(),
+            { timeout: 3000 }
+          );
+        });
+      }
+      totalDistanceKm = await calculateItineraryDistance({
+        originCoords: userCoords,
+        destination: trip.destination.trim(),
+      });
+    } catch (e) {
+      // Ignore distance calc errors
+    }
+
+    const payload = {
+      destination: trip.destination.trim(),
+      startDate: trip.startDate,
+      endDate: trip.endDate,
+      days: totalDays,
+      budget: Number(trip.budget) || 0,
+      numberOfTravelers: Number(trip.travelers) || 1,
+      totalDistanceKm: totalDistanceKm,
+      preferences: {
+        travelStyle: trip.travelStyle,
+        transport: trip.transport || "Driving",
+        interests: trip.interests,
+      },
+    };
+
+    const token =
+      localStorage.getItem("travexaToken") || localStorage.getItem("token");
+
+    if (!token) {
+      // Guest mode: Save local trip and display success popup
+      const localTrip = {
+        id: `trip-${Date.now()}`,
+        ...payload,
+        createdAt: new Date().toISOString(),
+      };
+      localStorage.setItem("travexaTrip", JSON.stringify(localTrip));
+      if (setGeneratedTrip) {
+        setGeneratedTrip(localTrip);
+      }
+      setLoading(false);
+      return;
+    }
+
+    try {
       const res = await API.post("/trips", payload, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -109,24 +163,15 @@ function PlannerForm({ setGeneratedTrip, onDestinationChange }) {
         }
       }
     } catch (err) {
-      if (err.response) {
-        if (err.response.status === 401) {
-          localStorage.removeItem("travexaToken");
-          localStorage.removeItem("token");
-          navigate("/login");
-          return;
-        }
-        const data = err.response.data;
-        if (data.message) {
-          setError(data.message);
-        } else if (data.errors && Array.isArray(data.errors)) {
-          const errorMsgs = data.errors.map((e) => e.msg || e.message).join(", ");
-          setError(errorMsgs || "Validation error");
-        } else {
-          setError("Failed to generate trip. Server error.");
-        }
-      } else {
-        setError("Server error. Please check your connection.");
+      // Fallback local save if server responds with error
+      const localTrip = {
+        id: `trip-${Date.now()}`,
+        ...payload,
+        createdAt: new Date().toISOString(),
+      };
+      localStorage.setItem("travexaTrip", JSON.stringify(localTrip));
+      if (setGeneratedTrip) {
+        setGeneratedTrip(localTrip);
       }
     } finally {
       setLoading(false);

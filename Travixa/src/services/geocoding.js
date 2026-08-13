@@ -114,6 +114,8 @@ const LANDMARK_DIRECTORY = {
   "new delhi": { lat: 28.6139, lon: 77.2090, name: "New Delhi, Delhi, India" },
   "bengaluru": { lat: 12.9716, lon: 77.5946, name: "Bengaluru, Karnataka, India" },
   "jaipur": { lat: 26.9124, lon: 75.7873, name: "Jaipur, Rajasthan, India" },
+  "pune": { lat: 18.5204, lon: 73.8567, name: "Pune, Maharashtra, India" },
+  "nashik": { lat: 19.9975, lon: 73.7898, name: "Nashik, Maharashtra, India" },
 };
 
 // Helper: Normalize user search input
@@ -308,4 +310,222 @@ function saveCacheToSession() {
   } catch (e) {
     // Ignore storage limit errors
   }
+}
+
+/**
+ * Calculates real road distance (in km) using OSRM for a sequence of points / itinerary.
+ */
+export async function calculateItineraryDistance({ originCoords, places = [], destination = "" }) {
+  const routeCoords = [];
+
+  // 1. If valid origin coords are provided (e.g. from user geolocation), use as start
+  if (originCoords && isValidCoordinate(originCoords[0], originCoords[1])) {
+    routeCoords.push({ name: "Starting Point", lat: originCoords[0], lon: originCoords[1] });
+  }
+
+  // 2. Geocode destination if provided
+  let destGeo = null;
+  if (destination && typeof destination === "string" && destination.trim()) {
+    destGeo = await geocodeLocation(destination.trim());
+    if (destGeo && isValidCoordinate(destGeo.lat, destGeo.lon) && routeCoords.length === 0) {
+      routeCoords.push({ name: destGeo.displayName || destination, lat: destGeo.lat, lon: destGeo.lon });
+    }
+  }
+
+  // 3. Geocode itinerary places
+  if (Array.isArray(places) && places.length > 0) {
+    for (const place of places) {
+      if (!place || typeof place !== "string" || !place.trim()) continue;
+      const geo = await geocodeLocation(place.trim());
+      if (geo && isValidCoordinate(geo.lat, geo.lon)) {
+        const last = routeCoords[routeCoords.length - 1];
+        if (!last || Math.abs(last.lat - geo.lat) > 0.001 || Math.abs(last.lon - geo.lon) > 0.001) {
+          routeCoords.push({ name: geo.displayName || place, lat: geo.lat, lon: geo.lon });
+        }
+      }
+    }
+  }
+
+  // Append destination at the end if not already present
+  if (destGeo && isValidCoordinate(destGeo.lat, destGeo.lon) && routeCoords.length > 0) {
+    const last = routeCoords[routeCoords.length - 1];
+    if (Math.abs(last.lat - destGeo.lat) > 0.001 || Math.abs(last.lon - destGeo.lon) > 0.001) {
+      routeCoords.push({ name: destGeo.displayName || destination, lat: destGeo.lat, lon: destGeo.lon });
+    }
+  }
+
+  if (import.meta.env?.DEV) {
+    console.log("Distance calculation:");
+    console.log("Route points:", routeCoords);
+  }
+
+  if (routeCoords.length < 2) {
+    if (import.meta.env?.DEV) {
+      console.log("Total distance (km): null (Insufficient route waypoints)");
+    }
+    return null;
+  }
+
+  const osrmWaypoints = routeCoords.map((pt) => `${pt.lon},${pt.lat}`).join(";");
+  const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${osrmWaypoints}?overview=false`;
+
+  try {
+    const res = await fetch(osrmUrl);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.routes && data.routes.length > 0) {
+        const distanceMeters = data.routes[0].distance || 0;
+        if (distanceMeters > 0) {
+          const totalDistanceKm = distanceMeters / 1000;
+          if (import.meta.env?.DEV) {
+            console.log("Total distance (km):", totalDistanceKm);
+          }
+          return totalDistanceKm;
+        }
+      }
+    }
+  } catch (err) {
+    if (import.meta.env?.DEV) {
+      console.warn("OSRM distance calculation error:", err.message);
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Formats numeric kilometer distance into readable string adhering to rounding rules:
+ * - Under 10 km -> 1 decimal place (e.g., "8.4 km")
+ * - 10 km or more -> nearest whole kilometer (e.g., "145 km")
+ * - Unavailable / null -> "Distance unavailable"
+ */
+export function formatTotalDistanceText(distKm) {
+  if (distKm === null || distKm === undefined || isNaN(distKm) || Number(distKm) <= 0) {
+    return "Distance unavailable";
+  }
+  const num = Number(distKm);
+  if (num < 10) {
+    return `${num.toFixed(1)} km`;
+  }
+  return `${Math.round(num)} km`;
+}
+
+/**
+ * Single Authoritative Route Distance Calculation Function.
+ * Accepts origin coordinates [lat, lon], destination name/coords, and travel mode.
+ * Returns: { distanceKm, distanceText, durationMinutes, durationText, geometry, destCoords }
+ */
+export async function calculateSmartRouteDistance({ originCoords, destination, transportMode = "driving" }) {
+  if (!destination || typeof destination !== "string" || !destination.trim()) {
+    return {
+      distanceKm: null,
+      distanceText: "Distance unavailable",
+      durationMinutes: null,
+      durationText: "N/A",
+      geometry: [],
+      destCoords: null,
+    };
+  }
+
+  // 1. Geocode destination
+  const destGeo = await geocodeLocation(destination.trim());
+  if (!destGeo || !isValidCoordinate(destGeo.lat, destGeo.lon)) {
+    return {
+      distanceKm: null,
+      distanceText: "Distance unavailable",
+      durationMinutes: null,
+      durationText: "N/A",
+      geometry: [],
+      destCoords: null,
+    };
+  }
+
+  const destLat = destGeo.lat;
+  const destLon = destGeo.lon;
+
+  // 2. Validate Origin (default to Delhi [28.6139, 77.209] if originCoords not set or invalid)
+  const [origLat, origLon] =
+    originCoords && isValidCoordinate(originCoords[0], originCoords[1])
+      ? originCoords
+      : [28.6139, 77.209];
+
+  // 3. Request OSRM route in strict longitude,latitude order
+  const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${origLon},${origLat};${destLon},${destLat}?overview=full&geometries=geojson`;
+
+  try {
+    const res = await fetch(osrmUrl);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.routes && data.routes.length > 0) {
+        const route = data.routes[0];
+        const rawCoords = route.geometry?.coordinates || [];
+
+        // Convert GeoJSON [longitude, latitude] to Leaflet [latitude, longitude]
+        const geometry = rawCoords
+          .filter(
+            (pt) =>
+              Array.isArray(pt) &&
+              pt.length >= 2 &&
+              !isNaN(pt[0]) &&
+              !isNaN(pt[1])
+          )
+          .map(([longitude, latitude]) => [latitude, longitude]);
+
+        const distanceMeters = route.distance || 0;
+        const durationSec = route.duration || 0;
+
+        const distanceKm = distanceMeters > 0 ? distanceMeters / 1000 : null;
+        const distanceText = formatTotalDistanceText(distanceKm);
+
+        const totalMinutes = Math.round(durationSec / 60);
+        let durationText = "N/A";
+        if (totalMinutes < 60) {
+          durationText = `${totalMinutes} mins`;
+        } else {
+          const hours = Math.floor(totalMinutes / 60);
+          const mins = totalMinutes % 60;
+          if (hours >= 24) {
+            const days = Math.floor(hours / 24);
+            const remHours = hours % 24;
+            durationText = `${days}d ${remHours}h`;
+          } else {
+            durationText = mins > 0 ? `${hours} hrs ${mins} mins` : `${hours} hrs`;
+          }
+        }
+
+        if (import.meta.env?.DEV) {
+          console.log("TRIP ROUTE DEBUG", {
+            origin: `${origLat},${origLon}`,
+            destination: destination.trim(),
+            distanceKm,
+            durationMinutes: totalMinutes,
+          });
+        }
+
+        return {
+          distanceKm,
+          distanceText,
+          durationMinutes: totalMinutes,
+          durationText,
+          geometry,
+          destCoords: [destLat, destLon],
+          destName: (destGeo.displayName || destination).split(",").slice(0, 2).join(",").trim(),
+        };
+      }
+    }
+  } catch (err) {
+    if (import.meta.env?.DEV) {
+      console.warn("[OSRM Routing] Error:", err.message);
+    }
+  }
+
+  return {
+    distanceKm: null,
+    distanceText: "Distance unavailable",
+    durationMinutes: null,
+    durationText: "N/A",
+    geometry: [],
+    destCoords: [destLat, destLon],
+    destName: (destGeo.displayName || destination).split(",").slice(0, 2).join(",").trim(),
+  };
 }

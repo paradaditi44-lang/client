@@ -262,6 +262,12 @@ function MapView({
         // ROAD ROUTE
         // =================================================
 
+        if (import.meta.env?.DEV) {
+          console.log(`[OSRM Routing MapView] Destination: ${to}`);
+          console.log(`[OSRM Routing MapView] Destination coordinates: latitude = ${lat2}, longitude = ${lon2}`);
+          console.log(`[OSRM Routing MapView] OSRM coordinates: ${lon1},${lat1};${lon2},${lat2}`);
+        }
+
         const osrmResponse =
           await fetch(
             `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`

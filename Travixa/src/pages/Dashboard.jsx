@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
+import { formatTotalDistanceText } from "../services/geocoding";
 import Footer from "../components/Footer";
 import TripMemoryModal from "../components/TripMemoryModal";
 import "../styles/Dashboard.css";
@@ -48,15 +49,26 @@ function Dashboard() {
   };
 
   const calculateDays = (trip) => {
-    if (trip.days) return trip.days;
-    if (trip.startDate && trip.endDate) {
+    if (trip?.startDate && trip?.endDate) {
+      const [sYear, sMonth, sDay] = String(trip.startDate).split('-').map(Number);
+      const [eYear, eMonth, eDay] = String(trip.endDate).split('-').map(Number);
+      if (sYear && sMonth && sDay && eYear && eMonth && eDay) {
+        const startUtc = Date.UTC(sYear, sMonth - 1, sDay);
+        const endUtc = Date.UTC(eYear, eMonth - 1, eDay);
+        const diffMs = endUtc - startUtc;
+        const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+        return Math.max(1, diffDays + 1);
+      }
       const start = new Date(trip.startDate);
       const end = new Date(trip.endDate);
-      const diffTime = Math.abs(end - start);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays > 0 ? diffDays : 1;
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+        const diffMs = Math.abs(end.getTime() - start.getTime());
+        const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+        return Math.max(1, Math.round(diffMs / (1000 * 60 * 60 * 24)) + 1);
+      }
     }
-    return 3;
+    if (trip?.days) return trip.days;
+    return 1;
   };
 
   const getDestinationImage = (destination) => {
@@ -148,21 +160,51 @@ function Dashboard() {
         setTripError("");
         const token =
           localStorage.getItem("travexaToken") || localStorage.getItem("token");
-        if (!token) {
-          setLoadingTrips(false);
-          return;
+
+        let fetchedTrips = [];
+        let hasBackendError = false;
+
+        if (token) {
+          try {
+            const response = await API.get("/trips", {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            if (response.data?.trips && Array.isArray(response.data.trips)) {
+              fetchedTrips = response.data.trips;
+            }
+          } catch (backendErr) {
+            console.error("Backend fetch trips error:", backendErr);
+            hasBackendError = true;
+          }
         }
-        const response = await API.get("/trips", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setTrips(response.data?.trips || []);
+
+        // Fallback or merge with localStorage travexaTrip
+        const localTripStr = localStorage.getItem("travexaTrip");
+        if (localTripStr) {
+          try {
+            const localTrip = JSON.parse(localTripStr);
+            if (localTrip && localTrip.destination) {
+              const localId = localTrip.id || localTrip._id || "local-trip-1";
+              const exists = fetchedTrips.some((t) => (t.id || t._id) === localId);
+              if (!exists) {
+                fetchedTrips = [localTrip, ...fetchedTrips];
+              }
+            }
+          } catch (e) {
+            // Ignore JSON parse error
+          }
+        }
+
+        setTrips(fetchedTrips);
+
+        if (fetchedTrips.length === 0 && hasBackendError && token) {
+          setTripError("Failed to load your trips. Please check your connection.");
+        }
       } catch (error) {
         console.error("Error fetching trips:", error);
-        setTripError(
-          error.response?.data?.message || "Failed to load your trips."
-        );
+        setTripError("Failed to load your trips.");
       } finally {
         setLoadingTrips(false);
       }

@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "../styles/MapCard.css";
-import { geocodeLocation, isValidCoordinate } from "../services/geocoding";
+import { geocodeLocation, isValidCoordinate, calculateSmartRouteDistance } from "../services/geocoding";
 
 // Fix Leaflet Default Icon path issues
 delete L.Icon.Default.prototype._getIconUrl;
@@ -146,13 +146,13 @@ function MapBoundsFitter({ userCoords, destCoords, routePolyline, isDestinationS
 function MapCard({ destination }) {
   const isDestinationSet = Boolean(destination && destination.trim().length > 0);
 
-  const [coords, setCoords] = useState([48.8566, 2.3522]); // Default Paris
-  const [locationName, setLocationName] = useState("Paris, France");
+  const [coords, setCoords] = useState(null);
+  const [locationName, setLocationName] = useState("");
   const [loadingMap, setLoadingMap] = useState(false);
 
   // User Geolocation Origin Coords
   const [userCoords, setUserCoords] = useState([28.6139, 77.209]); // Default Delhi
-  const [userLocationName, setUserLocationName] = useState("Your Location");
+  const [userLocationName, setUserLocationName] = useState("Delhi, India");
 
   // Routing State
   const [transportMode, setTransportMode] = useState("driving");
@@ -160,6 +160,10 @@ function MapCard({ destination }) {
   const [routeData, setRouteData] = useState(null);
   const [routeLoading, setRouteLoading] = useState(false);
   const [routeError, setRouteError] = useState(false);
+
+  // Refs for Request Cancellation and Stale Response Protection
+  const routeRequestIdRef = useRef(0);
+  const abortControllerRef = useRef(null);
 
   // Custom Markers Memoized
   const startIcon = useMemo(() => createCustomMarkerIcon("📍", "#0284c7"), []);
@@ -187,7 +191,7 @@ function MapCard({ destination }) {
         async (pos) => {
           const lat = pos.coords.latitude;
           const lon = pos.coords.longitude;
-          if (!isNaN(lat) && !isNaN(lon)) {
+          if (isValidCoordinate(lat, lon)) {
             setUserCoords([lat, lon]);
 
             try {
@@ -210,190 +214,83 @@ function MapCard({ destination }) {
           }
         },
         () => {
-          // Default location kept if permission denied
+          // Keep default location (Delhi) if permission denied
         }
       );
     }
   }, []);
 
-  // 2. Geocode Destination when destination prop changes
+  // 2. Single Unified Pipeline: Geocode + Route Calculation with Stale Protection
   useEffect(() => {
     if (!isDestinationSet) {
+      setCoords(null);
+      setLocationName("");
       setRoutePolyline([]);
       setRouteData(null);
       setRouteError(false);
+      setRouteLoading(false);
+      setLoadingMap(false);
       return;
     }
 
-    const timer = setTimeout(async () => {
+    const requestId = ++routeRequestIdRef.current;
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    const runPipeline = async () => {
       try {
         setLoadingMap(true);
+        setRouteLoading(true);
         setRouteError(false);
-        setRoutePolyline([]);
 
-        const result = await geocodeLocation(destination.trim());
+        const routeResult = await calculateSmartRouteDistance({
+          originCoords: userCoords,
+          destination: destination.trim(),
+          transportMode,
+        });
 
-        if (result && isValidCoordinate(result.lat, result.lon)) {
-          setCoords([result.lat, result.lon]);
-          const parts = (result.displayName || destination).split(",");
-          setLocationName(parts.slice(0, 2).join(",").trim());
-        } else {
+        if (requestId !== routeRequestIdRef.current) return;
+
+        if (!routeResult || !routeResult.destCoords) {
           setRouteError(true);
           setRoutePolyline([]);
+          setRouteData(null);
+          setLoadingMap(false);
+          setRouteLoading(false);
+          return;
         }
+
+        setCoords(routeResult.destCoords);
+        setLocationName(routeResult.destName);
+        setRoutePolyline(routeResult.geometry);
+        setRouteData({
+          distance: routeResult.distanceText,
+          duration: routeResult.durationText,
+        });
       } catch (err) {
-        console.error("Map geocoding error:", err);
+        if (err.name === "AbortError") return;
+        if (requestId !== routeRequestIdRef.current) return;
+        console.error("[OSRM Pipeline] Error:", err);
         setRouteError(true);
-        setRoutePolyline([]);
       } finally {
-        setLoadingMap(false);
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [destination, isDestinationSet]);
-
-  // 3. Recalculate Route & Convert Coordinates using OpenRouteService Directions API V2
-  const calculateRoute = useCallback(async () => {
-    if (!isDestinationSet || !coords || !userCoords) {
-      setRoutePolyline([]);
-      setRouteData(null);
-      return;
-    }
-
-    const [origLat, origLon] = userCoords;
-    const [destLat, destLon] = coords;
-
-    if (
-      isNaN(origLat) ||
-      isNaN(origLon) ||
-      isNaN(destLat) ||
-      isNaN(destLon)
-    ) {
-      setRoutePolyline([]);
-      setRouteError(true);
-      return;
-    }
-
-    // Reset previous route state to prevent stale polyline reuse
-    setRoutePolyline([]);
-    setRouteData(null);
-    setRouteLoading(true);
-    setRouteError(false);
-
-    const apiKey = import.meta.env.VITE_ORS_API_KEY;
-
-    try {
-      if ((transportMode === "driving" || transportMode === "walking") && apiKey && apiKey.trim()) {
-        // Map transport mode to OpenRouteService V2 profiles: driving-car or foot-walking
-        const profile = transportMode === "walking" ? "foot-walking" : "driving-car";
-        const orsUrl = `https://api.openrouteservice.org/v2/directions/${profile}?api_key=${apiKey.trim()}&start=${origLon},${origLat}&end=${destLon},${destLat}`;
-
-        if (process.env.NODE_ENV === "development") {
-          console.log(`[SmartRoutePlanner] Fetching OpenRouteService V2: ${transportMode} (${profile}) via ${orsUrl}`);
-        }
-
-        const res = await fetch(orsUrl);
-
-        if (res.ok) {
-          const data = await res.json();
-          if (process.env.NODE_ENV === "development") {
-            console.log(`[SmartRoutePlanner] ORS Response:`, data);
-          }
-
-          const feature = data.features?.[0];
-          if (feature && feature.geometry && feature.geometry.coordinates) {
-            const rawCoords = feature.geometry.coordinates;
-
-            // Convert GeoJSON [longitude, latitude] to Leaflet [latitude, longitude] format
-            const leafletPolyline = rawCoords
-              .filter(
-                (pt) =>
-                  Array.isArray(pt) &&
-                  pt.length >= 2 &&
-                  !isNaN(pt[0]) &&
-                  !isNaN(pt[1])
-              )
-              .map(([longitude, latitude]) => [latitude, longitude]);
-
-            const summary = feature.properties?.summary || {};
-            const distKm = (summary.distance || 0) / 1000;
-            const durSec = summary.duration || 0;
-
-            if (leafletPolyline.length > 0) {
-              setRoutePolyline(leafletPolyline);
-              setRouteData({
-                distance: formatDistance(distKm),
-                duration: formatDuration(durSec),
-              });
-              setRouteLoading(false);
-              return;
-            }
-          }
-        } else {
-          if (process.env.NODE_ENV === "development") {
-            console.warn(`[SmartRoutePlanner] ORS API request returned status ${res.status}. Falling back to estimated calculations.`);
-          }
+        if (requestId === routeRequestIdRef.current) {
+          setLoadingMap(false);
+          setRouteLoading(false);
         }
       }
+    };
 
-      // Fallback calculation for Train, Flight, or if ORS API request fails/unreachable
-      const directKm = haversineDistance(origLat, origLon, destLat, destLon);
-      const arcPoints = generateArcPoints(userCoords, coords);
+    const timer = setTimeout(runPipeline, 300);
 
-      if (transportMode === "walking") {
-        const estDist = directKm * 1.2;
-        const estSec = (estDist / 4.5) * 3600;
-        setRoutePolyline(arcPoints);
-        setRouteData({
-          distance: formatDistance(estDist),
-          duration: formatDuration(estSec),
-        });
-      } else if (transportMode === "driving") {
-        const estDist = directKm * 1.25;
-        const estSec = (estDist / 65) * 3600;
-        setRoutePolyline(arcPoints);
-        setRouteData({
-          distance: formatDistance(estDist),
-          duration: formatDuration(estSec),
-        });
-      } else if (transportMode === "train") {
-        const estDist = directKm * 1.25;
-        const estSec = (estDist / 85) * 3600;
-        setRoutePolyline(arcPoints);
-        setRouteData({
-          distance: formatDistance(estDist),
-          duration: formatDuration(estSec),
-        });
-      } else if (transportMode === "flight") {
-        const estDist = directKm;
-        const estSec = (estDist / 750) * 3600 + 5400;
-        setRoutePolyline(arcPoints);
-        setRouteData({
-          distance: formatDistance(estDist),
-          duration: formatDuration(estSec),
-        });
-      }
-    } catch (err) {
-      console.error("[SmartRoutePlanner] Error calculating route:", err);
-      // Fallback gracefully to estimated calculation on network error
-      const directKm = haversineDistance(origLat, origLon, destLat, destLon);
-      const arcPoints = generateArcPoints(userCoords, coords);
-      const estDist = directKm * 1.2;
-      const estSec = (estDist / 60) * 3600;
-      setRoutePolyline(arcPoints);
-      setRouteData({
-        distance: formatDistance(estDist),
-        duration: formatDuration(estSec),
-      });
-    } finally {
-      setRouteLoading(false);
-    }
-  }, [isDestinationSet, coords, userCoords, transportMode]);
-
-  useEffect(() => {
-    calculateRoute();
-  }, [calculateRoute]);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [destination, isDestinationSet, transportMode, userCoords]);
 
   return (
     <div className="map-card-preview">
@@ -415,7 +312,7 @@ function MapCard({ destination }) {
       {/* Interactive Map Frame */}
       <div className="map-frame">
         <MapContainer
-          center={isDestinationSet ? coords : userCoords}
+          center={isDestinationSet && coords ? coords : userCoords}
           zoom={10}
           scrollWheelZoom={false}
           style={{ height: "100%", width: "100%" }}
@@ -437,7 +334,7 @@ function MapCard({ destination }) {
           )}
 
           {/* Destination Marker */}
-          {isDestinationSet && (
+          {isDestinationSet && coords && (
             <Marker position={coords} icon={destIcon}>
               <Popup>
                 <strong>🏁 Destination</strong>
@@ -529,4 +426,59 @@ function MapCard({ destination }) {
   );
 }
 
-export default MapCard;
+class MapErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("MapCard Error Boundary caught an error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="map-card-preview">
+          <div className="map-card-header">
+            <div>
+              <span className="map-eyebrow">🗺️ LIVE MAP PREVIEW</span>
+              <h3 className="map-destination-title">📍 Destination Preview</h3>
+            </div>
+          </div>
+          <div
+            className="map-frame"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "20px",
+              textAlign: "center",
+              color: "#64748b",
+            }}
+          >
+            <div>
+              <span style={{ fontSize: "2rem" }}>🗺️</span>
+              <p style={{ marginTop: "10px", fontWeight: "600" }}>
+                Map preview is temporarily unavailable.
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export default function MapCardWithErrorBoundary(props) {
+  return (
+    <MapErrorBoundary>
+      <MapCard {...props} />
+    </MapErrorBoundary>
+  );
+}

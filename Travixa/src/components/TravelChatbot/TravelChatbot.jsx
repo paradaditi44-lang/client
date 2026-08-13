@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { sendChatMessage } from "../../services/api";
 import "./TravelChatbot.css";
 
 const LANGUAGES = [
@@ -311,60 +312,35 @@ function TravelChatbot() {
         context: { ...updatedContext, language: selectedLang },
       };
 
-      let response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const data = await sendChatMessage(payload);
+      const replyText =
+        data.reply || data.message || "I'm here to help with your travel questions!";
+      const aiMessage = {
+        id: Date.now() + 1,
+        sender: "ai",
+        text: replyText,
+        lang: selectedLang,
+        destination: updatedContext.destination || "",
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      };
 
-      if (!response.ok && response.status === 404) {
-        response = await fetch("http://localhost:5000/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-      }
+      setMessages((prev) => [...prev, aiMessage]);
 
-      if (response.ok) {
-        const data = await response.json();
-        const replyText = data.reply || data.message || "I'm here to help with your travel questions!";
-        const aiMessage = {
-          id: Date.now() + 1,
-          sender: "ai",
-          text: replyText,
-          lang: selectedLang,
-          destination: updatedContext.destination || "",
-          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        };
-
-        setMessages((prev) => [...prev, aiMessage]);
-
-        if (autoSpeak) {
-          speakText(replyText, selectedLang);
-        }
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        const errText = errorData.reply || "Sorry, I'm having trouble connecting right now. Please try again in a moment.";
-        const aiErrorMessage = {
-          id: Date.now() + 1,
-          sender: "ai",
-          text: errText,
-          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        };
-        setMessages((prev) => [...prev, aiErrorMessage]);
-        if (autoSpeak) speakText(errText, selectedLang);
+      if (autoSpeak) {
+        speakText(replyText, selectedLang);
       }
     } catch (err) {
       console.error("Chatbot API Error:", err);
-      const networkErrText = "Sorry, I'm having trouble connecting to the travel AI right now. Please make sure the backend server is running.";
-      const networkErrorMessage = {
+      const errText =
+        err.message || "Travexa AI is temporarily unavailable. Please try again.";
+      const aiErrorMessage = {
         id: Date.now() + 1,
         sender: "ai",
-        text: networkErrText,
+        text: errText,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
-      setMessages((prev) => [...prev, networkErrorMessage]);
-      if (autoSpeak) speakText(networkErrText, selectedLang);
+      setMessages((prev) => [...prev, aiErrorMessage]);
+      if (autoSpeak) speakText(errText, selectedLang);
     } finally {
       setIsThinking(false);
     }

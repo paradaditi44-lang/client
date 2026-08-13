@@ -25,11 +25,7 @@ function Navbar() {
   };
 
   const handlePlanTrip = () => {
-    if (loggedIn) {
-      navigate("/plan-trip");
-    } else {
-      navigate("/register");
-    }
+    navigate("/plan-trip");
   };
 
   return (

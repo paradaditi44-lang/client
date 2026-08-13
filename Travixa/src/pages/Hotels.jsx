@@ -3,6 +3,104 @@ import HotelCard from "../components/HotelCard";
 import Footer from "../components/Footer";
 import "../styles/Hotels.css";
 
+// Robust, non-aggressive normalization for local hotel image matching
+function normalizeHotelName(name = "") {
+  return String(name)
+    .toLowerCase()
+    .trim()
+    .replace(/[&\-\'\,\.\,\;\:\|\/\\]/g, " ")
+    .replace(/\s+/g, " ");
+}
+
+// Alias registry mapping normalized variation strings to canonical hotel map keys
+const HOTEL_IMAGE_ALIASES = {
+  "the ssk solitaire boutique hotel": "the ssk solitaire",
+  "hotel durga fast food veg restaurant": "hotel durga",
+  "hi 5 hotel and experience": "hi 5 hotel",
+  "hotel grand ashwin nx": "hotel grand ashwin",
+  "gateway hotel": "the gateway hotel",
+  "courtyard by marriott": "courtyard",
+};
+
+// Local curated hotel image registry
+const HOTEL_IMAGE_MAP = {
+  "hotel rahi": "/hotel-images/hotel-rahi.jpg",
+  "alwin row house": "/hotel-images/alwin-row-house.jpg",
+  "panchvati hotel": "/hotel-images/panchvati-hotel.jpg",
+  "ginger": "/hotel-images/ginger-hotel-nashik.jpg",
+  "shiv shakti annex": "/hotel-images/shiv-shakti-annex.jpg",
+  "hotel grand ashwin": "/hotel-images/hotel-grand-ashwin.jpg",
+  "hotel gurukrupa": "/hotel-images/hotel-gurukrupa.jpg",
+  "the utsav": "/hotel-images/the-utsav.jpg",
+  "hotel seven heaven": "/hotel-images/hotel-seven-heaven.jpg",
+  "hotel saptashrungi lodging": "/hotel-images/hotel-saptashrungi-lodging.jpg",
+  "majithia villa": "/hotel-images/majithia-villa.jpg",
+  "hotel durga": "/hotel-images/hotel-durga.jpg",
+  "the ssk solitaire": "/hotel-images/the-ssk-solitaire.jpg",
+  "hotel sri jai palace": "/hotel-images/hotel-sri-jai-palace.jpg",
+  "shivsagar hotel": "/hotel-images/shivsagar-hotel.jpg",
+  "hotel skylark inn": "/hotel-images/hotel-skylark-inn.jpg",
+  "hi 5 hotel": "/hotel-images/hi-5-hotel.jpg",
+  "courtyard": "/hotel-images/courtyard-nashik.jpg",
+  "hotel dwarka": "/hotel-images/hotel-dwarka.jpg",
+  "hotel chandralok": "/hotel-images/hotel-chandralok.jpg",
+  "grand rio": "/hotel-images/grand-rio-nashik.jpg",
+  "the gateway hotel": "/hotel-images/the-gateway-hotel-nashik.jpg",
+  "hotel omkar": "/hotel-images/hotel-omkar.jpg",
+  "hotel kashish palace": "/hotel-images/hotel-kashish-palace.jpg",
+};
+
+function getCuratedHotelPhoto(name = "") {
+  const normalized = normalizeHotelName(name);
+  const targetKey = HOTEL_IMAGE_ALIASES[normalized] || normalized;
+  return HOTEL_IMAGE_MAP[targetKey] || null;
+}
+
+// Deterministic metadata generators based strictly on hotel name
+function generateDeterministicPrice(name = "") {
+  let hash = 0;
+  const str = String(name).trim().toLowerCase();
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const absHash = Math.abs(hash);
+  const bucket = absHash % 10;
+  if (bucket < 4) {
+    // Budget range: ₹1500–₹2500
+    return 1500 + ((absHash % 21) * 50);
+  } else if (bucket < 8) {
+    // Mid-range: ₹2600–₹5000
+    return 2600 + ((absHash % 25) * 100);
+  } else {
+    // Luxury range: ₹5200–₹9500
+    return 5200 + ((absHash % 44) * 100);
+  }
+}
+
+function generateDeterministicAmenities(name = "") {
+  let hash = 0;
+  const str = String(name).trim().toLowerCase();
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const absHash = Math.abs(hash);
+  const amenitySubsets = [
+    ["WiFi", "Breakfast"],
+    ["Pool", "WiFi", "Parking"],
+    ["WiFi", "Parking"],
+    ["Pool", "Breakfast"],
+    ["Breakfast", "Parking"],
+    ["Pool", "WiFi"],
+    ["WiFi"],
+    ["Pool", "Breakfast", "Parking"],
+    ["Breakfast"],
+    ["Pool", "WiFi", "Breakfast", "Parking"],
+    ["Parking"],
+    ["WiFi", "Breakfast", "Parking"],
+  ];
+  return amenitySubsets[absHash % amenitySubsets.length];
+}
+
 function Hotels() {
   const [search, setSearch] = useState("");
   const [hotels, setHotels] = useState([]);
@@ -17,19 +115,6 @@ function Hotels() {
 
   const GEOAPIFY_KEY =
     import.meta.env?.VITE_GEOAPIFY_API_KEY || "21be2c66503444a1a04fc355b92e97e5";
-  const [googleKey, setGoogleKey] = useState(
-    () =>
-      import.meta.env?.VITE_GOOGLE_PLACES_API_KEY ||
-      localStorage.getItem("travexa_google_key") ||
-      ""
-  );
-  const [showKeyDrawer, setShowKeyDrawer] = useState(false);
-
-  const handleSaveGoogleKey = () => {
-    localStorage.setItem("travexa_google_key", googleKey.trim());
-    setShowKeyDrawer(false);
-    if (search.trim()) searchHotels();
-  };
 
   const searchHotels = async () => {
     if (!search.trim()) return;
@@ -38,41 +123,7 @@ function Hotels() {
     setHasSearched(true);
     setSearchedLocation(search.trim());
 
-    const activeGoogleKey = googleKey.trim();
-
-    // 1. GOOGLE PLACES API (When API key is present)
-    if (activeGoogleKey) {
-      try {
-        const googleUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(
-          search.trim() + " hotels"
-        )}&type=lodging&key=${activeGoogleKey}`;
-
-        const response = await fetch(googleUrl);
-        const data = await response.json();
-
-        if (data.status === "OK" && data.results && data.results.length > 0) {
-          const parsedHotels = data.results.map((place, idx) => ({
-            id: place.place_id || idx,
-            name: place.name || "Hotel",
-            location: place.formatted_address || search.trim(),
-            rating: place.rating ? place.rating.toFixed(1) : "4.5",
-            userRatingsTotal: place.user_ratings_total || null,
-            mapsUrl: `https://www.google.com/maps/place/?q=place_id:${place.place_id}`,
-            website: `https://www.google.com/search?q=${encodeURIComponent(
-              place.name + " " + (place.formatted_address || "")
-            )}`,
-          }));
-
-          setHotels(parsedHotels);
-          setLoading(false);
-          return;
-        }
-      } catch (err) {
-        console.warn("Google Places API error, switching to Geoapify:", err);
-      }
-    }
-
-    // 2. WORLDWIDE GEOAPIFY + VENUE SEARCH (Zero-Config Fallback)
+    // WORLDWIDE GEOAPIFY + VENUE SEARCH (Primary Hotel Source)
     try {
       const geoResponse = await fetch(
         `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(
@@ -106,12 +157,18 @@ function Hotels() {
           const ratingVal = (4.0 + (idx % 10) * 0.1).toFixed(1);
           const reviewCount = Math.floor(120 + (idx * 37) % 850);
 
+          // Deterministic local image & alias mapping
+          const photoUrl = getCuratedHotelPhoto(name);
+
           return {
             id: props.place_id || idx,
             name: name,
             location: address || "Address unavailable",
             rating: ratingVal,
             userRatingsTotal: reviewCount,
+            price: generateDeterministicPrice(name),
+            amenities: generateDeterministicAmenities(name),
+            photoUrl: photoUrl,
             website:
               props.website ||
               `https://www.google.com/search?q=${encodeURIComponent(
@@ -135,14 +192,26 @@ function Hotels() {
     setLoading(false);
   };
 
-  // Filter hotels based on selected chips
+  // Filter hotels based on selected chips (cumulative filtering)
   const filteredHotels = useMemo(() => {
     return hotels.filter((h) => {
+      // Rating filter
       if (selectedRating === "4.0+" && parseFloat(h.rating) < 4.0) return false;
       if (selectedRating === "4.5+" && parseFloat(h.rating) < 4.5) return false;
+
+      // Budget filter
+      if (selectedBudgetFilter === "₹ Budget" && h.price > 3000) return false;
+      if (selectedBudgetFilter === "₹₹ Luxury" && h.price <= 3000) return false;
+
+      // Amenity filter
+      if (selectedAmenity) {
+        const cleanAmenity = selectedAmenity.split(" ")[0]; // Extracts "Pool", "WiFi", "Breakfast", "Parking"
+        if (!h.amenities || !h.amenities.includes(cleanAmenity)) return false;
+      }
+
       return true;
     });
-  }, [hotels, selectedRating]);
+  }, [hotels, selectedRating, selectedAmenity, selectedBudgetFilter]);
 
   // Derived search statistics for the stats bar
   const stats = useMemo(() => {
@@ -251,38 +320,6 @@ function Hotels() {
               ))}
             </div>
           </div>
-
-          {/* Optional Google Places Key Setup Toggle */}
-          <div className="key-setup-bar">
-            <button
-              type="button"
-              className="btn-toggle-key"
-              onClick={() => setShowKeyDrawer(!showKeyDrawer)}
-            >
-              {showKeyDrawer
-                ? "Hide API Setup"
-                : "⚙️ Google Places API Key (Optional Setup)"}
-            </button>
-          </div>
-
-          {showKeyDrawer && (
-            <div className="key-drawer-box">
-              <input
-                type="password"
-                placeholder="Paste Google Places API Key..."
-                value={googleKey}
-                onChange={(e) => setGoogleKey(e.target.value)}
-                className="key-input"
-              />
-              <button
-                type="button"
-                onClick={handleSaveGoogleKey}
-                className="btn-save-key"
-              >
-                Save Key
-              </button>
-            </div>
-          )}
         </section>
 
         {/* Stats Summary Bar */}
@@ -344,7 +381,9 @@ function Hotels() {
                 location={hotel.location}
                 rating={hotel.rating}
                 userRatingsTotal={hotel.userRatingsTotal}
-                price="Check Price"
+                price={hotel.price}
+                amenities={hotel.amenities}
+                photoUrl={hotel.photoUrl}
                 website={hotel.website}
                 mapsUrl={hotel.mapsUrl}
               />
