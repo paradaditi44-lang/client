@@ -1,12 +1,10 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { useTheme } from "../context/ThemeContext";
-
+import { useTheme } from "../Context/ThemeContext";
 import "../styles/Navbar.css";
 
 function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme, toggleTheme } = useTheme();
 
   const { darkMode, toggleTheme } = useTheme();
 
@@ -96,6 +94,7 @@ function Navbar() {
       <div className="navbar-right">
         {loggedIn ? (
           <>
+            {/* PROFILE */}
             <button
               className="navbar-profile"
               onClick={() => navigate("/profile")}
@@ -104,6 +103,7 @@ function Navbar() {
               <span className="profile-name">{userName}</span>
             </button>
 
+            {/* LOGOUT */}
             <button
               className="navbar-logout"
               onClick={handleLogout}
@@ -120,8 +120,7 @@ function Navbar() {
           </button>
         )}
 
-        {/* DARK / LIGHT */}
-
+        {/* THEME BUTTON */}
         <button
           className="navbar-theme"
           onClick={toggleTheme}
