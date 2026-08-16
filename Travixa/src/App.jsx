@@ -4,7 +4,7 @@ import Navbar from "./components/Navbar";
 import TravelChatbot from "./components/TravelChatbot/TravelChatbot";
 
 import Home from "./pages/Home";
-import Login from "./pages/Login";
+import Login from "./pages/LoginTemp";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import PlanTrip from "./pages/PlanTrip";
