@@ -147,19 +147,39 @@ function PlannerForm({ setGeneratedTrip, onDestinationChange, onOriginChange }) 
       const daysCount = totalDays || 1;
       const fallbackDays = [];
       const destName = trip.destination.trim();
+
+      const clientThemes = [
+        { title: "Historic Center & Heritage Monuments", morning: "Historic Citadel & Landmark Plaza", afternoon: "Old Town Market & Palace Museum", b: "Artisanal Bakery", l: "Heritage Bistro", d: "Courtyard Restaurant" },
+        { title: "Cultural Museums & Art Circuit", morning: "National Art Museum", afternoon: "Botanical Conservatory & Gardens", b: "Morning Café", l: "Old Town Tavern", d: "Rooftop Lounge" },
+        { title: "Panoramic Viewpoints & Scenic Trail", morning: "Hilltop Overlook & Panorama Point", afternoon: "Riverside Promenade Walk", b: "Plaza Bistro", l: "Riverside Kitchen", d: "Historic Cellar" },
+        { title: "Artisan Quarters & Local Craft Bazaars", morning: "Royal Craft Village", afternoon: "Bustling Artisan Alley", b: "Garden Terrace", l: "Food Hall & Market", d: "Specialty Trattoria" },
+        { title: "Spiritual Sanctuaries & Nature Parks", morning: "Historic Temple Sanctuary", afternoon: "Scenic Forest Nature Trail", b: "Central Roast", l: "Panorama Pavilion", d: "Imperial Dining Room" },
+        { title: "Architectural Landmarks & Plaza Tour", morning: "Grand Cathedral Plaza", afternoon: "Civic Gardens & Fountain Park", b: "Boulevard Café", l: "Citadel Tavern", d: "Harbour Grill" },
+        { title: "Culinary Highlights & Farewell Trail", morning: "Sculpture Park & Open-Air Walk", afternoon: "Gourmet Food District", b: "Botanical Tea House", l: "Artisan Kitchen", d: "Farewell Palace Restaurant" }
+      ];
+
       for (let i = 1; i <= daysCount; i++) {
+        const theme = clientThemes[(i - 1) % clientThemes.length];
+        const isFinal = i === daysCount;
+
+        const dayActivities = [
+          `8:00 AM – Breakfast at ${destName} ${theme.b}`,
+          `9:00 AM – Guided tour of ${destName} ${theme.morning}`,
+          `12:30 PM – Lunch at ${destName} ${theme.l}`,
+          `2:30 PM – Afternoon visit to ${destName} ${theme.afternoon}`,
+          `8:00 PM – Dinner at ${destName} ${theme.d}`
+        ];
+
+        if (isFinal) {
+          dayActivities.push(`9:30 PM – 👋 Hotel Check-out & Departure transfer`);
+        }
+
         fallbackDays.push({
           day: i,
-          title: i === daysCount ? "Hotel Check-out & Departure" : `Day ${i} ${destName} Sightseeing`,
-          icon: i === 1 ? "📍" : i === daysCount ? "👋" : "📸",
-          activities: [
-            `8:00 AM – Breakfast at ${destName} Central Cafe`,
-            `9:00 AM – Guided tour of ${destName} Landmark ${i}`,
-            `12:30 PM – Lunch at ${destName} Heritage Bistro`,
-            `2:30 PM – Afternoon exploration of ${destName} Cultural Square`,
-            `8:00 PM – Dinner at ${destName} Local Restaurant`
-          ],
-          places: [`${destName} Landmark ${i}`],
+          title: `Day ${i} – ${destName} ${theme.title}`,
+          icon: i === 1 ? "📍" : isFinal ? "👋" : "📸",
+          activities: dayActivities,
+          places: [`${destName} ${theme.morning}`, `${destName} ${theme.afternoon}`],
           estimatedDistanceKm: 10,
           estimatedDistanceText: "10 km"
         });

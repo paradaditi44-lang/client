@@ -1,85 +1,102 @@
 /* =====================================================
-   VIBRANT TRAVEL DESTINATION CARD STYLES (Light & Dark)
+   TRAVEXA DESTINATION CARD STYLES (Light & Dark Theme)
 ===================================================== */
 
 .destination-section {
-  padding: 40px 30px;
+  padding: 36px 30px;
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 24px;
-  box-shadow: var(--shadow);
-  margin-top: 30px;
+  box-shadow: var(--shadow-sm);
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .destination-section h2 {
   color: var(--text);
-  font-size: 26px;
-  margin-bottom: 25px;
+  font-family: var(--font-sans);
+  font-size: 24px;
+  margin-bottom: 24px;
   font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
 .destination-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 22px;
 }
 
 .destination-card {
-  background: var(--card-bg);
+  background: var(--surface);
   border-radius: 20px;
   overflow: hidden;
   border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
 }
 
 .destination-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-5px);
+  background: var(--card-bg);
   box-shadow: var(--shadow);
+  border-color: var(--pastel-blue);
 }
 
 .destination-image {
   width: 100%;
-  height: 200px;
+  height: 185px;
   object-fit: cover;
   display: block;
+  transition: transform 0.35s ease;
+}
+
+.destination-card:hover .destination-image {
+  transform: scale(1.04);
 }
 
 .destination-content {
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 .destination-content h3 {
-  font-size: 22px;
+  font-family: var(--font-sans);
+  font-size: 20px;
   font-weight: 800;
   color: var(--text);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .destination-content p {
+  font-family: var(--font-sans);
   color: var(--text-secondary);
-  margin: 6px 0;
-  font-size: 14.5px;
+  margin: 4px 0;
+  font-size: 14px;
 }
 
 .destination-content button {
-  margin-top: 14px;
+  margin-top: 16px;
   width: 100%;
-  padding: 11px;
-  background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
-  color: #ffffff;
-  border: none;
+  padding: 10px;
+  background: var(--pastel-blue-subtle);
+  color: var(--text);
+  border: 1px solid rgba(56, 189, 248, 0.25);
   border-radius: 12px;
   cursor: pointer;
-  font-size: 14.5px;
+  font-family: var(--font-sans);
+  font-size: 14px;
   font-weight: 700;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
+  transition: all 0.25s ease;
 }
 
 .destination-content button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(2, 132, 199, 0.35);
-  filter: brightness(1.05);
+  background: var(--pastel-blue);
+  color: #ffffff;
+  border-color: var(--pastel-blue);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px var(--pastel-blue-glow);
 }

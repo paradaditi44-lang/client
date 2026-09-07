@@ -38,7 +38,7 @@ function Navbar() {
         className="navbar-logo"
         onClick={() => navigate("/")}
       >
-        ✈️ Travexa
+        <span className="logo-icon">✈️</span> <span className="logo-text">Travexa</span>
       </div>
 
       {/* MENU */}

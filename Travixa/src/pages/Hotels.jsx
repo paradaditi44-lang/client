@@ -76,12 +76,10 @@ function getFallbackHotelPhoto(name = "", idx = 0) {
   return HIGH_RES_HOTEL_POOL[index];
 }
 
-const PEXELS_KEY =
-  import.meta.env?.VITE_PEXELS_API_KEY ||
-  "Qm246I0PB2oKSdP9LEnonEiFz9Nt5qxmPipYscbQKyzVqEAEtTrS0423";
+const PEXELS_KEY = import.meta.env?.VITE_PEXELS_API_KEY || "";
 
 async function fetchPexelsHotelPhotos(destination = "") {
-  if (!destination || !destination.trim()) return [];
+  if (!destination || !destination.trim() || !PEXELS_KEY) return [];
   try {
     const res = await fetch(
       `https://api.pexels.com/v1/search?query=${encodeURIComponent(
@@ -168,8 +166,7 @@ function Hotels() {
   const [selectedAmenity, setSelectedAmenity] = useState("");
   const [selectedBudgetFilter, setSelectedBudgetFilter] = useState("All");
 
-  const GEOAPIFY_KEY =
-    import.meta.env?.VITE_GEOAPIFY_API_KEY || "21be2c66503444a1a04fc355b92e97e5";
+  const GEOAPIFY_KEY = import.meta.env?.VITE_GEOAPIFY_API_KEY || "";
 
   const searchHotels = async () => {
     if (!search.trim()) return;
@@ -177,6 +174,13 @@ function Hotels() {
     setLoading(true);
     setHasSearched(true);
     setSearchedLocation(search.trim());
+
+    if (!GEOAPIFY_KEY) {
+      console.warn("[Hotels] VITE_GEOAPIFY_API_KEY is missing from environment.");
+      setHotels([]);
+      setLoading(false);
+      return;
+    }
 
     // WORLDWIDE GEOAPIFY + VENUE SEARCH (Primary Hotel Source)
     try {

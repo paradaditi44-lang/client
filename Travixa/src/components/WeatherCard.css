@@ -10,13 +10,13 @@
 .twc-container {
   width: 100%;
   border-radius: 24px;
-  background: #ffffff;
-  border: 1.5px solid #e2e8f0;
-  box-shadow: 0 12px 36px rgba(2, 132, 199, 0.08);
-  color: #0f172a;
+  background: var(--card-bg);
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow);
+  color: var(--text);
   overflow: hidden;
   transition: all 0.4s ease;
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
 }
 
 /* =====================================================
@@ -25,49 +25,53 @@
 
 /* 1. SUNNY / CLEAR THEME */
 .twc-container.theme-sunny {
-  background: linear-gradient(135deg, #ffffff 0%, #fffbeb 50%, #fef3c7 100%);
-  border-color: #fde68a;
-  box-shadow: 0 16px 40px rgba(245, 158, 11, 0.14);
+  background: var(--card-bg);
+  border-color: var(--border);
+  box-shadow: var(--shadow);
 }
 
 .twc-container.theme-sunny .twc-search-btn {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: linear-gradient(135deg, var(--pastel-yellow, #f59e0b) 0%, #d97706 100%);
+  color: #ffffff;
   box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
 }
 
 /* 2. CLOUDY / FOG THEME */
 .twc-container.theme-cloudy {
-  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 50%, #e0f2fe 100%);
-  border-color: #bae6fd;
-  box-shadow: 0 16px 40px rgba(2, 132, 199, 0.14);
+  background: var(--card-bg);
+  border-color: var(--border);
+  box-shadow: var(--shadow);
 }
 
 .twc-container.theme-cloudy .twc-search-btn {
-  background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: #ffffff;
   box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
 }
 
 /* 3. RAIN / STORM THEME */
 .twc-container.theme-rain {
-  background: linear-gradient(135deg, #ffffff 0%, #eff6ff 50%, #dbeafe 100%);
-  border-color: #bfdbfe;
-  box-shadow: 0 16px 40px rgba(37, 99, 235, 0.14);
+  background: var(--card-bg);
+  border-color: var(--border);
+  box-shadow: var(--shadow);
 }
 
 .twc-container.theme-rain .twc-search-btn {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, var(--secondary) 0%, #1d4ed8 100%);
+  color: #ffffff;
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
 }
 
 /* 4. SNOW / ICE THEME */
 .twc-container.theme-snow {
-  background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 50%, #ccfbf1 100%);
-  border-color: #99f6e4;
-  box-shadow: 0 16px 40px rgba(13, 148, 136, 0.14);
+  background: var(--card-bg);
+  border-color: var(--border);
+  box-shadow: var(--shadow);
 }
 
 .twc-container.theme-snow .twc-search-btn {
   background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+  color: #ffffff;
   box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
 }
 

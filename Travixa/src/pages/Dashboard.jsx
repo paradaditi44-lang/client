@@ -240,11 +240,32 @@ function Dashboard() {
         {/* Welcome Hero Banner */}
         <section className="dashboard-hero-card">
           <div className="hero-content">
+            <span className="hero-eyebrow-badge">✨ AI TRAVEL COMPANION</span>
             <h1>Welcome Back 👋, {userName}!</h1>
             <p>Ready for your next adventure?</p>
           </div>
           <button className="btn-plan-hero" onClick={() => navigate("/plan-trip")}>
             ✨ + Plan New Trip
+          </button>
+        </section>
+
+        {/* Quick Actions Bar */}
+        <section className="dashboard-quick-actions">
+          <button className="quick-action-card" onClick={() => navigate("/plan-trip")}>
+            <span className="action-icon">✨</span>
+            <span className="action-label">Plan Trip</span>
+          </button>
+          <button className="quick-action-card" onClick={() => navigate("/hotels")}>
+            <span className="action-icon">🏨</span>
+            <span className="action-label">Hotels</span>
+          </button>
+          <button className="quick-action-card" onClick={() => navigate("/weather")}>
+            <span className="action-icon">🌤️</span>
+            <span className="action-label">Weather</span>
+          </button>
+          <button className="quick-action-card" onClick={() => navigate("/maps")}>
+            <span className="action-icon">🗺️</span>
+            <span className="action-label">Maps</span>
           </button>
         </section>
 
@@ -337,6 +358,7 @@ function Dashboard() {
               const daysCount = calculateDays(trip);
               const travelStyle = trip.preferences?.travelStyle || trip.travelStyle || "General";
               const existingMemory = memoriesMap[tripId];
+              const isUpcoming = trip.startDate && new Date(trip.startDate) >= today;
 
               return (
                 <div key={tripId} className="vibrant-trip-card">
@@ -349,6 +371,7 @@ function Dashboard() {
                     />
                     <div className="trip-card-badges-top">
                       <span className="badge-days">🗓️ {daysCount} Days</span>
+                      {isUpcoming && <span className="badge-upcoming">⭐ UPCOMING</span>}
                       {trip.budget && <span className="badge-budget">{formattedBudget}</span>}
                     </div>
                   </div>
@@ -397,19 +420,6 @@ function Dashboard() {
                         className="btn-memory-trigger"
                         onClick={() => setActiveMemoryTrip(trip)}
                         title={existingMemory ? "Edit Memory Journal" : "Create Trip Memory"}
-                        style={{
-                          padding: "8px 12px",
-                          borderRadius: "12px",
-                          border: "1.5px solid var(--border)",
-                          background: existingMemory ? "var(--surface)" : "var(--card-bg)",
-                          color: "var(--primary)",
-                          fontWeight: "700",
-                          fontSize: "12px",
-                          cursor: "pointer",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                        }}
                       >
                         {existingMemory ? "📖 Memory Journal" : "✨ Create Memory"}
                       </button>

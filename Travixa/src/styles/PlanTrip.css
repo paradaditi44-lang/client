@@ -1,16 +1,16 @@
 /* =====================================================
-   VIBRANT TRAVEL THEME — TRAVEXA PLAN TRIP
+   TRAVEXA PLAN TRIP PAGE STYLES (Light & Dark Theme)
 ===================================================== */
 
 .plan-trip-root {
   min-height: 100vh;
   background-color: var(--bg);
   background-image: 
-    radial-gradient(at 10% 10%, rgba(2, 132, 199, 0.08) 0px, transparent 50%),
-    radial-gradient(at 90% 20%, rgba(251, 146, 60, 0.08) 0px, transparent 50%),
-    radial-gradient(at 50% 80%, rgba(6, 182, 212, 0.08) 0px, transparent 50%);
+    radial-gradient(at 10% 10%, var(--pastel-blue-glow) 0px, transparent 45%),
+    radial-gradient(at 90% 20%, var(--pastel-purple-glow) 0px, transparent 45%),
+    radial-gradient(at 50% 80%, var(--pastel-pink-glow) 0px, transparent 45%);
   color: var(--text);
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
   position: relative;
   overflow-x: hidden;
   padding-bottom: 60px;
@@ -32,34 +32,34 @@
 .blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(90px);
+  filter: blur(100px);
   opacity: var(--blob-opacity, 0.18);
   animation: floatVibrant 14s infinite ease-in-out alternate;
 }
 
 .blob-1 {
-  top: -60px;
-  left: -60px;
-  width: 450px;
-  height: 450px;
-  background: #0284c7;
+  top: -80px;
+  left: -80px;
+  width: 480px;
+  height: 480px;
+  background: var(--pastel-blue);
 }
 
 .blob-2 {
-  top: 200px;
-  right: -80px;
-  width: 480px;
-  height: 480px;
-  background: #fb923c;
+  top: 180px;
+  right: -100px;
+  width: 500px;
+  height: 500px;
+  background: var(--pastel-purple);
   animation-delay: -5s;
 }
 
 .blob-3 {
-  bottom: 60px;
-  left: 30%;
-  width: 420px;
-  height: 420px;
-  background: #06b6d4;
+  bottom: 80px;
+  left: 25%;
+  width: 440px;
+  height: 440px;
+  background: var(--pastel-pink);
   animation-delay: -9s;
 }
 
@@ -68,7 +68,7 @@
     transform: translateY(0px) scale(1);
   }
   100% {
-    transform: translateY(30px) scale(1.05);
+    transform: translateY(25px) scale(1.04);
   }
 }
 
@@ -84,45 +84,48 @@
 /* Hero Header */
 .plan-trip-hero {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 36px;
+  background: var(--hero-gradient);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 32px 24px;
+  box-shadow: var(--shadow);
 }
 
 .hero-eyebrow {
-  display: inline-block;
-  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
   font-weight: 800;
-  letter-spacing: 1.5px;
-  color: #ea580c;
-  background: #fff7ed;
-  border: 1px solid #ffedd5;
-  padding: 8px 20px;
+  letter-spacing: 1.8px;
+  color: var(--primary);
+  background: var(--pastel-blue-subtle);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 6px 18px;
   border-radius: 30px;
   margin-bottom: 16px;
-  box-shadow: 0 4px 14px rgba(251, 146, 60, 0.15);
-}
-
-body.dark-theme .hero-eyebrow,
-body.dark .hero-eyebrow,
-.dark .hero-eyebrow {
-  background: rgba(234, 88, 12, 0.2);
-  border-color: rgba(234, 88, 12, 0.4);
-  color: #fb923c;
+  box-shadow: var(--shadow-sm);
 }
 
 .plan-trip-hero h1 {
-  font-size: 42px;
+  font-family: var(--font-sans);
+  font-size: clamp(32px, 4vw, 48px);
   font-weight: 800;
   color: var(--text);
-  margin-bottom: 12px;
-  letter-spacing: -0.5px;
+  margin-bottom: 14px;
+  letter-spacing: -1px;
+  line-height: 1.1;
 }
 
 .plan-trip-hero p {
-  font-size: 17px;
+  font-family: var(--font-sans);
+  font-size: 16.5px;
   color: var(--text-secondary);
-  max-width: 680px;
+  max-width: 660px;
   margin: 0 auto;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
 /* Responsive Two-Column Workspace Grid */
@@ -131,7 +134,14 @@ body.dark .hero-eyebrow,
   grid-template-columns: 1.15fr 0.85fr;
   gap: 28px;
   align-items: start;
-  margin-bottom: 40px;
+  margin-bottom: 44px;
+}
+
+/* Dashboard Grid for Popular Destinations & AI Suggestions */
+.dashboard-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
 }
 
 /* Empty State Card */
@@ -142,25 +152,25 @@ body.dark .hero-eyebrow,
   padding: 50px 30px;
   text-align: center;
   margin-bottom: 40px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .empty-state-glass:hover {
-  transform: translateY(-4px);
+  transform: translateY(-3px);
   box-shadow: var(--shadow);
 }
 
 .empty-icon-glow {
-  font-size: 52px;
+  font-size: 48px;
   margin-bottom: 16px;
 }
 
 .empty-state-glass h2 {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 800;
   color: var(--text);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .empty-state-glass p {
@@ -182,9 +192,10 @@ body.dark .hero-eyebrow,
 }
 
 /* RESPONSIVE MEDIA QUERIES */
-@media (max-width: 900px) {
+@media (max-width: 960px) {
   .planner-workspace-grid {
     grid-template-columns: 1fr;
+    gap: 24px;
   }
 }
 
@@ -192,10 +203,13 @@ body.dark .hero-eyebrow,
   .plan-trip-wrapper {
     padding: 24px 16px;
   }
+  .plan-trip-hero {
+    margin-bottom: 32px;
+  }
   .plan-trip-hero h1 {
-    font-size: 30px;
+    font-size: 28px;
   }
   .plan-trip-hero p {
-    font-size: 15px;
+    font-size: 14.5px;
   }
 }

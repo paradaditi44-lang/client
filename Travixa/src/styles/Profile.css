@@ -13,11 +13,16 @@
 /* HEADER */
 .profile-header {
   max-width: 1150px;
-  margin: 0 auto 40px;
+  margin: 0 auto 32px;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 30px;
+  background: var(--hero-gradient);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 28px 36px;
+  box-shadow: var(--shadow);
 }
 
 .profile-label {
@@ -259,16 +264,18 @@ body.dark-theme .saved-message {
   align-self: start;
   padding: 30px;
   border-radius: 25px;
-  background: linear-gradient(145deg, #172554, #1d4ed8);
-  color: white;
-  box-shadow: 0 20px 40px rgba(30, 64, 175, 0.2);
+  background: linear-gradient(135deg, var(--pastel-blue) 0%, var(--secondary) 100%);
+  color: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
 }
 
 .dark .profile-side-card,
 body.dark .profile-side-card,
 body.dark-theme .profile-side-card {
-  background: linear-gradient(145deg, #1e293b, #0f172a);
+  background: var(--card-bg);
   border: 1px solid var(--border);
+  color: var(--text);
 }
 
 .side-icon {

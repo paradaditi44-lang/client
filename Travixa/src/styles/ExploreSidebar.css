@@ -3,9 +3,8 @@
   flex-direction: column;
   gap: 16px;
   background: var(--card-bg);
-  backdrop-filter: blur(14px);
   border: 1px solid var(--border);
-  border-radius: 22px;
+  border-radius: 24px;
   padding: 20px;
   box-shadow: var(--shadow);
   min-height: 500px;
@@ -24,7 +23,7 @@
 .stat-block {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 12px 10px;
   text-align: center;
 }
@@ -66,30 +65,34 @@
 
 .place-detail-card {
   position: relative;
-  background: var(--card-bg);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 18px 16px 16px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
 }
 
 .place-detail-close {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: var(--surface);
-  border: none;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 50%;
   width: 24px;
   height: 24px;
   line-height: 1;
-  font-size: 16px;
+  font-size: 14px;
   color: var(--text-secondary);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .place-detail-close:hover {
-  background: var(--border);
+  background: var(--surface);
+  color: var(--text);
 }
 
 .place-detail-icon {
@@ -101,6 +104,8 @@
   border-radius: 12px;
   font-size: 1.3rem;
   margin-bottom: 10px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
 }
 
 .place-detail-card h3 {
@@ -126,19 +131,20 @@
 .place-detail-btn {
   display: block;
   text-align: center;
-  padding: 10px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
-  color: white;
+  padding: 11px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--pastel-blue) 0%, var(--secondary) 100%);
+  color: #ffffff;
   font-weight: 700;
   font-size: 0.85rem;
   text-decoration: none;
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.25);
   transition: transform 0.2s ease;
 }
 
 .place-detail-btn:hover {
   transform: translateY(-2px);
+  filter: brightness(1.05);
 }
 
 /* ---------- Place list ---------- */

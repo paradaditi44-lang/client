@@ -1,5 +1,5 @@
 /* =====================================================
-   VIBRANT TRAVEL LIVE MAP CARD STYLES (Light & Dark)
+   TRAVEXA LIVE MAP CARD STYLES (Light & Dark Theme)
 ===================================================== */
 
 .map-card-preview {
@@ -7,16 +7,16 @@
   border: 1px solid var(--border);
   border-radius: 24px;
   padding: 24px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   gap: 16px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
   height: 100%;
 }
 
 .map-card-preview:hover {
-  transform: translateY(-4px);
+  border-color: rgba(56, 189, 248, 0.25);
   box-shadow: var(--shadow);
 }
 
@@ -28,18 +28,20 @@
 
 .map-eyebrow {
   display: inline-block;
+  font-family: var(--font-sans);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 1.5px;
   color: var(--primary);
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--pastel-blue-subtle);
+  border: 1px solid rgba(56, 189, 248, 0.2);
   padding: 5px 14px;
   border-radius: 20px;
   margin-bottom: 6px;
 }
 
 .map-destination-title {
+  font-family: var(--font-sans);
   font-size: 22px;
   font-weight: 800;
   color: var(--text);
@@ -48,15 +50,18 @@
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 280px;
+  letter-spacing: -0.3px;
 }
 
 .map-spinner-badge {
-  font-size: 12.5px;
+  font-family: var(--font-sans);
+  font-size: 12px;
   color: var(--primary);
-  background: var(--surface);
+  background: var(--pastel-blue-subtle);
   padding: 5px 12px;
   border-radius: 14px;
   font-weight: 600;
+  border: 1px solid rgba(56, 189, 248, 0.2);
   animation: pulseText 1.5s infinite alternate;
 }
 
@@ -71,8 +76,8 @@
   height: 380px;
   border-radius: 18px;
   overflow: hidden;
-  border: 2px solid var(--border);
-  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 .custom-map-pin-wrapper {
@@ -95,6 +100,7 @@
 }
 
 .route-planner-title {
+  font-family: var(--font-sans);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 1.2px;
@@ -118,26 +124,26 @@
   border-radius: 20px;
   background: var(--surface);
   border: 1px solid var(--border);
-  color: var(--text);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s ease;
   outline: none;
 }
 
 .transport-chip:hover {
   background: var(--card-bg);
-  border-color: var(--primary);
-  color: var(--primary);
-  transform: translateY(-1px);
+  border-color: var(--pastel-blue);
+  color: var(--text);
 }
 
 .transport-chip.active {
-  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  background: linear-gradient(135deg, var(--pastel-blue) 0%, var(--secondary) 100%);
   color: #ffffff;
-  border-color: #0284c7;
-  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+  border-color: transparent;
+  box-shadow: 0 4px 14px var(--pastel-blue-glow);
 }
 
 .chip-icon {
@@ -163,7 +169,7 @@
 .route-metrics-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 14px;
   width: 100%;
 }
 
@@ -183,6 +189,7 @@
 
 .metric-label {
   display: block;
+  font-family: var(--font-sans);
   font-size: 9px;
   font-weight: 800;
   color: var(--text-secondary);
@@ -192,6 +199,7 @@
 
 .metric-value {
   display: block;
+  font-family: var(--font-sans);
   font-size: 15px;
   font-weight: 800;
   color: var(--text);
@@ -203,6 +211,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 600;
 }
@@ -212,12 +221,12 @@
 }
 
 .route-error-state {
-  color: #ef4444;
+  color: var(--pastel-pink);
 }
 
 .route-info-state {
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 12.5px;
 }
 
 .route-spinner {
@@ -225,9 +234,9 @@
 }
 
 /* RESPONSIVE DESIGN */
-@media (max-width: 900px) {
+@media (max-width: 960px) {
   .map-frame {
-    height: 320px;
+    height: 340px;
   }
   .transport-chips-container {
     gap: 6px;

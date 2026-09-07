@@ -2,9 +2,10 @@
   text-align: center;
   padding: 50px 24px;
   border-radius: 24px;
-  background: linear-gradient(135deg, #0284c7 0%, #06b6d4 50%, #10b981 100%);
-  color: #ffffff;
-  box-shadow: 0 16px 36px rgba(2, 132, 199, 0.25);
+  background: var(--hero-gradient);
+  border: 1px solid var(--border);
+  color: var(--text);
+  box-shadow: var(--shadow);
 }
 
 .hero h1 {
@@ -12,12 +13,12 @@
   font-weight: 800;
   margin-bottom: 12px;
   letter-spacing: -0.5px;
-  color: #ffffff;
+  color: var(--text);
 }
 
 .hero p {
   font-size: 20px;
-  color: #f0f9ff;
+  color: var(--text-secondary);
   font-weight: 500;
   max-width: 600px;
   margin: 0 auto;

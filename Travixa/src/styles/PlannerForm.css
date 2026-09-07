@@ -1,5 +1,5 @@
 /* =====================================================
-   VIBRANT TRAVEL PLANNER FORM STYLES (Light & Dark Theme)
+   TRAVEXA PLANNER FORM STYLES (Light & Dark Theme)
 ===================================================== */
 
 .planner-card-glass {
@@ -7,12 +7,12 @@
   border: 1px solid var(--border);
   border-radius: 24px;
   padding: 32px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
   transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .planner-card-glass:hover {
-  transform: translateY(-4px);
+  border-color: rgba(56, 189, 248, 0.25);
   box-shadow: var(--shadow);
 }
 
@@ -22,25 +22,29 @@
 
 .planner-badge {
   display: inline-block;
+  font-family: var(--font-sans);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 1.5px;
   color: var(--primary);
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--pastel-blue-subtle);
+  border: 1px solid rgba(56, 189, 248, 0.2);
   padding: 5px 14px;
   border-radius: 20px;
   margin-bottom: 10px;
 }
 
 .planner-card-header h2 {
+  font-family: var(--font-sans);
   font-size: 24px;
   font-weight: 800;
   color: var(--text);
   margin: 0 0 6px 0;
+  letter-spacing: -0.5px;
 }
 
 .planner-subtext {
+  font-family: var(--font-sans);
   font-size: 14.5px;
   color: var(--text-secondary);
   margin: 0;
@@ -51,19 +55,11 @@
   padding: 12px 16px;
   margin-bottom: 20px;
   border-radius: 14px;
-  background: #fff1f2;
-  border: 1px solid #fecdd3;
-  color: #e11d48;
+  background: var(--pastel-pink-subtle);
+  border: 1px solid rgba(244, 114, 182, 0.3);
+  color: var(--text);
   font-size: 14px;
   font-weight: 600;
-}
-
-body.dark-theme .planner-error-alert,
-body.dark .planner-error-alert,
-.dark .planner-error-alert {
-  background: rgba(225, 29, 72, 0.2);
-  border-color: rgba(225, 29, 72, 0.4);
-  color: #fda4af;
 }
 
 /* Form Grid */
@@ -84,10 +80,12 @@ body.dark .planner-error-alert,
 }
 
 .form-group label {
-  font-size: 11.5px;
+  font-family: var(--font-sans);
+  font-size: 11px;
   font-weight: 800;
   color: var(--text-secondary);
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
 }
 
 /* Input Group with Icons & Focus Glow */
@@ -95,21 +93,21 @@ body.dark .planner-error-alert,
   display: flex;
   align-items: center;
   background: var(--input-bg);
-  border: 1.5px solid var(--border);
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 12px 16px;
   gap: 12px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  transition: all 0.25s ease;
 }
 
 .input-group:focus-within {
   border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
+  box-shadow: 0 0 0 3.5px var(--pastel-blue-subtle);
 }
 
 .input-icon {
-  font-size: 18px;
+  font-size: 17px;
+  user-select: none;
 }
 
 .input-group input,
@@ -120,7 +118,7 @@ body.dark .planner-error-alert,
   color: var(--text);
   font-size: 14.5px;
   width: 100%;
-  font-family: inherit;
+  font-family: var(--font-sans);
   font-weight: 500;
 }
 
@@ -131,6 +129,7 @@ body.dark .planner-error-alert,
 
 .input-group input::placeholder {
   color: var(--text-secondary);
+  opacity: 0.8;
 }
 
 /* Interests Badges Grid */
@@ -141,11 +140,12 @@ body.dark .planner-error-alert,
 }
 
 .interest-badge {
-  padding: 8px 16px;
+  padding: 8px 18px;
   border-radius: 20px;
-  border: 1.5px solid var(--border);
+  border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text-secondary);
+  font-family: var(--font-sans);
   font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
@@ -154,16 +154,16 @@ body.dark .planner-error-alert,
 
 .interest-badge:hover {
   background: var(--card-bg);
-  border-color: var(--primary);
-  color: var(--primary);
+  border-color: var(--pastel-purple);
+  color: var(--text);
 }
 
 .interest-badge.active {
-  background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
+  background: linear-gradient(135deg, var(--pastel-blue) 0%, var(--secondary) 100%);
   color: #ffffff;
   font-weight: 700;
   border-color: transparent;
-  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+  box-shadow: 0 4px 14px var(--pastel-blue-glow);
 }
 
 /* Gradient Generate Button */
@@ -172,13 +172,14 @@ body.dark .planner-error-alert,
   padding: 16px 28px;
   border-radius: 14px;
   border: none;
-  background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
+  background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
   color: #ffffff;
+  font-family: var(--font-sans);
   font-size: 16.5px;
   font-weight: 800;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.3);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -186,12 +187,12 @@ body.dark .planner-error-alert,
 
 .btn-generate-gradient:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(6, 182, 212, 0.4);
+  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.45);
   filter: brightness(1.05);
 }
 
 .btn-generate-gradient:disabled {
-  opacity: 0.8;
+  opacity: 0.85;
   cursor: not-allowed;
 }
 
@@ -204,7 +205,7 @@ body.dark .planner-error-alert,
 .spinner-dot {
   width: 18px;
   height: 18px;
-  border: 2.5px solid rgba(255, 255, 255, 0.4);
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
   border-top-color: #ffffff;
   border-radius: 50%;
   animation: spinDot 0.8s linear infinite;

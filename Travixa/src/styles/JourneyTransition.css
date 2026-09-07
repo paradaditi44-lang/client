@@ -1,0 +1,349 @@
+/* =====================================================
+   TRAVEXA JOURNEY TRANSITION ANIMATION STYLES
+   (Light & Dark Theme, Responsive & Motion Accessible)
+===================================================== */
+
+.journey-transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(9, 13, 22, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  animation: overlayFadeIn 0.3s ease forwards;
+}
+
+body.light-theme .journey-transition-overlay,
+.light .journey-transition-overlay {
+  background: rgba(253, 251, 247, 0.88);
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Central Transition Card */
+.journey-transition-card {
+  width: min(640px, calc(100vw - 32px));
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  padding: 44px 36px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  animation: cardSlideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes cardSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Header Badge Pill */
+.journey-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  color: var(--primary);
+  background: var(--pastel-blue-subtle);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 6px 18px;
+  border-radius: 30px;
+  margin-bottom: 36px;
+  box-shadow: var(--shadow-sm);
+}
+
+.badge-sparkle {
+  font-size: 14px;
+}
+
+/* Path Visualization Container */
+.journey-path-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: relative;
+  margin-bottom: 40px;
+  padding: 0 10px;
+}
+
+/* Journey Node (Origin & Destination) */
+.journey-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-width: 110px;
+  z-index: 2;
+}
+
+.origin-node {
+  align-items: flex-start;
+}
+
+.destination-node {
+  align-items: flex-end;
+}
+
+.node-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.start-dot {
+  background: var(--pastel-blue);
+  box-shadow: 0 0 12px var(--pastel-blue-glow);
+}
+
+.end-dot {
+  background: var(--pastel-pink);
+  box-shadow: 0 0 12px var(--pastel-pink-glow);
+}
+
+.dot-ping {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--pastel-blue);
+  animation: nodePing 2s infinite ease-out;
+  opacity: 0.6;
+}
+
+.end-ping {
+  background: var(--pastel-pink);
+}
+
+@keyframes nodePing {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+.node-label-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.node-caption {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: var(--text-secondary);
+}
+
+.node-title {
+  font-family: var(--font-sans);
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Track Line & Vehicle Translation */
+.journey-track {
+  flex: 1;
+  position: relative;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  margin: 0 12px;
+}
+
+.track-line {
+  width: 100%;
+  height: 4px;
+  background: var(--surface);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.track-line-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, var(--pastel-blue) 0%, var(--pastel-purple) 50%, var(--pastel-pink) 100%);
+  animation: trackGlow 2.5s ease-in-out forwards;
+}
+
+@keyframes trackGlow {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+/* Vehicle Element Wrapper */
+.vehicle-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.linear-travel {
+  animation: vehicleDrive 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.flight-arc {
+  animation: vehicleFlight 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes vehicleDrive {
+  0% {
+    left: 0%;
+    transform: translateY(-50%) scale(0.9);
+  }
+  50% {
+    transform: translateY(-50%) scale(1.15);
+  }
+  100% {
+    left: 88%;
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+@keyframes vehicleFlight {
+  0% {
+    left: 0%;
+    transform: translateY(-50%) rotate(0deg) scale(0.9);
+  }
+  30% {
+    transform: translateY(-28px) rotate(-14deg) scale(1.25);
+  }
+  70% {
+    transform: translateY(-26px) rotate(4deg) scale(1.25);
+  }
+  100% {
+    left: 88%;
+    transform: translateY(-50%) rotate(0deg) scale(1);
+  }
+}
+
+.vehicle-emoji {
+  font-size: 28px;
+  display: inline-block;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+/* Status Bar */
+.journey-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 10px 22px;
+  border-radius: 20px;
+}
+
+.status-spinner-dot {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spinStatus 0.8s linear infinite;
+}
+
+@keyframes spinStatus {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.status-message-text {
+  font-family: var(--font-sans);
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* =====================================================
+   RESPONSIVE DESIGN & ACCESSIBILITY
+===================================================== */
+
+@media (max-width: 600px) {
+  .journey-transition-card {
+    padding: 32px 20px;
+  }
+  .node-title {
+    max-width: 90px;
+    font-size: 14px;
+  }
+  .vehicle-emoji {
+    font-size: 22px;
+  }
+  .journey-path-container {
+    gap: 8px;
+  }
+}
+
+/* Reduced Motion Mode */
+@media (prefers-reduced-motion: reduce) {
+  .linear-travel,
+  .flight-arc {
+    animation: none !important;
+    left: 50% !important;
+    transform: translateY(-50%) !important;
+  }
+  .dot-ping,
+  .track-line-progress {
+    animation: none !important;
+  }
+  .journey-transition-overlay,
+  .journey-transition-card {
+    animation: none !important;
+  }
+}

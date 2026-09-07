@@ -5,10 +5,6 @@ export { API_BASE_URL };
 export async function sendChatMessage(payload) {
   const endpoint = `${API_BASE_URL}/api/chat`;
 
-  if (import.meta.env?.DEV) {
-    console.log("Travexa Chat API:", API_BASE_URL || "same-origin");
-  }
-
   const makeRequest = async () => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000);
