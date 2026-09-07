@@ -143,7 +143,7 @@ function MapBoundsFitter({ userCoords, destCoords, routePolyline, isDestinationS
   return null;
 }
 
-function MapCard({ destination }) {
+function MapCard({ destination, origin }) {
   const isDestinationSet = Boolean(destination && destination.trim().length > 0);
 
   const [coords, setCoords] = useState(null);
@@ -153,6 +153,10 @@ function MapCard({ destination }) {
   // User Geolocation Origin Coords
   const [userCoords, setUserCoords] = useState([28.6139, 77.209]); // Default Delhi
   const [userLocationName, setUserLocationName] = useState("Delhi, India");
+
+  // Active Origin Coords & Name (either user location or manual origin)
+  const [activeOriginCoords, setActiveOriginCoords] = useState([28.6139, 77.209]);
+  const [activeOriginName, setActiveOriginName] = useState("Delhi, India");
 
   // Routing State
   const [transportMode, setTransportMode] = useState("driving");
@@ -247,8 +251,21 @@ function MapCard({ destination }) {
         setRouteLoading(true);
         setRouteError(false);
 
+        let effectiveCoords = userCoords;
+        let effectiveName = userLocationName;
+
+        if (origin && origin.trim() && origin.trim() !== "Current Location") {
+          const origGeo = await geocodeLocation(origin.trim());
+          if (origGeo && isValidCoordinate(origGeo.lat, origGeo.lon)) {
+            effectiveCoords = [origGeo.lat, origGeo.lon];
+            effectiveName = origGeo.displayName || origin.trim();
+          }
+        }
+        setActiveOriginCoords(effectiveCoords);
+        setActiveOriginName(effectiveName);
+
         const routeResult = await calculateSmartRouteDistance({
-          originCoords: userCoords,
+          originCoords: effectiveCoords,
           destination: destination.trim(),
           transportMode,
         });
@@ -290,7 +307,7 @@ function MapCard({ destination }) {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [destination, isDestinationSet, transportMode, userCoords]);
+  }, [destination, isDestinationSet, origin, transportMode, userCoords, userLocationName]);
 
   return (
     <div className="map-card-preview">
@@ -312,7 +329,7 @@ function MapCard({ destination }) {
       {/* Interactive Map Frame */}
       <div className="map-frame">
         <MapContainer
-          center={isDestinationSet && coords ? coords : userCoords}
+          center={isDestinationSet && coords ? coords : (activeOriginCoords || userCoords)}
           zoom={10}
           scrollWheelZoom={false}
           style={{ height: "100%", width: "100%" }}
@@ -322,13 +339,13 @@ function MapCard({ destination }) {
             url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
           />
 
-          {/* User Origin Marker */}
-          {userCoords && (
-            <Marker position={userCoords} icon={startIcon}>
+          {/* Starting Point Origin Marker */}
+          {(activeOriginCoords || userCoords) && (
+            <Marker position={activeOriginCoords || userCoords} icon={startIcon}>
               <Popup>
                 <strong>📍 Starting Point</strong>
                 <br />
-                {userLocationName}
+                {activeOriginName || userLocationName}
               </Popup>
             </Marker>
           )}
@@ -351,7 +368,7 @@ function MapCard({ destination }) {
 
           {/* Auto-Fit Bounds to Route & Markers */}
           <MapBoundsFitter
-            userCoords={userCoords}
+            userCoords={activeOriginCoords || userCoords}
             destCoords={coords}
             routePolyline={routePolyline}
             isDestinationSet={isDestinationSet}

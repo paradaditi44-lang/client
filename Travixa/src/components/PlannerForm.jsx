@@ -4,10 +4,11 @@ import API from "../api/api";
 import { calculateItineraryDistance } from "../services/geocoding";
 import "../styles/PlannerForm.css";
 
-function PlannerForm({ setGeneratedTrip, onDestinationChange }) {
+function PlannerForm({ setGeneratedTrip, onDestinationChange, onOriginChange }) {
   const navigate = useNavigate();
 
   const [trip, setTrip] = useState({
+    origin: "Current Location",
     destination: "",
     startDate: "",
     endDate: "",
@@ -39,6 +40,9 @@ function PlannerForm({ setGeneratedTrip, onDestinationChange }) {
 
     if (name === "destination" && onDestinationChange) {
       onDestinationChange(value);
+    }
+    if (name === "origin" && onOriginChange) {
+      onOriginChange(value);
     }
   };
 
@@ -90,40 +94,16 @@ function PlannerForm({ setGeneratedTrip, onDestinationChange }) {
     };
     const totalDays = calcDays();
 
-    let totalDistanceKm = null;
-    try {
-      let userCoords = null;
-      if ("geolocation" in navigator) {
-        await new Promise((resolve) => {
-          navigator.geolocation.getCurrentPosition(
-            (pos) => {
-              if (pos?.coords) {
-                userCoords = [pos.coords.latitude, pos.coords.longitude];
-              }
-              resolve();
-            },
-            () => resolve(),
-            { timeout: 3000 }
-          );
-        });
-      }
-      totalDistanceKm = await calculateItineraryDistance({
-        originCoords: userCoords,
-        destination: trip.destination.trim(),
-      });
-    } catch (e) {
-      // Ignore distance calc errors
-    }
-
     const payload = {
+      origin: trip.origin.trim() || "Current Location",
       destination: trip.destination.trim(),
       startDate: trip.startDate,
       endDate: trip.endDate,
       days: totalDays,
       budget: Number(trip.budget) || 0,
       numberOfTravelers: Number(trip.travelers) || 1,
-      totalDistanceKm: totalDistanceKm,
       preferences: {
+        origin: trip.origin.trim() || "Current Location",
         travelStyle: trip.travelStyle,
         transport: trip.transport || "Driving",
         interests: trip.interests,
@@ -163,10 +143,38 @@ function PlannerForm({ setGeneratedTrip, onDestinationChange }) {
         }
       }
     } catch (err) {
-      // Fallback local save if server responds with error
+      console.warn("Server POST /trips error, generating local fallback trip:", err.message);
+      const daysCount = totalDays || 1;
+      const fallbackDays = [];
+      const destName = trip.destination.trim();
+      for (let i = 1; i <= daysCount; i++) {
+        fallbackDays.push({
+          day: i,
+          title: i === daysCount ? "Hotel Check-out & Departure" : `Day ${i} ${destName} Sightseeing`,
+          icon: i === 1 ? "📍" : i === daysCount ? "👋" : "📸",
+          activities: [
+            `8:00 AM – Breakfast at ${destName} Central Cafe`,
+            `9:00 AM – Guided tour of ${destName} Landmark ${i}`,
+            `12:30 PM – Lunch at ${destName} Heritage Bistro`,
+            `2:30 PM – Afternoon exploration of ${destName} Cultural Square`,
+            `8:00 PM – Dinner at ${destName} Local Restaurant`
+          ],
+          places: [`${destName} Landmark ${i}`],
+          estimatedDistanceKm: 10,
+          estimatedDistanceText: "10 km"
+        });
+      }
+
       const localTrip = {
         id: `trip-${Date.now()}`,
         ...payload,
+        totalDistanceKm: daysCount * 10,
+        itinerary: JSON.stringify({
+          destination: destName,
+          duration: daysCount,
+          totalDistanceKm: daysCount * 10,
+          days: fallbackDays
+        }),
         createdAt: new Date().toISOString(),
       };
       localStorage.setItem("travexaTrip", JSON.stringify(localTrip));
@@ -193,8 +201,24 @@ function PlannerForm({ setGeneratedTrip, onDestinationChange }) {
       )}
 
       <form onSubmit={generateTrip} className="planner-form-grid">
+        {/* Starting Location (Origin) */}
+        <div className="form-group">
+          <label htmlFor="origin">🚀 STARTING LOCATION (ORIGIN)</label>
+          <div className="input-group">
+            <span className="input-icon">🛫</span>
+            <input
+              id="origin"
+              type="text"
+              name="origin"
+              placeholder="Current Location or e.g. Pune, Delhi"
+              value={trip.origin}
+              onChange={handleInput}
+            />
+          </div>
+        </div>
+
         {/* Destination */}
-        <div className="form-group full-width">
+        <div className="form-group">
           <label htmlFor="destination">📍 DESTINATION</label>
           <div className="input-group">
             <span className="input-icon">📍</span>

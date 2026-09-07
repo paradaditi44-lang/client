@@ -52,6 +52,8 @@ function TripDetails() {
     }
   };
 
+  const [weatherSummary, setWeatherSummary] = useState("Pleasant seasonal climate & clear skies");
+
   useEffect(() => {
     const savedTrip = localStorage.getItem("travexaTrip");
     if (savedTrip) {
@@ -65,6 +67,34 @@ function TripDetails() {
     }
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    if (trip?.destination) {
+      const dest = trip.destination.trim();
+      fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+          dest
+        )}&count=1&language=en&format=json`
+      )
+        .then((res) => res.json())
+        .then((geoData) => {
+          if (geoData.results && geoData.results.length > 0) {
+            const { latitude, longitude } = geoData.results[0];
+            return fetch(
+              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`
+            );
+          }
+        })
+        .then((wRes) => (wRes ? wRes.json() : null))
+        .then((wData) => {
+          if (wData?.current_weather) {
+            const temp = Math.round(wData.current_weather.temperature);
+            setWeatherSummary(`${temp}°C • Live weather for ${dest}`);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [trip]);
 
   if (loading) {
     return (
@@ -113,6 +143,7 @@ function TripDetails() {
   }
 
   // Helpers for displaying details
+  const displayOrigin = trip.preferences?.origin || trip.origin || "Current Location";
   const displayTravelers = trip.numberOfTravelers || trip.travellers || trip.travelers || 1;
   const displayBudget =
     typeof trip.budget === "number"
@@ -125,6 +156,26 @@ function TripDetails() {
     : Array.isArray(trip.interests)
     ? trip.interests
     : [];
+
+  const displayTotalDistance = (() => {
+    if (trip?.totalDistanceKm) {
+      return formatTotalDistanceText(trip.totalDistanceKm);
+    }
+    let itineraryObj = trip?.itinerary;
+    if (typeof itineraryObj === "string") {
+      try {
+        const parsed = JSON.parse(itineraryObj);
+        if (parsed && (parsed.totalDistanceText || parsed.totalDistanceKm)) {
+          itineraryObj = parsed;
+        }
+      } catch (e) {}
+    }
+    if (typeof itineraryObj === "object" && itineraryObj) {
+      if (itineraryObj.totalDistanceText) return itineraryObj.totalDistanceText;
+      if (itineraryObj.totalDistanceKm) return formatTotalDistanceText(itineraryObj.totalDistanceKm);
+    }
+    return formatTotalDistanceText(null);
+  })();
 
   const calculateDays = (t) => {
     const currentTrip = t || trip;
@@ -144,47 +195,25 @@ function TripDetails() {
   };
 
   const handleDownloadPDF = () => {
-    // Generate PDF using parsed days or defaults
-    const parseItinerary = (itineraryText) => {
-      if (!itineraryText) return [];
-      if (Array.isArray(itineraryText)) return itineraryText;
-      if (typeof itineraryText === "string") {
-        const dayIcons = ["✈️", "📸", "🏔️", "🏛️", "🌅", "🎒", "🚗", "🌟"];
-        const dayRegex = /(?:Day\s+\d+|###\s*Day\s+\d+|\*\*Day\s+\d+\*\*)/i;
-        if (dayRegex.test(itineraryText)) {
-          const parts = itineraryText
-            .split(/(?=(?:Day\s+\d+|###\s*Day\s+\d+|\*\*Day\s+\d+\*\*))/i)
-            .filter(Boolean);
-          return parts.map((part, index) => {
-            const lines = part.trim().split("\n").map((l) => l.trim()).filter(Boolean);
-            let titleLine = lines[0] ? lines[0].replace(/^#+\s*/, "").replace(/\*\*/g, "") : `Day ${index + 1}`;
-            const activities = lines.slice(1).map((l) => {
-              let line = l.replace(/^#+\s*/, "").replace(/\*\*/g, "").replace(/^[-*•]\s*/, "").replace(/^\d+\.\s+/, "").trim();
-              if (/^:\d{2}\s*(?:AM|PM)/i.test(line)) {
-                line = "8" + line;
-              }
-              return line;
-            }).filter(Boolean);
-            return {
-              day: index + 1,
-              title: titleLine.replace(/^Day\s+\d+[:\s-]*/i, "") || "Day Overview",
-              icon: dayIcons[index % dayIcons.length],
-              activities: activities.length > 0 ? activities : [part],
-            };
-          });
+    let itineraryObj = trip?.itinerary;
+    if (typeof itineraryObj === "string") {
+      try {
+        const parsed = JSON.parse(itineraryObj);
+        if (parsed && (parsed.days || Array.isArray(parsed))) {
+          itineraryObj = parsed;
         }
+      } catch (e) {
+        // Legacy markdown string
       }
-      return [
-        {
-          day: 1,
-          title: "AI Generated Itinerary",
-          icon: "✨",
-          activities: [itineraryText],
-        },
-      ];
-    };
+    }
 
-    const days = trip.itinerary ? parseItinerary(trip.itinerary) : [];
+    let days = [];
+    if (itineraryObj && Array.isArray(itineraryObj.days)) {
+      days = itineraryObj.days;
+    } else if (Array.isArray(itineraryObj)) {
+      days = itineraryObj;
+    }
+
     generateItineraryPDF(trip, days, calculateDays(trip));
   };
 
@@ -217,6 +246,11 @@ function TripDetails() {
             }}
           >
             <div>
+              <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "1px" }}>🛫 STARTING LOCATION</span>
+              <strong style={{ fontSize: "16px", color: "var(--text)", display: "block", marginTop: "4px" }}>{displayOrigin}</strong>
+            </div>
+
+            <div>
               <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "1px" }}>📍 DESTINATION</span>
               <strong style={{ fontSize: "16px", color: "var(--text)", display: "block", marginTop: "4px" }}>{trip.destination || "N/A"}</strong>
             </div>
@@ -246,16 +280,16 @@ function TripDetails() {
             </div>
 
             <div>
-              <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "1px" }}>🚶 TOTAL DISTANCE</span>
+              <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "1px" }}>🚶 LOCAL SIGHTSEEING</span>
               <strong style={{ fontSize: "16px", color: "var(--text)", display: "block", marginTop: "4px" }}>
-                {formatTotalDistanceText(trip.totalDistanceKm)}
+                {displayTotalDistance}
               </strong>
             </div>
 
             <div>
               <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "1px" }}>🌤️ WEATHER OVERVIEW</span>
               <strong style={{ fontSize: "15px", color: "var(--text)", display: "block", marginTop: "4px" }}>
-                Pleasant seasonal climate & clear skies
+                {weatherSummary}
               </strong>
             </div>
 

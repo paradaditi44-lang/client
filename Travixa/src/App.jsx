@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import TravelChatbot from "./components/TravelChatbot/TravelChatbot";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -27,18 +28,19 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
 
-        <Route path="/dashboard" element={<Dashboard />} />
-
-        <Route path="/plan-trip" element={<PlanTrip />} />
-        <Route path="/trip-details" element={<TripDetails />} />
-        <Route path="/trip-result" element={<AITripResult />} />
-
         <Route path="/hotels" element={<Hotels />} />
         <Route path="/weather" element={<Weather />} />
         <Route path="/maps" element={<Maps />} />
-
         <Route path="/about" element={<About />} />
-        <Route path="/profile" element={<Profile />} />
+
+        {/* Protected Routes (Requires Login) */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/plan-trip" element={<PlanTrip />} />
+          <Route path="/trip-details" element={<TripDetails />} />
+          <Route path="/trip-result" element={<AITripResult />} />
+        </Route>
       </Routes>
 
       {/* Global AI Travel Chatbot Widget */}

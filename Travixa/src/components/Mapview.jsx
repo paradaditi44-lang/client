@@ -215,51 +215,88 @@ function MapView({
         // =================================================
 
         if (travelMode === "flight") {
-          const airDistance =
-            calculateAirDistance(
-              lat1,
-              lon1,
-              lat2,
-              lon2
-            );
+          const airDistance = calculateAirDistance(lat1, lon1, lat2, lon2);
+          const estimatedFlightDistance = Math.round(airDistance * 1.05);
 
-          // Flight distance is usually slightly longer
-          // than straight-line distance
+          setRoutePolyline([start, end]);
+          setDistance(`${estimatedFlightDistance.toLocaleString("en-IN")} km (Air Flight)`);
 
-          const estimatedFlightDistance =
-            airDistance * 1.05;
-
-          setRoutePolyline([
-            start,
-            end,
-          ]);
-
-          setDistance(
-            `${Math.round(
-              estimatedFlightDistance
-            ).toLocaleString(
-              "en-IN"
-            )} km`
-          );
-
-          // Average flight speed + airport time
-
-          const flightHours =
-            estimatedFlightDistance /
-              700 +
-            1.5;
-
-          setDuration(
-            formatDuration(
-              flightHours
-            )
-          );
-
+          const flightHours = estimatedFlightDistance / 700 + 1.5;
+          setDuration(`${formatDuration(flightHours)} (Flight)`);
           return;
         }
 
         // =================================================
-        // ROAD ROUTE
+        // TRAIN ROUTE
+        // =================================================
+
+        if (travelMode === "train") {
+          const osrmResponse = await fetch(
+            `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`
+          );
+
+          if (osrmResponse.ok) {
+            const osrmData = await osrmResponse.json();
+            if (osrmData.routes && osrmData.routes.length > 0) {
+              const route = osrmData.routes[0];
+              const coords = route.geometry.coordinates.map((c) => [c[1], c[0]]);
+              const roadDistance = route.distance / 1000;
+
+              setRoutePolyline(coords);
+              setDistance(`≈ ${roadDistance.toFixed(1)} km (Est. Rail)`);
+
+              // Realistic train speed ~70 km/h + 0.5h station time
+              const trainHours = roadDistance / 70 + 0.5;
+              setDuration(`${formatDuration(trainHours)} (Est. Train)`);
+              return;
+            }
+          }
+
+          setDistance("Rail distance unavailable");
+          setDuration("N/A");
+          setRoutePolyline([start, end]);
+          return;
+        }
+
+        // =================================================
+        // WALKING ROUTE
+        // =================================================
+
+        if (travelMode === "walking") {
+          const osrmResponse = await fetch(
+            `https://router.project-osrm.org/route/v1/foot/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`
+          );
+
+          if (osrmResponse.ok) {
+            const osrmData = await osrmResponse.json();
+            if (osrmData.routes && osrmData.routes.length > 0) {
+              const route = osrmData.routes[0];
+              const coords = route.geometry.coordinates.map((c) => [c[1], c[0]]);
+              const walkDistance = route.distance / 1000;
+
+              setRoutePolyline(coords);
+              setDistance(`${walkDistance.toFixed(1)} km`);
+
+              // Realistic walking speed 5 km/h
+              const walkHours = walkDistance / 5;
+              setDuration(`${formatDuration(walkHours)} (Walking)`);
+              return;
+            }
+          }
+
+          // Fallback if walking route across ocean / massive distance not found
+          const airKm = calculateAirDistance(lat1, lon1, lat2, lon2);
+          if (airKm > 500) {
+            setError("Walking route not available for long distance / cross-water trips.");
+            setDistance("N/A");
+            setDuration("N/A");
+            setRoutePolyline([start, end]);
+            return;
+          }
+        }
+
+        // =================================================
+        // ROAD ROUTE (DRIVING)
         // =================================================
 
         if (import.meta.env?.DEV) {
@@ -268,94 +305,32 @@ function MapView({
           console.log(`[OSRM Routing MapView] OSRM coordinates: ${lon1},${lat1};${lon2},${lat2}`);
         }
 
-        const osrmResponse =
-          await fetch(
-            `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`
-          );
+        const osrmResponse = await fetch(
+          `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`
+        );
 
-        const osrmData =
-          await osrmResponse.json();
+        const osrmData = await osrmResponse.json();
 
-        // =================================================
-        // ROUTE NOT FOUND
-        // =================================================
-
-        if (
-          !osrmData.routes ||
-          osrmData.routes.length === 0
-        ) {
-          setError(
-            "Unable to find a road route between these locations."
-          );
-
+        if (!osrmData.routes || osrmData.routes.length === 0) {
+          setError("Unable to find a road route between these locations.");
           setDistance("Not available");
-
           setDuration("Not available");
-
-          setRoutePolyline([
-            start,
-            end,
-          ]);
-
+          setRoutePolyline([start, end]);
           return;
         }
 
-        // =================================================
-        // GET ACTUAL ROAD ROUTE
-        // =================================================
+        const route = osrmData.routes[0];
+        const coords = route.geometry.coordinates.map((coordinate) => [
+          coordinate[1],
+          coordinate[0],
+        ]);
 
-        const route =
-          osrmData.routes[0];
-
-        const coords =
-          route.geometry.coordinates.map(
-            (coordinate) => [
-              coordinate[1],
-              coordinate[0],
-            ]
-          );
-
-        const roadDistance =
-          route.distance / 1000;
-
+        const roadDistance = route.distance / 1000;
         setRoutePolyline(coords);
+        setDistance(`${roadDistance.toFixed(1)} km`);
 
-        // =================================================
-        // DISTANCE
-        // =================================================
-
-        setDistance(
-          `${roadDistance.toFixed(
-            1
-          )} km`
-        );
-
-        // =================================================
-        // ESTIMATE TIME BY TRAVEL MODE
-        // =================================================
-
-        let speed = 45;
-
-        if (travelMode === "driving") {
-          speed = 45;
-        }
-
-        if (travelMode === "train") {
-          speed = 55;
-        }
-
-        if (travelMode === "walking") {
-          speed = 5;
-        }
-
-        const estimatedHours =
-          roadDistance / speed;
-
-        setDuration(
-          formatDuration(
-            estimatedHours
-          )
-        );
+        const driveHours = route.duration > 0 ? route.duration / 3600 : roadDistance / 45;
+        setDuration(`${formatDuration(driveHours)} (Driving)`);
       } catch (error) {
         console.error(
           "Routing error:",

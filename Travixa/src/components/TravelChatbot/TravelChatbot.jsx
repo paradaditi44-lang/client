@@ -50,13 +50,53 @@ const INITIAL_CONTEXT = {
 
 function TravelChatbot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState(INITIAL_MESSAGES);
+  const [messages, setMessages] = useState(() => {
+    try {
+      const saved = localStorage.getItem("travexa_chat_messages");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.warn("Failed to load saved chat messages:", e.message);
+    }
+    return INITIAL_MESSAGES;
+  });
+
   const [inputText, setInputText] = useState("");
   const [isThinking, setIsThinking] = useState(false);
   const [selectedLang, setSelectedLang] = useState("en");
 
   // Conversation Context
-  const [context, setContext] = useState(INITIAL_CONTEXT);
+  const [context, setContext] = useState(() => {
+    try {
+      const saved = localStorage.getItem("travexa_chat_context");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === "object") return parsed;
+      }
+    } catch (e) {
+      console.warn("Failed to load saved chat context:", e.message);
+    }
+    return INITIAL_CONTEXT;
+  });
+
+  // Save messages & context to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem("travexa_chat_messages", JSON.stringify(messages));
+    } catch (e) {
+      console.warn("Failed to save chat messages:", e.message);
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("travexa_chat_context", JSON.stringify(context));
+    } catch (e) {
+      console.warn("Failed to save chat context:", e.message);
+    }
+  }, [context]);
 
   // Voice Assistant States
   const [isListening, setIsListening] = useState(false);
@@ -279,6 +319,23 @@ function TravelChatbot() {
     return updated;
   };
 
+  // Reset/Clear conversation history
+  const handleResetChat = () => {
+    stopSpeech();
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
+    setMessages(INITIAL_MESSAGES);
+    setContext(INITIAL_CONTEXT);
+    try {
+      localStorage.removeItem("travexa_chat_messages");
+      localStorage.removeItem("travexa_chat_context");
+    } catch (e) {
+      console.warn("Failed to clear chat storage:", e.message);
+    }
+  };
+
   // Send message handler
   const handleSend = async (textToSend) => {
     const text = textToSend || inputText;
@@ -301,6 +358,15 @@ function TravelChatbot() {
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
+    // Extract existing valid history to send to backend (capped to last 10 messages)
+    const formattedHistory = messages
+      .filter((msg) => msg.text && !msg.isError && (msg.sender === "user" || msg.sender === "ai"))
+      .map((msg) => ({
+        role: msg.sender === "user" ? "user" : "assistant",
+        content: msg.text,
+      }))
+      .slice(-10);
+
     setMessages((prev) => [...prev, userMessage]);
     setInputText("");
     setIsThinking(true);
@@ -310,6 +376,7 @@ function TravelChatbot() {
         message: text,
         language: selectedLang,
         context: { ...updatedContext, language: selectedLang },
+        history: formattedHistory,
       };
 
       const data = await sendChatMessage(payload);
@@ -337,6 +404,7 @@ function TravelChatbot() {
         id: Date.now() + 1,
         sender: "ai",
         text: errText,
+        isError: true, // Marked as error so it won't corrupt history payload
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages((prev) => [...prev, aiErrorMessage]);
@@ -378,6 +446,16 @@ function TravelChatbot() {
             </div>
 
             <div className="chatbot-header-actions">
+              {/* Reset/Clear Chat Button */}
+              <button
+                type="button"
+                className="chatbot-clear-btn"
+                onClick={handleResetChat}
+                title="Clear conversation history & start fresh"
+              >
+                🧹 Reset
+              </button>
+
               {/* Voice Output Auto-Speak Toggle */}
               {window.speechSynthesis && (
                 <button

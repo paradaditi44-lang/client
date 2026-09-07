@@ -16,44 +16,59 @@ function Login() {
   const [error, setError] = useState("");
 
   const handleLogin = async (e) => {
-  e.preventDefault();
-  setError("");
+    e.preventDefault();
+    setError("");
 
-  if (!email.trim()) {
-    setError("Please enter your email.");
-    return;
-  }
+    const trimmedEmail = email.trim();
 
-  if (!password.trim()) {
-    setError("Please enter your password.");
-    return;
-  }
-
-  try {
-    const response = await API.post("/auth/login", {
-      email,
-      password,
-    });
-
-    const { token, user } = response.data;
-
-    // Save authentication
-    localStorage.setItem("travexaToken", token);
-    localStorage.setItem("travexaLoggedIn", "true");
-
-    // Save user details
-    localStorage.setItem("travexaUserName", user.name);
-    localStorage.setItem("travexaUserEmail", user.email);
-
-    navigate("/dashboard");
-  } catch (err) {
-    if (err.response) {
-      setError(err.response.data.message || "Login failed");
-    } else {
-      setError("Unable to connect to server.");
+    if (!trimmedEmail) {
+      setError("Please enter your email.");
+      return;
     }
-  }
-};
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (!password.trim()) {
+      setError("Please enter your password.");
+      return;
+    }
+
+    try {
+      const response = await API.post("/auth/login", {
+        email: trimmedEmail,
+        password,
+      });
+
+      const { token, user } = response.data;
+
+      // Save authentication
+      localStorage.setItem("travexaToken", token);
+      localStorage.setItem("travexaLoggedIn", "true");
+
+      // Save user details
+      localStorage.setItem("travexaUserName", user.name);
+      localStorage.setItem("travexaUserEmail", user.email);
+
+      navigate("/dashboard");
+    } catch (err) {
+      if (err.response && err.response.data) {
+        const data = err.response.data;
+        if (data.message) {
+          setError(data.message);
+        } else if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+          setError(data.errors[0].msg || data.errors[0].message || "Validation error");
+        } else {
+          setError("Login failed");
+        }
+      } else {
+        setError("Unable to connect to server.");
+      }
+    }
+  };
 
 
   return (

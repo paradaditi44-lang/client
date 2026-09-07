@@ -55,7 +55,8 @@
 
 /* Chat Window Container */
 .chatbot-window {
-  width: 380px;
+  width: min(380px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
   height: 540px;
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.95);
@@ -405,6 +406,23 @@
   gap: 8px;
 }
 
+.chatbot-clear-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 12px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chatbot-clear-btn:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+}
+
 .chatbot-tts-btn {
   background: rgba(255, 255, 255, 0.18);
   border: none;
@@ -592,11 +610,12 @@ body.dark-theme .chatbot-mic-btn:hover {
 
 @media (max-width: 480px) {
   .travel-chatbot-wrapper {
-    bottom: 16px;
-    right: 16px;
+    bottom: 12px;
+    right: 12px;
   }
   .chatbot-window {
-    width: calc(100vw - 32px);
+    width: min(380px, calc(100vw - 24px));
+    max-width: calc(100vw - 24px);
     height: 480px;
   }
 }

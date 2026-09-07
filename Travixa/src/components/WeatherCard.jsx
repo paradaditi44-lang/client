@@ -68,43 +68,53 @@ const parseWMOCode = (code) => {
   return { main: 'Clear', description: 'Clear sky', icon: '01d' };
 };
 
-const WeatherCard = ({ defaultCity = 'Seoul', apiKey = '', className = '' }) => {
+const WeatherCard = ({ defaultCity, apiKey = '', className = '' }) => {
   const [cityInput, setCityInput] = useState('');
-  const [searchCity, setSearchCity] = useState(defaultCity);
+  const [searchCity, setSearchCity] = useState(defaultCity || 'Seoul');
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [unit, setUnit] = useState('C');
-  
-  const [userApiKey, setUserApiKey] = useState(() => {
-    return (
-      apiKey ||
-      localStorage.getItem('travexa_openweather_key') ||
-      import.meta.env?.VITE_OPENWEATHER_API_KEY ||
-      ''
-    );
-  });
-  
-  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const [isUsingOpenWeather, setIsUsingOpenWeather] = useState(false);
+
+  const envApiKey = apiKey || import.meta.env?.VITE_OPENWEATHER_API_KEY || '';
 
   const quickCities = ['Seoul', 'Tokyo', 'Paris', 'New York', 'Bali', 'London', 'Mumbai'];
 
+  // Automatic destination detection if defaultCity not passed explicitly
+  useEffect(() => {
+    if (defaultCity) {
+      setSearchCity(defaultCity);
+    } else {
+      try {
+        const savedTrip = localStorage.getItem("travexaTrip");
+        if (savedTrip) {
+          const parsed = JSON.parse(savedTrip);
+          if (parsed?.destination) {
+            setSearchCity(parsed.destination);
+            return;
+          }
+        }
+      } catch (e) {}
+      setSearchCity('Seoul');
+    }
+  }, [defaultCity]);
+
   const fetchWeather = async (targetQuery) => {
-    if (!targetQuery.trim()) return;
+    if (!targetQuery || !targetQuery.trim()) return;
 
     setLoading(true);
     setError(null);
 
-    const activeKey = userApiKey.trim();
+    const activeKey = envApiKey.trim();
     const rawQuery = targetQuery.trim().toLowerCase();
-    
+
     let searchTarget = targetQuery.trim();
     if (LOCATION_ALIASES[rawQuery]) {
       searchTarget = LOCATION_ALIASES[rawQuery].name;
     }
 
-    // 1. OpenWeatherMap API (when API Key provided)
+    // 1. OpenWeatherMap API (when environment API Key is provided)
     if (activeKey) {
       try {
         const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
@@ -184,29 +194,51 @@ const WeatherCard = ({ defaultCity = 'Seoul', apiKey = '', className = '' }) => 
           placeName = nameParts[0].trim();
           countryCode = nameParts[nameParts.length - 1].trim().slice(0, 2).toUpperCase();
         } else {
-          throw new Error('City not found. Please enter a valid city name.');
+          throw new Error(`Weather unavailable for "${targetQuery}". Please check the spelling or search another destination.`);
         }
       }
 
-      // Step 3: Fetch Weather for resolved coordinates
-      const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=relativehumidity_2m,surface_pressure,apparent_temperature&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
+      // Step 3: Fetch Weather & Daily Forecast for resolved coordinates
+      const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=relativehumidity_2m,surface_pressure,apparent_temperature&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`;
 
       const weatherRes = await fetch(weatherUrl);
       const data = await weatherRes.json();
 
       if (!data.current_weather) {
-        throw new Error('City not found. Please enter a valid city name.');
+        throw new Error(`Weather unavailable for "${targetQuery}". Please check the spelling or search another destination.`);
       }
 
       const current = data.current_weather;
       const condition = parseWMOCode(current.weathercode);
       const currentHourIndex = new Date().getHours();
-      
+
       const humidity = data.hourly?.relativehumidity_2m?.[currentHourIndex] ?? 65;
       const pressure = Math.round(data.hourly?.surface_pressure?.[currentHourIndex] ?? 1013);
       const feelsLike = data.hourly?.apparent_temperature?.[currentHourIndex] ?? current.temperature;
       const tempMax = data.daily?.temperature_2m_max?.[0] ?? Math.round(current.temperature + 4);
       const tempMin = data.daily?.temperature_2m_min?.[0] ?? Math.round(current.temperature - 3);
+
+      // Parse 5-day daily forecast
+      const dailyForecast = [];
+      if (data.daily && Array.isArray(data.daily.time)) {
+        data.daily.time.slice(0, 5).forEach((dateStr, i) => {
+          const code = data.daily.weathercode?.[i] ?? 0;
+          const cond = parseWMOCode(code);
+          const dateObj = new Date(dateStr);
+          const dayName = isNaN(dateObj.getTime())
+            ? `Day ${i + 1}`
+            : dateObj.toLocaleDateString("en-US", { weekday: "short" });
+          dailyForecast.push({
+            date: dateStr,
+            dayName,
+            maxTemp: data.daily.temperature_2m_max?.[i] ?? current.temperature + 4,
+            minTemp: data.daily.temperature_2m_min?.[i] ?? current.temperature - 3,
+            condition: cond.description,
+            main: cond.main,
+            icon: cond.icon,
+          });
+        });
+      }
 
       const formattedData = {
         name: placeName,
@@ -231,12 +263,13 @@ const WeatherCard = ({ defaultCity = 'Seoul', apiKey = '', className = '' }) => 
             description: condition.description,
             icon: condition.icon
           }
-        ]
+        ],
+        dailyForecast,
       };
 
       setWeatherData(formattedData);
     } catch (err) {
-      setError(err.message || 'City not found. Please enter a valid city name.');
+      setError(err.message || `Weather unavailable for "${targetQuery}". Please check spelling or search another city.`);
     } finally {
       setLoading(false);
     }
@@ -244,7 +277,7 @@ const WeatherCard = ({ defaultCity = 'Seoul', apiKey = '', className = '' }) => 
 
   useEffect(() => {
     fetchWeather(searchCity);
-  }, [searchCity, userApiKey]);
+  }, [searchCity]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -329,40 +362,6 @@ const WeatherCard = ({ defaultCity = 'Seoul', apiKey = '', className = '' }) => 
         </div>
       </div>
 
-      {/* API Setup Link Bar */}
-      <div className="twc-api-bar">
-        <div className="twc-live-badge">
-          <span className="twc-dot live"></span>
-          <span>{isUsingOpenWeather ? 'OpenWeatherMap API' : 'Live Real-Time Weather'}</span>
-          <button
-            type="button"
-            className="twc-api-toggle-link"
-            onClick={() => setShowApiKeyInput(!showApiKeyInput)}
-          >
-            {showApiKeyInput ? 'Hide Setup' : userApiKey ? 'Change API Key' : '⚙️ OpenWeather Key (Optional)'}
-          </button>
-        </div>
-
-        {showApiKeyInput && (
-          <div className="twc-api-drawer">
-            <input
-              type="password"
-              className="twc-api-input"
-              placeholder="Paste OpenWeatherMap API Key..."
-              value={userApiKey}
-              onChange={(e) => setUserApiKey(e.target.value)}
-            />
-            <button
-              type="button"
-              className="twc-api-save-btn"
-              onClick={handleSaveApiKey}
-            >
-              Save Key
-            </button>
-          </div>
-        )}
-      </div>
-
       {/* Card Body */}
       <div className="twc-body">
         {/* Loading Spinner */}
@@ -377,7 +376,7 @@ const WeatherCard = ({ defaultCity = 'Seoul', apiKey = '', className = '' }) => 
         {!loading && error && (
           <div className="twc-error-state">
             <div className="twc-error-icon">⚠️</div>
-            <h4 className="twc-error-title">City Not Found</h4>
+            <h4 className="twc-error-title">Destination Weather</h4>
             <p className="twc-error-msg">{error}</p>
             <button
               type="button"
@@ -520,6 +519,27 @@ const WeatherCard = ({ defaultCity = 'Seoul', apiKey = '', className = '' }) => 
                 <div className="twc-metric-subtext">Clear distance</div>
               </div>
             </div>
+
+            {/* 5-Day Weather Forecast Grid */}
+            {weatherData.dailyForecast && weatherData.dailyForecast.length > 0 && (
+              <div className="twc-forecast-section" style={{ marginTop: "24px", paddingTop: "20px", borderTop: "1px solid var(--border, rgba(255,255,255,0.1))" }}>
+                <h4 style={{ fontSize: "12px", fontWeight: "800", color: "var(--text-secondary, #94a3b8)", letterSpacing: "1px", marginBottom: "12px", textTransform: "uppercase" }}>
+                  📅 5-Day Weather Forecast
+                </h4>
+                <div className="twc-forecast-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(90px, 1fr))", gap: "10px" }}>
+                  {weatherData.dailyForecast.map((day, idx) => (
+                    <div key={idx} className="twc-forecast-card" style={{ background: "var(--surface, rgba(255,255,255,0.05))", borderRadius: "14px", padding: "12px 8px", textAlign: "center", border: "1px solid var(--border, rgba(255,255,255,0.1))" }}>
+                      <span style={{ fontSize: "11px", fontWeight: "800", display: "block", marginBottom: "4px", color: "var(--text-secondary, #94a3b8)" }}>{day.dayName}</span>
+                      <span style={{ fontSize: "20px", display: "block", margin: "4px 0" }}>
+                        {day.main.includes("Rain") ? "🌧️" : day.main.includes("Cloud") ? "⛅" : day.main.includes("Snow") ? "❄️" : day.main.includes("Fog") ? "🌫️" : "☀️"}
+                      </span>
+                      <span style={{ fontSize: "13px", fontWeight: "700", display: "block", color: "var(--text, #ffffff)" }}>{formatTemp(day.maxTemp)}</span>
+                      <span style={{ fontSize: "11px", opacity: 0.7, display: "block", color: "var(--text-secondary, #94a3b8)" }}>{formatTemp(day.minTemp)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

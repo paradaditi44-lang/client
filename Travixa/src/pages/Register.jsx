@@ -25,13 +25,21 @@ function Register() {
       return;
     }
 
-    if (!email.trim()) {
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
       setError("Please enter your email.");
       return;
     }
 
-    if (!email.includes("@")) {
-      setError("Please enter a valid email.");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (!password) {
+      setError("Please enter your password.");
       return;
     }
 
@@ -48,7 +56,7 @@ function Register() {
     try {
       const response = await API.post("/auth/register", {
         name: name.trim(),
-        email: email.trim(),
+        email: trimmedEmail,
         password: password,
       });
 
@@ -62,14 +70,14 @@ function Register() {
         const data = err.response.data;
         if (data.message) {
           setError(data.message);
-        } else if (data.errors && Array.isArray(data.errors)) {
+        } else if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
           const errorMsgs = data.errors.map((e) => e.msg || e.message).join(", ");
           setError(errorMsgs || "Validation error");
         } else {
           setError("Server error");
         }
       } else {
-        setError("Server error");
+        setError("Unable to connect to server.");
       }
     }
   };

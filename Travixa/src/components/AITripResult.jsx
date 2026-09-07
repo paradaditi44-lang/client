@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { generateItineraryPDF } from "../utils/generatePDF";
-import { formatTotalDistanceText } from "../services/geocoding";
+import { formatTotalDistanceText, calculateItineraryDistance } from "../services/geocoding";
 import PackingChecklist from "./PackingChecklist";
 import DestinationVideos from "./DestinationVideos/DestinationVideos";
 
@@ -18,6 +18,7 @@ function AITripResult({ trip: propTrip, showExtras = true, showSummary = true })
   const [duration, setDuration] = useState("");
   const [travelMode, setTravelMode] = useState("driving");
   const [loading, setLoading] = useState(false);
+  const [calculatedDistance, setCalculatedDistance] = useState(null);
 
   useEffect(() => {
     if (propTrip) {
@@ -90,19 +91,37 @@ function AITripResult({ trip: propTrip, showExtras = true, showSummary = true })
     );
   }
 
-  // Parse or format backend itinerary string into day objects with exact day count enforcement
-  const parseItinerary = (itineraryText, targetDays) => {
-    if (!itineraryText) return [];
+  // Parse or format backend itinerary into canonical day objects
+  const parseItinerary = (itineraryData, targetDays) => {
+    if (!itineraryData) return [];
+
+    let itineraryObj = itineraryData;
+    if (typeof itineraryData === "string") {
+      try {
+        const parsedJson = JSON.parse(itineraryData);
+        if (parsedJson && (parsedJson.days || Array.isArray(parsedJson))) {
+          itineraryObj = parsedJson;
+        }
+      } catch (e) {
+        // Legacy markdown string
+      }
+    }
+
+    if (itineraryObj && Array.isArray(itineraryObj.days)) {
+      return itineraryObj.days;
+    }
+
+    if (Array.isArray(itineraryObj)) {
+      return itineraryObj;
+    }
 
     let parsed = [];
-    if (Array.isArray(itineraryText)) {
-      parsed = itineraryText;
-    } else if (typeof itineraryText === "string") {
+    if (typeof itineraryData === "string") {
       const dayIcons = ["✈️", "📸", "🏔️", "🏛️", "🌅", "🎒", "🚗", "🌟"];
       const dayRegex = /(?:Day\s+\d+|###\s*Day\s+\d+|\*\*Day\s+\d+\*\*)/i;
 
-      if (dayRegex.test(itineraryText)) {
-        const parts = itineraryText
+      if (dayRegex.test(itineraryData)) {
+        const parts = itineraryData
           .split(/(?=(?:Day\s+\d+|###\s*Day\s+\d+|\*\*Day\s+\d+\*\*))/i)
           .filter(Boolean);
 
@@ -121,15 +140,46 @@ function AITripResult({ trip: propTrip, showExtras = true, showSummary = true })
             .map((l) => l.trim())
             .filter(Boolean);
 
-          let titleLine = lines[0] ? lines[0].replace(/^#+\s*/, "").replace(/\*\*/g, "") : `Day ${index + 1}`;
+          let rawTitleLine = lines[0] ? lines[0].replace(/^#+\s*/, "").replace(/\*\*/g, "") : `Day ${index + 1} Overview`;
+          let cleanTitle = rawTitleLine
+            .replace(/^(?:Day\s+\d+|###\s*Day\s+\d+|\*\*Day\s+\d+\*\*)\s*[:–-]*\s*/i, "")
+            .replace(/\s*[-–]\s*Day\s+\d+\s*/gi, "")
+            .trim();
+
           const cleanActivityLine = (rawLine) => {
-            if (!rawLine) return "";
-            let line = rawLine.trim().replace(/^#+\s*/, "").replace(/\*\*/g, "");
-            line = line.replace(/^[-*•]\s*/, "").replace(/^\d+\.\s+/, "");
-            if (/^:\d{2}\s*(?:AM|PM)/i.test(line)) {
-              line = "8" + line;
+            if (!rawLine || typeof rawLine !== "string") return "";
+            let text = rawLine.trim();
+
+            if (/^#+$|^[-*_]{3,}$/.test(text)) return "";
+            if (/^\|[\s\-:|]+\|?$/i.test(text)) return "";
+            if (/^\|\s*Time\s*\|\s*Activity\s*\|?$/i.test(text)) return "";
+            if (/^\|\s*Time\s*\|\s*Location\s*\|\s*Details\s*\|?$/i.test(text)) return "";
+
+            if (text.startsWith("|")) {
+              const cells = text.split("|").map((c) => c.trim()).filter(Boolean);
+              if (cells.length >= 2) {
+                if (/^\d{1,2}:\d{2}\s*(?:AM|PM)?$/i.test(cells[0])) {
+                  text = `${cells[0]} – ${cells.slice(1).join(" - ")}`;
+                } else {
+                  text = cells.join(" – ");
+                }
+              } else if (cells.length === 1) {
+                text = cells[0];
+              }
             }
-            return line.trim();
+
+            text = text.replace(/\*\*/g, "").replace(/__/g, "").replace(/`/g, "");
+            text = text
+              .replace(/^#+\s*/, "")
+              .replace(/^[-*•]\s*/, "")
+              .replace(/^\d+\.\s+/, "")
+              .trim();
+
+            if (/^:\d{2}\s*(?:AM|PM)/i.test(text)) {
+              text = "8" + text;
+            }
+
+            return text;
           };
 
           const activities = lines
@@ -139,61 +189,16 @@ function AITripResult({ trip: propTrip, showExtras = true, showSummary = true })
 
           return {
             day: index + 1,
-            title: titleLine.replace(/^Day\s+\d+[:\s-]*/i, "") || `Day ${index + 1} Overview`,
+            title: cleanTitle || `Day ${index + 1} Overview`,
             icon: dayIcons[index % dayIcons.length],
             activities: activities.length > 0 ? activities : [part],
           };
         });
-      } else {
-        const lines = itineraryText
-          .split("\n")
-          .map((l) => l.trim())
-          .filter(Boolean);
-
-        const cleanActivityLine = (rawLine) => {
-          if (!rawLine) return "";
-          let line = rawLine.trim().replace(/^#+\s*/, "").replace(/\*\*/g, "");
-          line = line.replace(/^[-*•]\s*/, "").replace(/^\d+\.\s+/, "");
-          if (/^:\d{2}\s*(?:AM|PM)/i.test(line)) {
-            line = "8" + line;
-          }
-          return line.trim();
-        };
-
-        parsed = [
-          {
-            day: 1,
-            title: "AI Generated Itinerary",
-            icon: "✨",
-            activities: lines.map(cleanActivityLine).filter(Boolean),
-          },
-        ];
       }
     }
 
     if (!targetDays || targetDays <= 0) return parsed;
-
-    // Validate and enforce targetDays count strictly
-    if (parsed.length > targetDays) {
-      parsed = parsed.slice(0, targetDays);
-    } else if (parsed.length < targetDays) {
-      const dayIcons = ["✈️", "📸", "🏔️", "🏛️", "🌅", "🎒", "🚗", "🌟"];
-      for (let i = parsed.length + 1; i <= targetDays; i++) {
-        parsed.push({
-          day: i,
-          title: `Day ${i} Sightseeing & Exploration`,
-          icon: dayIcons[(i - 1) % dayIcons.length],
-          activities: [
-            "🌅 Morning: Local breakfast and landmark visit",
-            "☀ Late Morning: City center exploration & museum tour",
-            "🍽 Lunch: Regional dining recommendation",
-            "🌇 Afternoon: Shopping and park relaxation",
-            "🌆 Evening: Sunset viewpoint",
-            "🌙 Night: Local dinner & relaxation",
-          ],
-        });
-      }
-    }
+    if (parsed.length > targetDays) return parsed.slice(0, targetDays);
 
     return parsed.map((d, idx) => ({ ...d, day: idx + 1 }));
   };
@@ -227,6 +232,77 @@ function AITripResult({ trip: propTrip, showExtras = true, showSummary = true })
     ? parseItinerary(trip.itinerary, displayDays)
     : parseItinerary(null, displayDays);
 
+  useEffect(() => {
+    if (!trip?.totalDistanceKm && days && days.length > 0 && !calculatedDistance) {
+      const places = [];
+      days.forEach((d) => {
+        if (Array.isArray(d.activities)) {
+          d.activities.forEach((act) => {
+            let cleaned = act
+              .replace(/^[\d:]+\s*(?:AM|PM)?\s*[-–]?\s*/i, "")
+              .replace(/^(?:Visit|Explore|Tour of|Guided tour of|Sightseeing at|Stroll through|Transfer to)\s+/i, "")
+              .replace(/\(.*?\)/g, "")
+              .replace(/~?₹[\d,]+\/person/gi, "")
+              .trim();
+            if (
+              cleaned &&
+              cleaned.length > 3 &&
+              !cleaned.toLowerCase().startsWith("breakfast") &&
+              !cleaned.toLowerCase().startsWith("lunch") &&
+              !cleaned.toLowerCase().startsWith("dinner") &&
+              !cleaned.toLowerCase().startsWith("daily summary") &&
+              !cleaned.toLowerCase().startsWith("trip summary") &&
+              !cleaned.toLowerCase().startsWith("safe travels")
+            ) {
+              places.push(cleaned);
+            }
+          });
+        }
+      });
+      if (places.length > 0) {
+        calculateItineraryDistance({
+          destination: trip.destination,
+          places: places,
+          transportMode: trip.preferences?.transport || trip.transport || "Driving",
+        })
+          .then((dist) => {
+            if (dist) setCalculatedDistance(dist);
+          })
+          .catch(() => {});
+      }
+    }
+  }, [trip, days, calculatedDistance]);
+
+  const [weatherSummary, setWeatherSummary] = useState("Pleasant seasonal climate & clear skies");
+
+  useEffect(() => {
+    if (trip?.destination) {
+      const dest = trip.destination.trim();
+      fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+          dest
+        )}&count=1&language=en&format=json`
+      )
+        .then((res) => res.json())
+        .then((geoData) => {
+          if (geoData.results && geoData.results.length > 0) {
+            const { latitude, longitude } = geoData.results[0];
+            return fetch(
+              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`
+            );
+          }
+        })
+        .then((wRes) => (wRes ? wRes.json() : null))
+        .then((wData) => {
+          if (wData?.current_weather) {
+            const temp = Math.round(wData.current_weather.temperature);
+            setWeatherSummary(`${temp}°C • Live weather for ${dest}`);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [trip]);
+
   const displayTravelers = trip.numberOfTravelers || trip.travellers || trip.travelers || 1;
   const displayBudget = typeof trip.budget === "number" ? `₹${trip.budget.toLocaleString()}` : (trip.budget || "N/A");
   const displayCategory = trip.preferences?.travelStyle || trip.travelStyle || "Family";
@@ -241,9 +317,7 @@ function AITripResult({ trip: propTrip, showExtras = true, showSummary = true })
           <div className="starting-point">
             <span>📍 STARTING POINT</span>
             <strong>
-              {locationError
-                ? locationError
-                : currentLocation || "Detecting..."}
+              {trip.preferences?.origin || trip.origin || (locationError ? locationError : currentLocation || "Current Location")}
             </strong>
           </div>
 
@@ -280,13 +354,13 @@ function AITripResult({ trip: propTrip, showExtras = true, showSummary = true })
               </div>
 
               <div>
-                <span>🚶 TOTAL DISTANCE</span>
-                <strong>{formatTotalDistanceText(trip.totalDistanceKm)}</strong>
+                <span>🚶 LOCAL SIGHTSEEING</span>
+                <strong>{formatTotalDistanceText(trip.totalDistanceKm || calculatedDistance)}</strong>
               </div>
 
               <div>
                 <span>🌤️ WEATHER OVERVIEW</span>
-                <strong>Pleasant seasonal climate & clear skies</strong>
+                <strong>{weatherSummary}</strong>
               </div>
 
               <div style={{ gridColumn: "1 / -1" }}>
@@ -335,73 +409,108 @@ function AITripResult({ trip: propTrip, showExtras = true, showSummary = true })
 
               <div className="day-content">
                 <div className="day-title">
-                  <span>
-                    {day.icon || "📍"}
-                  </span>
-                  <h3>
-                    {day.title}
-                  </h3>
+                  <span>{day.icon || "📍"}</span>
+                  <h3>{typeof day.title === "string" ? day.title.replace(/\*\*/g, "").replace(/^#+\s*/, "").trim() : day.title}</h3>
                 </div>
 
                 <div className="activities">
-                  {day.activities.map((activity, index) => {
-                    const isHeader =
-                      /^(?:🌅|☀|🍽|🌇|🌆|🌙|Daily Summary|Trip Summary|###|\*\*)/.test(
-                        activity
-                      ) || /^\d+:\d+/.test(activity);
+                  {Array.isArray(day.activities) ? (
+                    day.activities.map((activity, index) => {
+                      if (!activity || typeof activity !== "string") return null;
 
-                    const isSummaryItem = /^(?:💰|🚶|🚗|🌤|🎒|🍲|- 💰|- 🚶|- 🚗|- 🌤|- 🎒|- 🍲)/.test(
-                      activity
-                    );
+                      let text = activity.trim();
+                      if (/^#+$|^[-*_]{3,}$/.test(text)) return null;
+                      if (/^\|[\s\-:|]+\|?$/i.test(text)) return null;
+                      if (/^\|\s*Time\s*\|\s*Activity\s*\|?$/i.test(text)) return null;
+                      if (/^\|\s*Time\s*\|\s*Location\s*\|\s*Details\s*\|?$/i.test(text)) return null;
 
-                    if (isHeader) {
+                      if (text.startsWith("|")) {
+                        const cells = text.split("|").map((c) => c.trim()).filter(Boolean);
+                        if (cells.length >= 2) {
+                          if (/^\d{1,2}:\d{2}\s*(?:AM|PM)?$/i.test(cells[0])) {
+                            text = `${cells[0]} – ${cells.slice(1).join(" - ")}`;
+                          } else {
+                            text = cells.join(" – ");
+                          }
+                        } else if (cells.length === 1) {
+                          text = cells[0];
+                        }
+                      }
+
+                      text = text.replace(/\*\*/g, "").replace(/__/g, "").replace(/`/g, "");
+                      text = text
+                        .replace(/^#+\s*/, "")
+                        .replace(/^[-*•]\s*/, "")
+                        .replace(/^\d+\.\s+/, "")
+                        .trim();
+
+                      if (!text) return null;
+
+                      const isHeader =
+                        /^(?:🌅|☀|🍽|🌇|🌆|🌙|Daily Summary|Trip Summary|Budget Snapshot|Cost Breakdown)/i.test(
+                          text
+                        ) || /^(?:Budget Snapshot|Cost Breakdown|Trip Summary)/i.test(text);
+
+                      const isSummaryItem = /^(?:💰|🚶|🚗|🌤|🎒|🍲|- 💰|- 🚶|- 🚗|- 🌤|- 🎒|- 🍲)/.test(
+                        text
+                      );
+
+                      if (isHeader) {
+                        return (
+                          <div
+                            key={index}
+                            className="activity-section-header"
+                            style={{
+                              gridColumn: "1 / -1",
+                              fontWeight: "800",
+                              fontSize: "14.5px",
+                              color: "var(--primary, #0284c7)",
+                              marginTop: index > 0 ? "14px" : "4px",
+                              marginBottom: "4px",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                            }}
+                          >
+                            <span>{text.startsWith("💰") ? text : `💰 ${text}`}</span>
+                          </div>
+                        );
+                      }
+
+                      if (isSummaryItem) {
+                        return (
+                          <div
+                            key={index}
+                            className="activity-summary-item"
+                            style={{
+                              gridColumn: "1 / -1",
+                              fontSize: "13.5px",
+                              color: "var(--text)",
+                              background: "var(--surface)",
+                              padding: "6px 12px",
+                              borderRadius: "10px",
+                              margin: "4px 0",
+                              fontWeight: "600",
+                            }}
+                          >
+                            {text}
+                          </div>
+                        );
+                      }
+
                       return (
-                        <div
-                          key={index}
-                          className="activity-section-header"
-                          style={{
-                            fontWeight: "800",
-                            fontSize: "15px",
-                            color: "var(--primary, #0284c7)",
-                            marginTop: index > 0 ? "16px" : "4px",
-                            marginBottom: "6px",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                          }}
-                        >
-                          <span>{activity}</span>
+                        <div className="activity" key={index}>
+                          <span className="activity-dot">✓</span>
+                          <span>{text}</span>
                         </div>
                       );
-                    }
-
-                    if (isSummaryItem) {
-                      return (
-                        <div
-                          key={index}
-                          className="activity-summary-item"
-                          style={{
-                            fontSize: "13.5px",
-                            color: "var(--text)",
-                            background: "var(--surface)",
-                            padding: "6px 12px",
-                            borderRadius: "10px",
-                            margin: "4px 0",
-                            fontWeight: "600",
-                          }}
-                        >
-                          {activity}
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <div className="activity" key={index}>
-                        <span className="activity-dot">✓</span>
-                        <span>{activity}</span>
-                      </div>
-                    );
-                  })}
+                    })
+                  ) : (
+                    <div className="activity" style={{ gridColumn: "1 / -1" }}>
+                      <span className="activity-dot">✓</span>
+                      <span>{typeof day.activities === "string" ? day.activities.replace(/\*\*/g, "").replace(/^#+\s*/, "") : "Explore local highlights & sightseeing."}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

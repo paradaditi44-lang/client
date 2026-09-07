@@ -6,8 +6,7 @@ import "../styles/Navbar.css";
 function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme, toggleTheme } = useTheme();
-
+  
   const { darkMode, toggleTheme } = useTheme();
 
   const loggedIn =
@@ -17,11 +16,15 @@ function Navbar() {
     localStorage.getItem("travexaUserName") || "Traveller";
 
   const handleLogout = () => {
+    localStorage.removeItem("travexaToken");
+    localStorage.removeItem("token");
     localStorage.removeItem("travexaLoggedIn");
     localStorage.removeItem("travexaUserName");
+    localStorage.removeItem("travexaUserEmail");
+    localStorage.removeItem("travexaTrip");
+    localStorage.removeItem("travexaProfile");
 
-    navigate("/");
-    window.location.reload();
+    navigate("/login");
   };
 
   const handlePlanTrip = () => {

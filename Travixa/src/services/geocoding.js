@@ -313,32 +313,25 @@ function saveCacheToSession() {
 }
 
 /**
- * Calculates real road distance (in km) using OSRM for a sequence of points / itinerary.
+ * Calculates real road distance (in km) between itinerary attractions.
+ * Does NOT include user GPS/home location or city center artificial endpoints.
  */
-export async function calculateItineraryDistance({ originCoords, places = [], destination = "" }) {
+export async function calculateItineraryDistance({ places = [], destination = "", transportMode = "Driving" }) {
   const routeCoords = [];
 
-  // 1. If valid origin coords are provided (e.g. from user geolocation), use as start
-  if (originCoords && isValidCoordinate(originCoords[0], originCoords[1])) {
-    routeCoords.push({ name: "Starting Point", lat: originCoords[0], lon: originCoords[1] });
-  }
-
-  // 2. Geocode destination if provided
-  let destGeo = null;
-  if (destination && typeof destination === "string" && destination.trim()) {
-    destGeo = await geocodeLocation(destination.trim());
-    if (destGeo && isValidCoordinate(destGeo.lat, destGeo.lon) && routeCoords.length === 0) {
-      routeCoords.push({ name: destGeo.displayName || destination, lat: destGeo.lat, lon: destGeo.lon });
-    }
-  }
-
-  // 3. Geocode itinerary places
   if (Array.isArray(places) && places.length > 0) {
     for (const place of places) {
       if (!place || typeof place !== "string" || !place.trim()) continue;
-      const geo = await geocodeLocation(place.trim());
+      
+      // Destination-aware geocoding: append destination name if missing
+      const query = place.toLowerCase().includes((destination || "").toLowerCase())
+        ? place.trim()
+        : `${place.trim()}, ${destination.trim()}`;
+
+      const geo = await geocodeLocation(query);
       if (geo && isValidCoordinate(geo.lat, geo.lon)) {
         const last = routeCoords[routeCoords.length - 1];
+        // Prevent city-center coordinate collisions & duplicate adjacent coordinates
         if (!last || Math.abs(last.lat - geo.lat) > 0.001 || Math.abs(last.lon - geo.lon) > 0.001) {
           routeCoords.push({ name: geo.displayName || place, lat: geo.lat, lon: geo.lon });
         }
@@ -346,28 +339,15 @@ export async function calculateItineraryDistance({ originCoords, places = [], de
     }
   }
 
-  // Append destination at the end if not already present
-  if (destGeo && isValidCoordinate(destGeo.lat, destGeo.lon) && routeCoords.length > 0) {
-    const last = routeCoords[routeCoords.length - 1];
-    if (Math.abs(last.lat - destGeo.lat) > 0.001 || Math.abs(last.lon - destGeo.lon) > 0.001) {
-      routeCoords.push({ name: destGeo.displayName || destination, lat: destGeo.lat, lon: destGeo.lon });
-    }
-  }
-
-  if (import.meta.env?.DEV) {
-    console.log("Distance calculation:");
-    console.log("Route points:", routeCoords);
-  }
-
   if (routeCoords.length < 2) {
-    if (import.meta.env?.DEV) {
-      console.log("Total distance (km): null (Insufficient route waypoints)");
-    }
     return null;
   }
 
+  const modeLower = (transportMode || "driving").toLowerCase();
+  const profile = modeLower.includes("walk") ? "foot" : modeLower.includes("bike") || modeLower.includes("ride") ? "bike" : "driving";
+
   const osrmWaypoints = routeCoords.map((pt) => `${pt.lon},${pt.lat}`).join(";");
-  const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${osrmWaypoints}?overview=false`;
+  const osrmUrl = `https://router.project-osrm.org/route/v1/${profile}/${osrmWaypoints}?overview=false`;
 
   try {
     const res = await fetch(osrmUrl);
@@ -377,10 +357,7 @@ export async function calculateItineraryDistance({ originCoords, places = [], de
         const distanceMeters = data.routes[0].distance || 0;
         if (distanceMeters > 0) {
           const totalDistanceKm = distanceMeters / 1000;
-          if (import.meta.env?.DEV) {
-            console.log("Total distance (km):", totalDistanceKm);
-          }
-          return totalDistanceKm;
+          return Math.round(totalDistanceKm * 10) / 10;
         }
       }
     }
@@ -390,7 +367,24 @@ export async function calculateItineraryDistance({ originCoords, places = [], de
     }
   }
 
-  return null;
+  // Haversine fallback calculation between consecutive waypoints
+  let fallbackTotal = 0;
+  const factor = profile === "foot" ? 1.2 : profile === "bike" ? 1.25 : 1.35;
+
+  for (let i = 0; i < routeCoords.length - 1; i++) {
+    const R = 6371;
+    const lat1 = routeCoords[i].lat;
+    const lon1 = routeCoords[i].lon;
+    const lat2 = routeCoords[i + 1].lat;
+    const lon2 = routeCoords[i + 1].lon;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    fallbackTotal += R * c * factor;
+  }
+
+  return Math.round(fallbackTotal * 10) / 10;
 }
 
 /**
@@ -399,11 +393,18 @@ export async function calculateItineraryDistance({ originCoords, places = [], de
  * - 10 km or more -> nearest whole kilometer (e.g., "145 km")
  * - Unavailable / null -> "Distance unavailable"
  */
-export function formatTotalDistanceText(distKm) {
+export function formatTotalDistanceText(distKm, isEstimated = false) {
+  if (typeof distKm === "string") {
+    if (distKm.trim()) return distKm.trim();
+    return "Distance could not be calculated";
+  }
   if (distKm === null || distKm === undefined || isNaN(distKm) || Number(distKm) <= 0) {
-    return "Distance unavailable";
+    return "Distance could not be calculated";
   }
   const num = Number(distKm);
+  if (isEstimated) {
+    return `≈ ${num < 10 ? num.toFixed(1) : Math.round(num)} km (Estimated)`;
+  }
   if (num < 10) {
     return `${num.toFixed(1)} km`;
   }
@@ -449,8 +450,43 @@ export async function calculateSmartRouteDistance({ originCoords, destination, t
       ? originCoords
       : [28.6139, 77.209];
 
-  // 3. Request OSRM route in strict longitude,latitude order
-  const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${origLon},${origLat};${destLon},${destLat}?overview=full&geometries=geojson`;
+  const modeLower = (transportMode || "driving").toLowerCase();
+
+  // A. FLIGHT ROUTE (Air Distance calculation)
+  if (modeLower.includes("flight")) {
+    const R = 6371;
+    const dLat = ((destLat - origLat) * Math.PI) / 180;
+    const dLon = ((destLon - origLon) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((origLat * Math.PI) / 180) *
+        Math.cos((destLat * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const airDistance = R * c * 1.05;
+    const distanceKm = Math.round(airDistance * 10) / 10;
+    const flightHours = distanceKm / 700 + 1.5;
+    const totalMinutes = Math.round(flightHours * 60);
+
+    const hours = Math.floor(flightHours);
+    const mins = Math.round((flightHours - hours) * 60);
+    const durationText = hours === 0 ? `${mins} mins` : mins === 0 ? `${hours} hrs` : `${hours} hrs ${mins} mins`;
+
+    return {
+      distanceKm,
+      distanceText: `${distanceKm.toLocaleString("en-IN")} km (Air Flight)`,
+      durationMinutes: totalMinutes,
+      durationText: `${durationText} (Flight)`,
+      geometry: [[origLat, origLon], [destLat, destLon]],
+      destCoords: [destLat, destLon],
+      destName: (destGeo.displayName || destination).split(",").slice(0, 2).join(",").trim(),
+    };
+  }
+
+  // B. ROAD & RAIL ROUTING PROFILE (OSRM)
+  const profile = modeLower.includes("walk") ? "foot" : "driving";
+  const osrmUrl = `https://router.project-osrm.org/route/v1/${profile}/${origLon},${origLat};${destLon},${destLat}?overview=full&geometries=geojson`;
 
   try {
     const res = await fetch(osrmUrl);
@@ -460,47 +496,38 @@ export async function calculateSmartRouteDistance({ originCoords, destination, t
         const route = data.routes[0];
         const rawCoords = route.geometry?.coordinates || [];
 
-        // Convert GeoJSON [longitude, latitude] to Leaflet [latitude, longitude]
         const geometry = rawCoords
-          .filter(
-            (pt) =>
-              Array.isArray(pt) &&
-              pt.length >= 2 &&
-              !isNaN(pt[0]) &&
-              !isNaN(pt[1])
-          )
+          .filter((pt) => Array.isArray(pt) && pt.length >= 2 && !isNaN(pt[0]) && !isNaN(pt[1]))
           .map(([longitude, latitude]) => [latitude, longitude]);
 
         const distanceMeters = route.distance || 0;
-        const durationSec = route.duration || 0;
+        const distanceKm = distanceMeters > 0 ? Math.round((distanceMeters / 1000) * 10) / 10 : null;
 
-        const distanceKm = distanceMeters > 0 ? distanceMeters / 1000 : null;
-        const distanceText = formatTotalDistanceText(distanceKm);
+        let totalMinutes = 0;
+        let distanceText = "";
+        let durationText = "";
 
-        const totalMinutes = Math.round(durationSec / 60);
-        let durationText = "N/A";
-        if (totalMinutes < 60) {
-          durationText = `${totalMinutes} mins`;
+        if (modeLower.includes("train")) {
+          distanceText = `≈ ${formatTotalDistanceText(distanceKm)} (Est. Rail)`;
+          totalMinutes = Math.round(((distanceKm / 70) + 0.5) * 60);
+        } else if (modeLower.includes("walk")) {
+          distanceText = formatTotalDistanceText(distanceKm);
+          totalMinutes = Math.round((distanceKm / 5) * 60);
         } else {
-          const hours = Math.floor(totalMinutes / 60);
-          const mins = totalMinutes % 60;
-          if (hours >= 24) {
-            const days = Math.floor(hours / 24);
-            const remHours = hours % 24;
-            durationText = `${days}d ${remHours}h`;
-          } else {
-            durationText = mins > 0 ? `${hours} hrs ${mins} mins` : `${hours} hrs`;
-          }
+          distanceText = formatTotalDistanceText(distanceKm);
+          totalMinutes = Math.round(route.duration / 60);
         }
 
-        if (import.meta.env?.DEV) {
-          console.log("TRIP ROUTE DEBUG", {
-            origin: `${origLat},${origLon}`,
-            destination: destination.trim(),
-            distanceKm,
-            durationMinutes: totalMinutes,
-          });
+        const hours = Math.floor(totalMinutes / 60);
+        const mins = totalMinutes % 60;
+        if (hours === 0) {
+          durationText = `${mins} mins`;
+        } else {
+          durationText = mins > 0 ? `${hours} hrs ${mins} mins` : `${hours} hrs`;
         }
+
+        if (modeLower.includes("train")) durationText += " (Est. Train)";
+        if (modeLower.includes("walk")) durationText += " (Walking)";
 
         return {
           distanceKm,

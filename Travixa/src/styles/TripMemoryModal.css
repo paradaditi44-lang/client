@@ -18,8 +18,9 @@
 
 .memory-modal-card {
   width: 100%;
-  max-width: 640px;
+  max-width: min(640px, calc(100vw - 32px));
   max-height: 90vh;
+  box-sizing: border-box;
   background: var(--card-bg, #ffffff);
   color: var(--text, #0f172a);
   border: 1px solid var(--border, #e2e8f0);

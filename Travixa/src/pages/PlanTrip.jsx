@@ -11,6 +11,7 @@ import "../styles/PlanTrip.css";
 function PlanTrip() {
   const [showPopup, setShowPopup] = useState(false);
   const [destinationPreview, setDestinationPreview] = useState("");
+  const [originPreview, setOriginPreview] = useState("Current Location");
 
   const [trips, setTrips] = useState([]);
   const [loadingTrips, setLoadingTrips] = useState(true);
@@ -69,6 +70,7 @@ function PlanTrip() {
           <div className="planner-left-panel">
             <PlannerForm
               onDestinationChange={(dest) => setDestinationPreview(dest)}
+              onOriginChange={(orig) => setOriginPreview(orig)}
               setGeneratedTrip={() => {
                 setShowPopup(true);
               }}
@@ -77,7 +79,7 @@ function PlanTrip() {
 
           {/* Right Column: Live Map Preview */}
           <div className="planner-right-panel">
-            <MapCard destination={destinationPreview} />
+            <MapCard destination={destinationPreview} origin={originPreview} />
           </div>
         </div>
 

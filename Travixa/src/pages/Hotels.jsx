@@ -50,6 +50,61 @@ const HOTEL_IMAGE_MAP = {
   "hotel kashish palace": "/hotel-images/hotel-kashish-palace.jpg",
 };
 
+// Curated high-res hotel photo fallback pool (Unsplash CDN direct URLs at 1200px width)
+const HIGH_RES_HOTEL_POOL = [
+  "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=85",
+  "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=1200&q=85",
+  "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=85",
+  "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1200&q=85",
+  "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=85",
+  "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1200&q=85",
+  "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1200&q=85",
+  "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1200&q=85",
+  "https://images.unsplash.com/photo-1455587734955-081b22074882?auto=format&fit=crop&w=1200&q=85",
+  "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=1200&q=85",
+  "https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?auto=format&fit=crop&w=1200&q=85",
+  "https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=1200&q=85",
+];
+
+function getFallbackHotelPhoto(name = "", idx = 0) {
+  let hash = 0;
+  const str = String(name).trim().toLowerCase();
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = (Math.abs(hash) + idx) % HIGH_RES_HOTEL_POOL.length;
+  return HIGH_RES_HOTEL_POOL[index];
+}
+
+const PEXELS_KEY =
+  import.meta.env?.VITE_PEXELS_API_KEY ||
+  "Qm246I0PB2oKSdP9LEnonEiFz9Nt5qxmPipYscbQKyzVqEAEtTrS0423";
+
+async function fetchPexelsHotelPhotos(destination = "") {
+  if (!destination || !destination.trim()) return [];
+  try {
+    const res = await fetch(
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(
+        destination.trim() + " hotel resort"
+      )}&per_page=24`,
+      {
+        headers: { Authorization: PEXELS_KEY },
+      }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      if (data.photos && data.photos.length > 0) {
+        return data.photos.map(
+          (p) => p.src.landscape || p.src.large2x || p.src.large || p.src.original
+        );
+      }
+    }
+  } catch (e) {
+    // Ignore Pexels API error and fallback silently
+  }
+  return [];
+}
+
 function getCuratedHotelPhoto(name = "") {
   const normalized = normalizeHotelName(name);
   const targetKey = HOTEL_IMAGE_ALIASES[normalized] || normalized;
@@ -148,6 +203,13 @@ function Hotels() {
       const hotelData = await hotelResponse.json();
 
       if (hotelData.features && hotelData.features.length > 0) {
+        let pexelsPhotos = [];
+        try {
+          pexelsPhotos = await fetchPexelsHotelPhotos(search.trim());
+        } catch (e) {
+          // Ignore Pexels error and fallback
+        }
+
         const formattedHotels = hotelData.features.map((item, idx) => {
           const props = item.properties || {};
           const name = props.name || props.address_line1 || `Hotel in ${search.trim()}`;
@@ -157,8 +219,35 @@ function Hotels() {
           const ratingVal = (4.0 + (idx % 10) * 0.1).toFixed(1);
           const reviewCount = Math.floor(120 + (idx * 37) % 850);
 
-          // Deterministic local image & alias mapping
-          const photoUrl = getCuratedHotelPhoto(name);
+          // Multi-tiered high-resolution photo resolution pipeline:
+          let photoUrl = null;
+          let photoSource = "representative";
+
+          // Tier 1: Curated local image map (e.g. Nashik local files)
+          const localPhoto = getCuratedHotelPhoto(name);
+          if (localPhoto) {
+            photoUrl = localPhoto;
+            photoSource = "actual";
+          }
+
+          // Tier 2: OpenStreetMap / Geoapify Wikimedia media reference
+          if (!photoUrl && props.wiki_and_media?.wikimedia_commons) {
+            const fileName = props.wiki_and_media.wikimedia_commons.replace(/^File:/i, "");
+            photoUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fileName)}?width=1200`;
+            photoSource = "actual";
+          }
+
+          // Tier 3: Destination Pexels photo search (1200px landscape / 940px@2x large2x)
+          if (!photoUrl && pexelsPhotos.length > 0) {
+            photoUrl = pexelsPhotos[idx % pexelsPhotos.length];
+            photoSource = "representative";
+          }
+
+          // Tier 4: Deterministic high-res fallback from curated hotel photo pool (1200px)
+          if (!photoUrl) {
+            photoUrl = getFallbackHotelPhoto(name, idx);
+            photoSource = "representative";
+          }
 
           return {
             id: props.place_id || idx,
@@ -169,6 +258,7 @@ function Hotels() {
             price: generateDeterministicPrice(name),
             amenities: generateDeterministicAmenities(name),
             photoUrl: photoUrl,
+            photoSource: photoSource,
             website:
               props.website ||
               `https://www.google.com/search?q=${encodeURIComponent(

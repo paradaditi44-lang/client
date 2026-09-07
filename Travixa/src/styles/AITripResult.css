@@ -183,6 +183,8 @@
   margin: 0;
   color: var(--text);
   font-size: 19px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* ACTIVITIES */
@@ -199,6 +201,32 @@
   gap: 9px;
   color: var(--text-secondary);
   font-size: 13px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.activity span {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.activity-summary-item {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* TABLE OVERFLOW ONLY */
+.markdown-table-wrapper,
+.itinerary-table-container,
+.day-content table,
+.activity-card table,
+.timeline table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 12px 0;
 }
 
 .activity-dot {
@@ -211,6 +239,7 @@
   align-items: center;
   justify-content: center;
   font-size: 11px;
+  flex-shrink: 0;
 }
 
 body.dark-theme .activity-dot,
